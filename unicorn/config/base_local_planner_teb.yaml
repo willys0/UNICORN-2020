@@ -1,0 +1,114 @@
+# Configuration for timed elastic band planner (teb) and global planner
+# More information @ http://wiki.ros.org/teb_local_planner
+
+# All distances are in meters
+# All angles are in radians
+# All velocities are m/s and angular velocities in rad/s
+
+recovery_behaviour_enabled: true
+controller_frequency: 5.0
+
+TebLocalPlannerROS:
+
+ odom_topic: odom
+ map_frame: map
+    
+ # Trajectory
+  
+ teb_autosize: True
+ dt_ref: 0.3
+ dt_hysteresis: 0.1
+ global_plan_overwrite_orientation: False
+ max_global_plan_lookahead_dist: 3.0
+ feasibility_check_no_poses: 2
+ orientation_mode: 2
+    
+ # Robot
+         
+ max_vel_x: 0.3
+ max_vel_y: 0
+ min_vel_x: 0.13
+ min_vel_y: 0
+ max_vel_x_backwards: 0.18
+ max_vel_theta: 0.4
+ min_vel_theta: -0.4
+ acc_lim_x: 0.5
+ acc_lim_y: 0.0
+ acc_lim_theta: 0.4
+ min_turning_radius: 0.0
+ footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
+   type: "two_circles"
+   front_offset: 0.0 
+   front_radius: 0.35 
+   rear_offset: 0.25 
+   rear_radius: 0.35 
+
+ # GoalTolerance
+    
+ xy_goal_tolerance: 0.1 
+ yaw_goal_tolerance: 0.08 
+ free_goal_vel: False
+ force_reinit_new_goal_tolerance: 3.0
+    
+ # Obstacles
+ min_obstacle_dist: 0.07
+ include_costmap_obstacles: True
+ costmap_obstacles_behind_robot_dist: 1.5
+ obstacle_poses_affected: 5
+ polygon_obstacle_poses_affected: 5
+ costmap_converter_plugin: "costmap_converter::CostmapToLinesDBSRANSAC" 
+ costmap_converter_spin_thread: True
+ costmap_converter_rate: 5
+ obstacle_association_force_inclusion_factor: 60.0
+
+ costmap_converter/CostmapToLinesDBSRANSAC:
+    cluster_max_distance: 0.4
+    cluster_min_pts: 2
+    ransac_inlier_distance: 0.15
+    ransac_min_inliers: 10
+    ransac_no_iterations: 2000
+    ransac_remainig_outliers: 3
+    ransac_convert_outlier_pts: True
+    ransac_filter_remaining_outlier_pts: False
+    convex_hull_min_pt_separation: 0.1
+
+ # Optimization
+    
+ no_inner_iterations: 5
+ no_outer_iterations: 4
+ optimization_activate: True
+ optimization_verbose: False
+ penalty_epsilon: 0.0
+ weight_max_vel_x: 1.5
+ weight_max_vel_theta: 1
+ weight_acc_lim_x: 1.0
+ weight_acc_lim_theta: 1.0
+ weight_kinematics_nh: 500
+ weight_kinematics_forward_drive: 5
+ weight_kinematics_turning_radius: 0
+ weight_optimaltime: 5
+ weight_obstacle: 100
+ weight_viapoint: 0.2
+ weight_dynamic_obstacle: 10 
+
+ # Homotopy Class Planner
+
+ enable_homotopy_class_planning: False
+ enable_multithreading: True
+ simple_exploration: False
+ max_number_classes: 1
+ roadmap_graph_no_samples: 15
+ roadmap_graph_area_width: 5
+ h_signature_prescaler: 0.5 
+ h_signature_threshold: 0.1
+ obstacle_keypoint_offset: 0.1
+ visualize_hc_graph: False
+
+# others
+
+cmd_angle_instead_rotvel: False
+min_samples: 3
+allow_init_with_backwards_motion: False
+inflation_dist: 5.0
+viapoints_all_candidates: False
+global_plan_via_point_sep: -1.0 #Weight on following global path

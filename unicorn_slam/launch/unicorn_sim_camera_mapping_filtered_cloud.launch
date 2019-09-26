@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+<!-- Runs a simulation that has the husqvarna model with lidar and camera
+also runs costmap creation using lidar and camera that takes into account 3d objects
+ -->
+	<master auto="start"/>
+
+	<!-- roslaunch arguments -->
+	<arg name="show_rviz" default="true"/>
+	<arg name="paused" default="false"/>
+	<arg name="debug" default="true"/>  
+	<arg name="gui" default="false"/> 
+
+	<!-- Needs to be gmapping_sim.launch if using gazebo and not gmapping.launch -->
+	<arg name="scan_topic" default="scan" />
+
+	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
+		<rosparam file="$(find unicorn_slam)/config/gmapping_sim_cam.yaml"/>
+		<remap from="scan" to="$(arg scan_topic)"/>
+	</node>
+	<!-- Opens the world specified in arg="world_name" -->
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(find unicorn_slam)/worlds/testworld3.world"/>
+		<arg name="paused" value="false"/>
+		<arg name="use_sim_time" value="true"/>
+		<arg name="gui" value="true"/>
+		<arg name="headless" value="false"/>
+		<arg name="debug" value="false"/>
+	</include>
+
+	<!-- Launches move_base and loads the costmap and planner settings -->
+	<!--- Run AMCL -->
+	<include file="$(find amcl)/examples/amcl_diff.launch" />
+	<!-- Start the move_base pkg and load the sim costmap settings -->
+	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" >
+		<!-- Load the costmap settings -->
+		<rosparam file="$(find unicorn_description)/config/sim/costmap_common_params_filtered.yaml" command="load" ns="global_costmap" />
+		<rosparam file="$(find unicorn_description)/config/sim/costmap_common_params_filtered.yaml" command="load" ns="local_costmap" />
+		<rosparam file="$(find unicorn_description)/config/sim/local_costmap_params.yaml" command="load" />
+		<rosparam file="$(find unicorn_description)/config/sim/global_costmap_params.yaml" command="load" />
+		<!-- Load the teb local planner settings -->
+		<rosparam file="$(find unicorn_description)/config/sim/base_local_planner_teb.yaml" command="load" />
+		<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+		<!-- Sets the frequency for the controller -->
+		<param name="controller_frequency" value="10.0" /> 
+	</node>
+
+	<!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->
+	<node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
+	<node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid pcl_manager" output="screen">
+		<remap from="~input" to="/camera/depth/points" />
+		<remap from="~output" to="cloud_filtered" />
+		<rosparam>
+			filter_field_name: z
+			filter_limit_min: 0.01
+			filter_limit_max: 1.5
+			filter_limit_negative: False
+			leaf_size: 0.01
+		</rosparam>
+	</node>
+
+	<!-- urdf xml robot description loaded on the Parameter Server-->
+	<param name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_cam.urdf.xacro'" />
+
+	<!-- push robot_description to factory and spawn robot in gazebo -->
+	<node name="automower_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model automower -x 7.5 -y -2.6 -z 0.2 -Y -1.5707" />
+
+	<!-- robot visualization in Rviz -->
+	<!-- Starts rviz with the settings from the args="settings_file.rviz" 
+	change this file to change which topics are open on startup-->
+	<group if="$(arg show_rviz)">
+		<node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find am_description)/rviz/pf.rviz"/> 
+	</group>
+
+	<!-- load joint controller configurations from YAML file to parameter server -->
+	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
+
+	<!-- source that publishes the joint positions as a sensor_msgs/JointState -->
+	<param name="use_gui" value="false"/>
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+	<!-- publish all the frames to TF -->
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
+		<param name="publish_frequency" value="50"/>
+	</node>
+
+</launch>
+
+

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+	<xacro:macro name="rplidar_a2" params="frame:=laser topic:=scan 
+		robot_namespace:=/" >
+	   <link name="${frame}">
+	    <inertial>
+		<mass value="0.564" />
+		<origin xyz ="0 0 0" />
+		<inertia ixx ="0.003881243" ixy="0.0" ixz="0.0"							 iyy="0.000498940"  iyz="0.0" izz="0.003879257" />
+	    </inertial>
+	    <visual>
+		<origin xyz = "0.0 0.0 0.28" rpy= "0.0 0.0 0.0" />
+   	    </visual>
+	    <collision>
+		<origin xyz = "0 0 0" rpy = "0 0 0" />
+		<geometry>
+		   <box size ="0.07271 0.27794 0.073"/>
+		</geometry>
+	    </collision>
+	   </link>
+	</xacro:macro>
+</robot>

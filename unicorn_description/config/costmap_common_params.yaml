@@ -1,0 +1,53 @@
+footprint: [[-0.5, -0.3], [-0.5, 0.3], [0.2, 0.3], [0.2, -0.3]]
+footprint_padding: 0.0
+
+plugins:
+  - {name: static_layer,     type: "costmap_2d::StaticLayer"}
+  - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
+  - {name: sonar_layer,       type: "range_sensor_layer::RangeSensorLayer"}
+  #- {name: voxel_layer,       type: "costmap_2d::VoxelLayer"}
+  - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
+
+#For this example we'll configure the costmap in voxel-grid mode
+obstacle_layer:
+  map_type: costmap
+
+  #Voxel grid specific parameters
+  origin_z: 0.0
+  z_resolution: 0.2
+  z_voxels: 10
+  unknown_threshold: 9
+
+
+  #Set the tolerance we're willing to have for tf transforms
+  transform_tolerance: 0.3
+
+  #Obstacle marking parameters
+  obstacle_range: 3.0
+  max_obstacle_height: 2.0
+  raytrace_range: 3.0
+
+  #Cost function parameters
+  inflation_radius: 0.7
+  cost_scaling_factor: 8.0
+
+  #The cost at which a cell is considered an obstacle when a map is read from the map_server
+  lethal_cost_threshold: 250
+
+  #Configuration for the sensors that the costmap will use to update a map
+  observation_sources: laser_scan_sensor point_cloud_sensor
+
+    #testing with 360 degrees of view from LIDAR
+  laser_scan_sensor: {sensor_frame: base_laser, data_type: LaserScan, topic: /scan, expected_update_rate: 0.5,
+    marking: true, clearing: true, max_obstacle_height: 1, min_obstacle_height: 0.08}
+
+  point_cloud_sensor: {sensor_frame: camera_left_depth_link, data_type: PointCloud2, topic: /camera/depth/points,
+    marking: true, clearing: true, max_obstacle_height: 2, min_obstacle_height: 0.08}
+
+  sonar_layer:
+   topics: [ '/ultrasonic_br', '/ultrasonic_bl']
+   no_readings_timeout: 1.0
+   clear_on_max_reading: true
+
+
+

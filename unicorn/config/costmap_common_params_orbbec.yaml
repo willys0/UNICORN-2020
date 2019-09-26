@@ -1,0 +1,42 @@
+#This file contains common configuration options for the two costmaps used in the navigation stack for more details on the parameters in this file, and a full list of the parameters used by the costmaps, please see http://www.ros.org/wiki/costmap_2d
+#The footprint of the robot and associated padding
+# footprint: [[-0.3, -0.3], [-0.3, 0.3], [0.6, 0.3], [0.6, -0.3]]
+footprint: [[-0.5, -0.3], [-0.5, 0.3], [0.2, 0.3], [0.2, -0.3]]
+footprint_padding: 0.01
+
+#For this example we'll configure the costmap in voxel-grid mode
+obstacle_layer:
+  map_type: costmap
+
+  #Voxel grid specific parameters
+  origin_z: 0.0
+  z_resolution: 0.2
+  z_voxels: 10
+  unknown_threshold: 9
+
+
+  #Set the tolerance we're willing to have for tf transforms
+  transform_tolerance: 0.3
+
+  #Obstacle marking parameters
+  obstacle_range: 4.0
+  max_obstacle_height: 2.0
+  raytrace_range: 3.0
+
+  #Cost function parameters
+  inflation_radius: 0.7
+  cost_scaling_factor: 8.0
+
+  #The cost at which a cell is considered an obstacle when a map is read from the map_server
+  lethal_cost_threshold: 250
+
+  #Configuration for the sensors that the costmap will use to update a map
+  observation_sources: laser_scan_sensor point_cloud_sensor
+
+  laser_scan_sensor: {sensor_frame: base_laser, data_type: LaserScan, topic: /scan, expected_update_rate: 0.5,
+     marking: true, clearing: true, max_obstacle_height: 1, min_obstacle_height: 0.08}
+
+  # point_cloud_sensor: {sensor_frame: zed_center, data_type: PointCloud2, topic: /zed/point_cloud/cloud_registered, expected_update_rate: 1.0,
+  #    marking: true, clearing: true, max_obstacle_height: 1, min_obstacle_height: 0.1, observation_persistence: 0.0, mark_threshold: 9}
+  point_cloud_sensor: {sensor_frame: camera_depth_optical_frame, data_type: PointCloud2, topic: /camera/depth/points, expected_update_rate: 1.0,
+     marking: true, clearing: true, max_obstacle_height: 1, min_obstacle_height: 0.1, observation_persistence: 0.0, mark_threshold: 9}

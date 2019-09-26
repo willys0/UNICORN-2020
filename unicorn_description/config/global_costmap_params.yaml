@@ -1,0 +1,19 @@
+global_costmap:
+
+  plugins:
+    - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
+  # - {name: static_layer,     type: "costmap_2d::StaticLayer"}
+    - {name: static_layer,     type: "costmap_2d::StaticLayer"}
+    - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
+    #- {name: voxel_layer,       type: "costmap_2d::VoxelLayer"}
+    
+  
+  global_frame: /map
+  robot_base_frame: chassis_link
+  update_frequency: 1.0
+  use_first_map_only: True
+  static_map: True
+
+  inflation_layer:
+     inflation_radius: 4
+     cost_scaling_factor: 3

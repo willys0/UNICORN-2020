@@ -1,0 +1,6 @@
+KERNEL=="ttyACM?", ATTRS{idVendor}=="0483", ATTRS{idProduct}=="5740", ATTRS{serial}=="00000000050C", SYMLINK+="charlieHRP"
+KERNEL=="ttyACM?", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", ATTRS{serial}=="95432313238351505012", SYMLINK+="charlieArduinoBumper"
+KERNEL=="ttyACM?", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", ATTRS{serial}=="9543231323835150D052", SYMLINK+="charlieArduinoRangesensor"
+KERNEL=="ttyACM?", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="804f", ATTRS{serial}=="B94A5A9B5150394841202020FF0D3629", SYMLINK+="charlieArduinoTagUWB"
+KERNEL=="ttyACM?", ATTRS{idVendor}=="2341", ATTRS{idProduct}=="0043", ATTRS{serial}=="74839373034351F04111", SYMLINK+="charlieArduinoLift"
+

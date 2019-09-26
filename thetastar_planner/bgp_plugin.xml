@@ -1,0 +1,7 @@
+<library path="lib/libthetastar_planner">
+  <class name="thetastar_planner/ThetaStarPlanner" type="thetastar_planner::ThetaStarPlanner" base_class_type="nav_core::BaseGlobalPlanner">
+    <description>
+      An implementation of Theta* algorithm for global path finding
+    </description>
+  </class>
+</library>

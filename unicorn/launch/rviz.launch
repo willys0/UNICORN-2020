@@ -1,0 +1,10 @@
+<!-- Launches rviz with predefined settings -->
+
+<launch>
+
+<node pkg="rviz" 
+	name="rviz" 
+	type="rviz"
+	args ="-d $(find unicorn)/config/default.rviz"/>
+
+</launch>

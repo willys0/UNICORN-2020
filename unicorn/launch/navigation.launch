@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+    <param name="/use_sim_time" value="true"/>
+    <arg name="tf_prefix" default="r1"/>
+    <arg name="initial_pose_x" default="0.0" />
+    <arg name="initial_pose_y" default="0.0" />
+    <arg name="initial_pose_a" default="0.0" />   
+<arg name="scan_topic" value="scan_filtered"/>
+
+    <group ns="$(arg tf_prefix)">
+        <param name="tf_prefix" type="string" value="$(arg tf_prefix)"/>
+
+
+     <node pkg="amcl" type="amcl" name="amcl" output="screen">
+		<rosparam command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
+		<param name="use_map_topic" value="true"/>
+     </node>	
+
+
+        <!--include file="$(find unicorn_multi)/launch/amcl.launch">
+            <arg name="scan_topic" value="front_laser/scan" />
+             <arg name="initial_pose_x" value="$(arg initial_pose_x)"/>
+            <arg name="initial_pose_y" value="$(arg initial_pose_y)"/>
+            <arg name="initial_pose_a" value="$(arg initial_pose_a)"/>
+        </include-->
+
+        <include file="$(find unicorn_multi)/launch/move_base.launch">
+            <!--arg name="global_frame_id" value="/map" /-->
+        </include>
+    </group>
+
+</launch>

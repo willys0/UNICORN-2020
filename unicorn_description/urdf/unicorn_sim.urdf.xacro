@@ -1,0 +1,368 @@
+<?xml version="1.0"?>
+<robot name="unicorn" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- PROPERTY LIST -->
+  <xacro:arg name="robot_namespace" default="/" />
+  <!--All units in m-kg-s-radians unit system -->
+  <xacro:property name="M_PI" value="3.1415926535897931" />
+  <!-- Main Body-base -->
+  <xacro:property name="base_x_size" value="0.72" />
+  <xacro:property name="base_y_size" value="0.55" />
+  <xacro:property name="base_z_size" value="0.6" />
+  <xacro:property name="base_mass" value="15" /> <!-- 21.446 in kg-->
+  <!--Inertial macros for the box and cylinder. Units are kg*m^2-->
+  <xacro:macro name="box_inertia" params="m x y z">
+    <inertia  ixx="${m*(y*y+z*z)/12}" ixy = "0" ixz = "0"
+              iyy="${m*(x*x+z*z)/12}" iyz = "0"
+              izz="${m*(x*x+z*z)/12}" />
+  </xacro:macro>
+
+  <!-- LMS111 -->
+  <xacro:arg name="laser_xyz" default="0.0 0.0 0.260" />
+  <xacro:arg name="laser_rpy" default="0.0 0.0 ${M_PI}" />
+  <xacro:include filename="$(find lms1xx)/urdf/sick_lms1xx.urdf.xacro" />
+
+  <!-- Ultrasonic sensor -->
+  <xacro:arg name="ultrasonic_xyz" default="-0.3 0 0.2" />
+  <xacro:arg name="ultrasonic_rpy" default="0 0 ${M_PI}" />
+  <xacro:include filename="$(find unicorn_description)/urdf/ultrasonic_sensor.urdf.xacro" />
+
+  <!-- Camera -->
+  <xacro:arg name="camera_enabled" default="false" />
+  <xacro:arg name="camera_xyz" default="1.0 1.0 1.0" />
+  <xacro:arg name="camera_rpy" default="0.0 0.0 0.0" />
+  <xacro:include filename="$(find unicorn_description)/urdf/stereo_camera.urdf.xacro" />
+
+  <!-- Wheel -->
+  <xacro:include filename="$(find am_description)/urdf/wheel.urdf.xacro" />
+
+  <!-- Swivel wheel -->
+  <xacro:include filename="$(find am_description)/urdf/swivel_wheel.urdf.xacro" />
+  
+  <!-- Materials -->
+  <xacro:include filename="$(find am_description)/urdf/materials.urdf.xacro" />
+
+  <link 
+    name="chassis_link">
+    <inertial>
+      <origin
+        xyz="0.17 0 -0.10"
+        rpy="0 0 0" />
+      <mass
+        value="${base_mass}" />
+      <box_inertia  m="${5*base_mass}" x="${base_x_size}" y="${base_y_size}" z="${base_z_size}"/>
+    </inertial>
+    <visual>
+      <origin
+        xyz="-0.17 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://unicorn_description/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="-0.17 0 0.08"
+        rpy="0 0 0" />
+      <geometry>
+        <!-- <mesh
+          filename="package://unicorn_description/meshes/base_link.STL" /> -->
+          <box size="0.65 0.5 0.2"/>
+      </geometry>
+      <!-- <surface>
+         <friction>
+           <ode><mu>0</mu><mu2>0</mu2></ode>
+         </friction>
+      </surface> -->
+    </collision>
+  </link>
+  <link
+    name="base_link_gazebo">
+    <inertial>
+      <origin
+        xyz="0.17 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.01" />
+      <box_inertia  m="${5*0.01}" x="${base_x_size}" y="${base_y_size}" z="${base_z_size}"/>
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <!-- <mesh
+          filename="package://unicorn_description/meshes/base_link.STL" /> -->
+          <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <!-- <surface>
+         <friction>
+           <ode><mu>0</mu><mu2>0</mu2></ode>
+         </friction>
+      </surface> -->
+    </collision>
+  </link>
+  <gazebo reference="base_link_gazebo">
+    <material>Gazebo/Green</material>
+    <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+  <joint name="base_link_gazebo_joint" type="fixed">
+    <parent link="chassis_link"/>
+    <child link="base_link_gazebo" />
+  <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
+  </joint>
+
+  <wheel fb="back" lr="right" parent="base_link_gazebo" translateY="-0.24" translateX="0.0" translateZ="-0.006" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="left" parent="base_link_gazebo" translateY="0.24" translateX="0.0" translateZ="-0.006" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+
+  <swivel_wheel fb="front" lr="right" parent="base_link_gazebo" translateY="-0.16" translateX="0.355" translateZ="0.03" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
+  <swivel_wheel fb="front" lr="left" parent="base_link_gazebo" translateY="0.16" translateX="0.355" translateZ="0.03" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
+
+  <!-- LOOP SENSORs -->
+  <!-- <sensorpos name="loop_front_center" parent="base_link_gazebo" translateX="0.38" translateY="0.0" translateZ="-0.04"/>
+  <sensorpos name="loop_front_right" parent="base_link_gazebo" translateX="0.38" translateY="-0.07" translateZ="-0.04"/>
+  <sensorpos name="loop_rear_left" parent="base_link_gazebo" translateX="-0.07" translateY="0.14" translateZ="-0.04"/>
+  <sensorpos name="loop_rear_right" parent="base_link_gazebo" translateX="-0.07" translateY="-0.14" translateZ="-0.04"/> -->
+
+  <!-- CONFINEMENT SENSORs -->
+  <!-- <sensorpos name="col_front_chassis" parent="base_link_gazebo" translateX="0.55" translateY="0.0" translateZ="0.00"/>
+  <sensorpos name="col_front_left" parent="base_link_gazebo" translateX="0.43" translateY="0.24" translateZ="0.00"/>
+  <sensorpos name="col_front_right" parent="base_link_gazebo" translateX="0.43" translateY="-0.24" translateZ="0.00"/>
+  <sensorpos name="col_rear_left" parent="base_link_gazebo" translateX="-0.10" translateY="0.24" translateZ="0.0"/>
+  <sensorpos name="col_rear_right" parent="base_link_gazebo" translateX="-0.10" translateY="-0.24" translateZ="0.0"/> -->
+
+  <!-- CUTTING DISC -->
+  <!-- <link name="cutting_disc_center">
+    <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+            <cylinder length="0.01" radius="0.11" />
+        </geometry>
+        <material name="Purple" />
+    </visual>
+  </link>
+
+  <gazebo reference="cutting_disc_center">
+    <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+
+  <joint name="cutting_disc_center_joint" type="fixed">
+    <parent link="base_link_gazebo"/>
+    <child link="cutting_disc_center" />
+  <origin xyz="0.25 0.0 -0.07" rpy="0 0 0" />
+  </joint> -->
+
+
+  <!-- Antenna -->
+  <!-- <link name="antenna_center">
+    <visual>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <geometry>
+            <cylinder length="0.01" radius="0.05" />
+        </geometry>
+        <material name="Purple" />
+    </visual>
+  </link>
+
+  <gazebo reference="antenna_center">
+    <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+
+  <joint name="antenna_center_joint" type="fixed">
+    <parent link="base_link_gazebo"/>
+    <child link="antenna_center" />
+  <origin xyz="0.27 0.0 0.0" rpy="0 0 0" />
+  </joint> -->
+  
+  <!--<sick_lms1xx_mount prefix="base"/>-->
+
+  <sick_lms1xx frame="base_laser" topic="scan" robot_namespace="$(arg robot_namespace)"/>
+
+  <joint name="laser_mount_joint" type="fixed">
+    <origin xyz="$(arg laser_xyz)" rpy="$(arg laser_rpy)" />
+    <parent link="base_link_gazebo" />
+    <child link="base_laser" />
+  </joint>
+
+  <!-- Camera -->
+  <xacro:if value="$(arg camera_enabled)">
+    <stereo_camera frame="camera_left_link" topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+    <!-- generate an optical frame http://www.ros.org/reps/rep-0103.html#suffix-frames
+        so that ros and opencv can operate on the camera frame correctly -->
+    <joint name="camera_optical_joint" type="fixed">
+      <!-- these values have to be these values otherwise the gazebo camera image
+          won't be aligned properl  y with the frame it is supposedly originating from -->
+      <origin xyz="$(arg camera_xyz)" rpy="0 0 ${-pi}"/>
+      <parent link="base_link_gazebo"/>
+      <child link="camera_left_link"/>
+    </joint>
+    <joint name="camera_depth_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+      <parent link="camera_left_link"/>
+      <child link="camera_left_depth_link"/>
+    </joint>
+  </xacro:if>  
+
+  <!-- GPS -->
+  <gazebo>
+    <plugin name="novatel_gps_sim" filename="libhector_gazebo_ros_gps.so">
+      <alwaysOn>1</alwaysOn>
+      <updateRate>10.0</updateRate>
+      <bodyName>chassis_link</bodyName>
+      <topicName>gps</topicName>
+      <velocityTopicName>gps_velocity</velocityTopicName>
+      <drift>5.0 5.0 5.0</drift>
+      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+      <velocityDrift>0 0 0</velocityDrift>
+      <velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
+    </plugin>
+  </gazebo>
+
+
+  <!-- Ultrasonic sensors -->
+  
+  <ultrasonic_sensor frame="base_ultrasonic_fr" topic="fr" robot_namespace="$(arg robot_namespace)"/>
+  <joint name="ultrasonic_mount_joint_fr" type="fixed">
+    <origin xyz="-0.2 0.2 0.0" rpy="0 0 ${M_PI + M_PI/4}"/>
+    <parent link="base_link_gazebo"/>
+    <child link="base_ultrasonic_fr" />
+  </joint>
+
+  <ultrasonic_sensor frame="base_ultrasonic_fm" topic="fm" robot_namespace="$(arg robot_namespace)"/>
+  <joint name="ultrasonic_mount_joint_fm" type="fixed">
+    <origin xyz="-0.2 0.0 0.0" rpy="0 0 ${M_PI}"/>
+    <parent link="base_link_gazebo"/>
+    <child link="base_ultrasonic_fm" />
+  </joint>
+
+  <ultrasonic_sensor frame="base_ultrasonic_fl" topic="fl" robot_namespace="$(arg robot_namespace)"/>
+  <joint name="ultrasonic_mount_joint_fl" type="fixed">
+    <origin xyz="-0.2 -0.2 0.0" rpy="0 0 ${M_PI - M_PI/4}"/>
+    <parent link="base_link_gazebo"/>
+    <child link="base_ultrasonic_fl" />
+  </joint>
+
+  <ultrasonic_sensor frame="base_ultrasonic_r" topic="r" robot_namespace="$(arg robot_namespace)"/>
+  <joint name="ultrasonic_mount_joint_r" type="fixed">
+    <origin xyz="0.4 0.25 0.0" rpy="0 -${M_PI/64} ${3*M_PI/4}"/>
+    <parent link="base_link_gazebo"/>
+    <child link="base_ultrasonic_r" />
+  </joint>
+
+  <ultrasonic_sensor frame="base_ultrasonic_l" topic="l" robot_namespace="$(arg robot_namespace)"/>
+  <joint name="ultrasonic_mount_joint_l" type="fixed">
+    <origin xyz="0.4 -0.25 0.0" rpy="0 -${M_PI/64} -${3*M_PI/4}"/>
+    <parent link="base_link_gazebo"/>
+    <child link="base_ultrasonic_l" />
+  </joint>
+
+  <ultrasonic_sensor frame="base_ultrasonic_rm" topic="rm" robot_namespace="$(arg robot_namespace)"/>
+  <joint name="ultrasonic_mount_joint_rm" type="fixed">
+    <origin xyz="0.15 0.25 0.0" rpy="0 -${M_PI/64} ${M_PI/4}"/>
+    <parent link="base_link_gazebo"/>
+    <child link="base_ultrasonic_rm" />
+  </joint>
+
+  <ultrasonic_sensor frame="base_ultrasonic_lm" topic="lm" robot_namespace="$(arg robot_namespace)"/>
+  <joint name="ultrasonic_mount_joint_lm" type="fixed">
+    <origin xyz="0.15 -0.25 0.0" rpy="0 -${M_PI/64} -${M_PI/4}"/>
+    <parent link="base_link_gazebo"/>
+    <child link="base_ultrasonic_lm"/>
+  </joint>
+
+  <ultrasonic_sensor frame="base_ultrasonic_br" topic="br" robot_namespace="$(arg robot_namespace)"/>
+  <joint name="ultrasonic_mount_joint_br" type="fixed">
+    <origin xyz="0.5 0.2 0.0" rpy="0 -${M_PI/64} -${M_PI/4}"/>
+    <parent link="base_link_gazebo"/>
+    <child link="base_ultrasonic_br" />
+  </joint>
+
+  <ultrasonic_sensor frame="base_ultrasonic_bm" topic="bm" robot_namespace="$(arg robot_namespace)"/>
+  <joint name="ultrasonic_mount_joint_bm" type="fixed">
+    <origin xyz="0.5 0.0 0.0" rpy="0 -${M_PI/64} 0"/>
+    <parent link="base_link_gazebo"/>
+    <child link="base_ultrasonic_bm" />
+  </joint>
+
+  <ultrasonic_sensor frame="base_ultrasonic_bl" topic="bl" robot_namespace="$(arg robot_namespace)"/>
+  <joint name="ultrasonic_mount_joint_bl" type="fixed">
+    <origin xyz="0.5 -0.2 0.0" rpy="0 -${M_PI/64} ${M_PI/4}"/>
+    <parent link="base_link_gazebo"/>
+    <child link="base_ultrasonic_bl" />
+  </joint>
+
+ 
+
+  <!-- GAZEBO STUFF -->
+  <gazebo>
+    <plugin name="automower_gazebo_controller" filename="libam_gazebo_controller_2wd.so">
+      <alwaysOn>true</alwaysOn>
+      <updateRate>100.0</updateRate>
+      <leftJoint>back_right_wheel_joint</leftJoint>
+      <rightJoint>back_left_wheel_joint</rightJoint>
+      <wheelSeparation>0.4645</wheelSeparation>
+      <wheelDiameter>0.245</wheelDiameter>
+      <wheelTorque>100</wheelTorque>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryTopic>odom</odometryTopic>
+      <odometryFrame>odom_gazebo</odometryFrame>
+      <robotBaseFrame>chassis_link</robotBaseFrame>
+      <publishWheelTF>false</publishWheelTF>
+      <publishWheelJointState>false</publishWheelJointState>
+    </plugin>
+
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />
+
+    <plugin name="imu_plugin" filename="libhector_gazebo_ros_imu.so">
+    <alwaysOn>false</alwaysOn>
+    <bodyName>chassis_link</bodyName>
+    <topicName>imu</topicName>
+    <serviceName>imu_service</serviceName>
+    <updateRate>100.0</updateRate>
+    <rpyOffsets>0 0 0</rpyOffsets> <!-- deprecated -->
+<!--
+      <gaussianNoise>0.0</gaussianNoise>
+      <accelDrift>0.5 0.5 0.5</accelDrift>
+      <accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
+      <rateDrift>0.1 0.1 0.1</rateDrift>
+      <rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
+      <headingDrift>0.1</headingDrift>
+      <headingGaussianNoise>1.00</headingGaussianNoise>
+-->
+
+    <gaussianNoise>0.0</gaussianNoise>  <!-- deprecated -->
+      <accelDrift>0.0 0.0 0.0</accelDrift>
+      <accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise>
+      <rateDrift>0.0 0.0 0.0</rateDrift>
+      <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
+      <headingDrift>0.0</headingDrift>
+      <headingGaussianNoise>0.00</headingGaussianNoise>
+    </plugin>
+
+    <plugin name="am_gazebo_wheelencoder" filename="libam_gazebo_wheelencoder.so">
+  </plugin>
+
+   
+  </gazebo>
+
+
+</robot>

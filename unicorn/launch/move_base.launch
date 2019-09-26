@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" >
+		<!-- Load the costmap settings -->
+		<rosparam file="$(find unicorn_description)/config/sim/costmap_common_params.yaml" command="load" ns="global_costmap" />
+		<rosparam file="$(find unicorn_description)/config/sim/costmap_common_params.yaml" command="load" ns="local_costmap" />
+		<rosparam file="$(find unicorn_description)/config/sim/local_costmap_params.yaml" command="load" />
+		<rosparam file="$(find unicorn_description)/config/sim/global_costmap_params.yaml" command="load" />
+		<!-- Load the teb local planner settings -->
+		<rosparam file="$(find unicorn_description)/config/sim/base_local_planner_teb.yaml" command="load" />
+		<param name="base_global_planner" value="thetastar_planner/ThetaStarPlanner"/>
+		<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+
+
+		<!-- Sets the frequency for the controller -->
+		<param name="controller_frequency" value="10.0" />
+		<remap from="map" to="/map"/>
+	</node>
+</launch>

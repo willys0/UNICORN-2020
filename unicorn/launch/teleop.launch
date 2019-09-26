@@ -1,0 +1,11 @@
+<launch>
+
+<!-- Launch hrp teleop node for backwards driving -->
+<node name="hrp_teleop"
+	pkg="am_driver"
+	type="hrp_teleop.py"
+	output="screen">
+	<remap from="/cmd_vel" to="/unicorn/cmd_vel"/>
+</node>
+
+</launch>

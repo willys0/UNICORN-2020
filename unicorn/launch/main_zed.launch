@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+	
+<!-- roslaunch arguments -->
+<arg name="debug" default="false"/>
+<arg name="use_gmapping" default="false"/>
+<arg name="use_orbbec" default="false"/> <!-- Set to false if using zed camera / true for orbbec -->
+<arg name="scan_topic" value="scan_filtered"/>
+<arg name="map_file" value="$(find unicorn_slam)/maps/work_room.yaml"/>
+<arg name="lidar_ip" default="192.168.0.100" />
+
+<!-- Joint pos gui -->
+<param name="use_gui" value="false"/>
+
+<group if="$(arg use_gmapping)">
+
+	<!-- Launch grid-mapping -->
+	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
+		<rosparam file="$(find unicorn_slam)/config/gmapping_default.yaml"/>
+		<remap from="scan" to="$(arg scan_topic)"/>
+	</node>
+	
+</group>
+
+<group unless="$(arg use_gmapping)">
+	<rosparam param="global_local">false</rosparam>
+	<!-- Run the map server -->
+	<node pkg="map_server" type="map_server" args="$(arg map_file)" respawn="true" name="map" />
+
+	<!--- Run AMCL -->
+	<node pkg="amcl" type="amcl" name="amcl" output="screen">
+		<rosparam command="load" file="$(find unicorn_slam)/config/amcl.yaml"/>
+		<remap from="scan" to="$(arg scan_topic)"/>
+	</node>
+
+	
+</group>
+<group if="$(arg use_orbbec)">
+<!-- Run Orbbec camera -->
+<include file="$(find usb_cam)/launch/usb_cam-test.launch"/>
+<include file ="$(find astra_launch)/launch/astrapro.launch"/>
+</group>
+<group unless="$(arg use_orbbec)">
+<!-- Run zed camera -->
+ <group ns="zed">
+    <include file="$(find zed_wrapper)/launch/zed_camera.launch">
+        <arg name="publish_tf" value="false"/>
+        <arg name="publish_urdf" value="false"/>
+        <arg name="odometry_frame" value="odom"/>
+        <arg name="base_frame" value="zed_center"/>
+        <arg name="camera_frame" value="zed_left_camera"/>
+        <arg name="depth_frame" value="zed_depth_camera"/>
+        <arg name="confidence_val" value="80"/>
+    </include>
+</group>
+
+
+<!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->
+<node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
+<node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid pcl_manager" output="screen">
+<remap from="~input" to="/zed/point_cloud/cloud_registered" />
+<remap from="~output" to="cloud_filtered" />
+<rosparam>
+ filter_field_name: z
+ filter_limit_min: 0.3
+ filter_limit_max: 1.5
+ filter_limit_negative: False
+ leaf_size: 0.02
+</rosparam>
+</node>
+</group>
+
+<!-- load joint controller configurations from YAML file to parameter server -->
+<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
+
+<!-- Urdf xml robot description loaded on the Parameter Server-->
+<param name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target_2.urdf.xacro'" />
+<!-- Starts interface between automower and unicorn to enable backward driving -->
+<node name="am_unicorn_interface" 
+	pkg="unicorn" 
+	type="am_unicorn_interface" 
+	output="screen">
+</node>
+
+<!-- Starts interface between automower and unicorn to enable backward driving -->
+<node name="range_sensor_driver" 
+	pkg="unicorn" 
+	type="range_sensor_driver" 
+	output="screen">
+<rosparam>
+ serial_port: "/dev/ttyACM0"
+</rosparam>
+</node>
+
+
+<!-- Start the am_driver -->
+<node name="am_driver_safe" pkg="am_driver_safe" type="am_driver_safe_node" output="screen">
+	<param name="serialPort" value="/dev/ttyACM1" type="str" />
+	<param name="printCharge" value="false"/>
+	<param name="publishTf" value="1"/>
+	<param name="pitchAndRoll" value="false"/>
+	<param name="publishGPS" value="false"/>
+	<param name="serialLog" value="false"/>
+	<param name="hil" value="0"/>
+	<param name="jsonFile" value="$(find am_driver_safe)/config/automower_hrp.json" type="string" />
+</node> 
+
+<!-- Start the Sick LMS111 driver -->
+<node pkg="lms1xx" name="lms1xx" type="LMS1xx_node">
+	<param name="host" value="$(arg lidar_ip)" />
+	<param name="frame_id" value="base_laser"/>
+</node>
+
+<!-- Launch Move Base -->
+<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+	<!-- <param name="base_global_planner" value="navfn/NavfnROS"/> -->
+	<param name="base_global_planner" value="global_planner/GlobalPlanner"/>
+	<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+	<rosparam file="$(find unicorn)/config/base_local_planner_teb.yaml" command="load" />
+	<rosparam file="$(find unicorn)/config/costmap_common_params_zed.yaml" command="load" ns="global_costmap" />
+	<rosparam file="$(find unicorn)/config/costmap_common_params_zed.yaml" command="load" ns="local_costmap" />
+	<rosparam file="$(find unicorn)/config/local_costmap_params.yaml" command="load" />
+	<rosparam file="$(find unicorn)/config/global_costmap_params.yaml" command="load" />
+	<remap from="cmd_vel" to="/unicorn/cmd_vel"/>
+</node>
+<!-- source that publishes the joint positions as a sensor_msgs/JointState -->
+<param name="use_gui" value="false"/>
+<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+
+<!-- publish all the frames to TF -->
+<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
+	<param name="publish_frequency" value="50"/>
+</node>
+
+<!-- <node name="initialpose_publisher" pkg="unicorn" type="pub_initialpose"/> -->
+
+<!-- Starts laser filter to enable limitation of laserscan angle -->
+<node name="laser_filter" pkg="unicorn" type="laser_scan_filter" output="screen">
+<rosparam>
+ upper_angle: 1.57
+ lower_angle: -1.57
+</rosparam>
+</node>
+
+
+<node pkg="robot_localization" type="ukf_localization_node" name="ukf_localization_node" clear_params="true">
+   <rosparam command="load" file="$(find unicorn)/config/ukf_template.yaml" />
+</node>
+
+
+</launch>

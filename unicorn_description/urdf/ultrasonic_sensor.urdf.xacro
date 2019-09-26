@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="ultrasonic_sensor" params="frame topic:=sonar robot_namespace:=/" >
+
+    <link name="${frame}">
+      <collision>
+        <origin xyz="-0.2 0 0.2" rpy="0 0 0"/>
+        <geometry>
+          <box size="${0.030} ${0.030} ${0.030}"/>
+        </geometry>
+      </collision>
+
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <box size="${0.030} ${0.030} ${0.030}"/>
+        </geometry>
+      </visual>
+      <inertial>  
+        <mass value="1e-5" />
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
+      </inertial>
+    </link>
+
+    <!-- ultrasonic -->
+    <gazebo reference="${frame}">
+    <turnGravityOff>true</turnGravityOff>
+        <sensor type="ray" name="sonar">
+          <visualize>true</visualize>
+          <update_rate>5</update_rate>
+          <ray>
+            <scan>
+              <horizontal>
+                <samples>5</samples>
+                <resolution>1.0</resolution>
+                <min_angle>-0.075</min_angle>
+                <max_angle>0.075</max_angle>
+              </horizontal>
+              <vertical>
+                <samples>5</samples>
+                <resolution>1</resolution>
+                <min_angle>-0.02</min_angle>
+                <max_angle>0.02</max_angle>
+              </vertical>
+            </scan>
+            <range>
+              <min>0.02</min>
+              <max>4.0</max>
+              <resolution>0.01</resolution>
+            </range>
+          </ray>
+          <plugin name="gazebo_ros_range" filename="libgazebo_ros_range.so" >
+            <gaussianNoise>0.005</gaussianNoise>
+            <alwaysOn>true</alwaysOn>
+            <updateRate>5</updateRate>
+            <topicName>ultrasonic_${topic}</topicName>
+            <frameName>${frame}</frameName>
+            <fov>0.5</fov>
+            <radiation>ultrasound</radiation>
+          </plugin>
+        </sensor>
+    </gazebo>
+  </xacro:macro>
+</robot>

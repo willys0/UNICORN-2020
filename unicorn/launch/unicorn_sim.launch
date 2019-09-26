@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Launches Gazebo with predefined settings with the Unicorn platform -->
+<launch>
+	<!-- roslaunch arguments -->
+	<arg name="use_teb_planner" default="true"/>
+	<arg name="show_rviz" default="true"/>
+	<arg name="paused" default="false"/>
+	<arg name="debug" default="false"/>  	
+	<arg name="gazebo_gui" default="true"/>
+	<arg name="use_gmapping" default="false"/>
+	<arg name="use_hector" default="true"/>   <!-- Meant to be used if Hector slam is desired -->
+	<arg name="scan_topic" value="scan_filtered"/>
+	<arg name="map_file" value="$(find unicorn_slam)/maps/gmap_map.yaml"/>
+	<rosparam param="odom_frame">odom_gazebo</rosparam>
+	<rosparam param="global_local">false</rosparam>
+	<rosparam param="frame_id">chassis_link</rosparam>
+
+	<!-- Joint pos gui -->
+	<param name="use_gui" value="false"/> 
+
+	<!-- Lidar angle limitations (rad) -->
+	<rosparam param="use_sim_time">true</rosparam>
+
+	<group if="$(arg use_gmapping)">
+		<!-- Launch grid-mapping -->
+		<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
+			<rosparam file="$(find unicorn_slam)/config/gmapping_sim.yaml"/>
+			<remap from="scan" to="$(arg scan_topic)"/>
+		</node>
+	</group>
+
+
+	<group unless="$(arg use_gmapping)">
+		<!-- Run the map server -->
+		<node pkg="map_server" type="map_server" args="$(arg map_file)" respawn="true" name="map" />
+		<!--- Run AMCL -->
+		<node pkg="amcl" type="amcl" name="amcl" output="screen">
+			<rosparam command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
+			<remap from="scan" to="$(arg scan_topic)"/>
+		</node>
+	</group>
+	
+	<!-- Launch move_base -->
+	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+		<rosparam file="$(find unicorn_description)/config/base_local_planner_teb.yaml" command="load" />
+		<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
+		<param name="base_global_planner" value="global_planner/GlobalPlanner"/>
+		<rosparam file="$(find unicorn_description)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
+		<rosparam file="$(find unicorn_description)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
+		<rosparam file="$(find unicorn_description)/config/local_costmap_params.yaml" command="load" />
+		<rosparam file="$(find unicorn_description)/config/global_costmap_params.yaml" command="load" />
+		<remap from="cmd_vel" to="/unicorn/cmd_vel"/> 
+	</node>
+
+	<node name="voxel_grid_2_point_cloud" pkg="costmap_2d" type="costmap_2d_cloud">
+		<remap from="voxel_grid" to="/move_base/local_costmap/obstacle_layer/voxel_grid"/>
+		<remap from="voxel_marked_cloud" to="/move_base/local_costmap/obstacle_layer/marked_cloud"/>
+		<remap from="voxel_unknown_cloud" to="/move_base/local_costmap/obstacle_layer/unknown_cloud"/>
+	</node>
+
+	<!-- Launch gazebo world -->
+	<include file="$(find gazebo_ros)/launch/empty_world.launch">
+		<arg name="world_name" value="$(find husky_gazebo)/worlds/clearpath_playpen.world"/>
+		<arg name="paused" value="false"/>
+		<arg name="use_sim_time" value="true"/>
+		<arg name="gui" value="$(arg gazebo_gui)"/>
+		<arg name="headless" value="false"/>
+		<arg name="debug" value="false"/>
+	</include>
+
+	<!-- urdf xml robot description loaded on the Parameter Server-->
+	<param name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_sim.urdf.xacro'" />
+
+	<!-- push robot_description to factory and spawn robot in gazebo -->
+	<node name="automower_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model automower -x 0.0 -y 0.0 -z 0.2 -Y 0.0" /> <!-- 5.5 -2.6 0.2 -1.5707 -->
+
+	<!-- robot visualization in Rviz -->
+	<group if="$(arg show_rviz)">
+		<node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find am_description)/rviz/pf.rviz"/> 
+	</group>
+
+	<!-- load joint controller configurations from YAML file to parameter server -->
+	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
+
+	<!-- source that publishes the joint positions as a sensor_msgs/JointState -->
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+	
+	<!-- publish all the frames to TF -->
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
+		<param name="publish_frequency" value="50"/>
+	</node>
+	
+<!-- Starts laser filter to enable limitation of laserscan angle -->
+<node name="laser_filter" pkg="unicorn" type="laser_scan_filter" output="screen">
+<rosparam>
+ upper_angle: 1.57
+ lower_angle: -1.57
+</rosparam>
+</node>
+	
+	<!-- Starts interface between automower and unicorn to enable backward driving -->
+	<node name="am_unicorn_interface" pkg="unicorn" type="am_unicorn_interface" output="screen"/>
+
+
+	<!-- Starts the Arduino to enable ros and read/ write from it -->
+	<node name="serial_node" pkg="rosserial_python" type="serial_node.py">
+            <param name="port" value="/dev/ttyACM0"/>
+            <param name="baud" value="57600" />
+    </node>
+
+	<!-- static transform for the Orbbec camera -->
+<!--	<node name="static_tf_orbbec"
+		pkg="tf"
+		type="static_transform_publisher"
+		args="0 0 0 0 0 0 chassis_link camera_link 100">
+	</node>
+-->
+<!-- test for a new static camera, not on the robot -->
+<!-- Edit, the camera has a static place in the world, need to test with a real camera to see the feed from the camera. 
+	<node name="static_tf_orbbec2"
+		pkg="tf"
+		type = "static_transform_publisher"
+		args="5 5 0 0 0 0 map camera_link 100">
+	</node> 
+-->
+
+
+</launch>

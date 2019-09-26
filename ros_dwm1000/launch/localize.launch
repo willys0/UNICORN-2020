@@ -1,0 +1,17 @@
+<launch>
+
+    <arg name="map_file" value="$(find unicorn_slam)/maps/canteen.yaml"/>
+    <!--arg name="map_file" default="$(find ros_dwm1000)/maps/map.yaml"/-->
+    <!--node pkg="map_server" name="map_server"  type="map_server" args="$(arg map_file)" /-->
+
+    <include file="$(find ros_dwm1000)/launch/tf.launch" />
+
+    <node pkg="ros_dwm1000" name="ros_dwm1000"  type="localize.py" output="screen">
+        <param name="serial_port" value="/dev/charlieArduinoTagUWB" />
+        <param name="req_anchor" value="3" />
+        <param name="min_range" value="0.5" />
+        <param name="max_range" value="12.0" />
+        <param name="frame_id" value="uwb_tag" />
+    </node>
+
+</launch>

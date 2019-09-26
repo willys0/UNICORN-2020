@@ -1,0 +1,6 @@
+#tester snart
+plugins:    
+    - {name: test_optim_node, type: "teb_local_planner::TebLocalPlannerROS"}
+
+test_optim_node: 
+    max_vel_x: 0.9

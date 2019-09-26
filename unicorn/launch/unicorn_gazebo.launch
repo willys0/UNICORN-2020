@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+  <arg name="robot_name" default="r1" />
+  <!--arg name="model" default="$(find unicorn_description)/urdf/unicorn_cam.urdf.xacro" /-->
+  <arg name="robot_position" default="-x 0.0 -y 0.0 -z 0.0" />
+
+  <group ns="$(arg robot_name)">
+    <param name="tf_prefix" type="string" value="$(arg robot_name)"/>
+
+    <!-- Load the URDF into the ROS Parameter Server -->
+    <!--param name="robot_description" command="$(find xacro)/xacro.py $(arg model)" /-->
+
+    <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
+    <!--node name="automower_spawn" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model $(arg robot_name) -param robot_description $(arg robot_position)" /-->
+
+    <param name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_cam.urdf.xacro' robot_namespace:=$(arg robot_name)" />
+
+    <node name="automower_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model $(arg robot_name) $(arg robot_position)" />
+    !-- load joint controller configurations from YAML file to parameter server -->
+    
+   <rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
+   <!-- source that publishes the joint positions as a sensor_msgs/JointState -->
+
+   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
+		<param name="publish_frequency" value="50"/>
+     </node>
+
+
+  </group>
+
+</launch>
