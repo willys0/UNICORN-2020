@@ -78,7 +78,7 @@ To access the git manual.
 
 ```
 cd ~/catkin_ws/src
-git clone https://github.com/notlochness/UNICORN.git
+git clone https://github.com/jsn15011/UNICORN-2019.git
 ```
 
 #### Checkout the branch you want and make a local one
