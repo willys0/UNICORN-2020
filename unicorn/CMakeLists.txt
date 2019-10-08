@@ -17,11 +17,13 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   geometry_msgs
   message_generation
+  
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED)
-
+#find_package(rostest REQUIRED)
+#find_package(GTest REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -112,7 +114,7 @@ find_package(Boost REQUIRED)
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include
-#  LIBRARIES unicorn
+# LIBRARIES unicorn
  CATKIN_DEPENDS roscpp rospy std_msgs nav_msgs actionlib actionlib_msgs tf geometry_msgs message_runtime
 #  DEPENDS system_lib
 )
@@ -126,6 +128,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${GTEST_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -141,6 +144,7 @@ target_link_libraries(am_unicorn_interface ${catkin_LIBRARIES})
 
 add_executable(unicorn_statemachine src/unicorn_statemachine.cpp)
 add_dependencies(unicorn_statemachine ${catkin_EXPORTED_TARGETS})
+add_library(unicorn_statemachine_lib src/unicorn_statemachine.cpp)
 target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES})
 
 add_executable(range_sensor_driver src/range_sensor_driver.cpp)
@@ -208,13 +212,25 @@ target_link_libraries(range_sensor_driver ${catkin_LIBRARIES})
 
 #############
 ## Testing ##
-#############
+##############
+catkin_add_gtest(unicorn-test test/test_unicorn.cpp)
+#target_link_libraries(unicorn-test ${catkin_LIBRARIES})
 
+#add_executable(unicorn-test test/test_unicorn.cpp)
+#target_link_libraries(unicorn-test ${GTEST_LIBRARIES} pthread)
+#add_rostest_gtest(unicorn-tests test/test_unicorn.test test/test_unicorn.cpp)
+target_link_libraries(unicorn-test ${catkin_LIBRARIES} ${GTEST_LIBRARIES} unicorn_statemachine_lib)
+#add_dependencies(unicorn-test unicorn_statemachine ${catkin_EXPORTED_TARGETS})
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_unicorn.cpp)
-# if(TARGET ${PROJECT_NAME}-test)
-#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
-# endif()
+#add_dependencies(unicorn-test ${catkin_EXPORTED_TARGETS})
+#target_link_libraries(Unicorn-test unicorn_statemachine)
+#if(TARGET ${PROJECT_NAME}-test)
+#  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME}_statemachine)
+#endif()
 
+#target_link_libraries(unicorn-test ${catkin_LIBRARIES})
+# catkin_add_gtest(utest test/utest.cpp)
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
+
+

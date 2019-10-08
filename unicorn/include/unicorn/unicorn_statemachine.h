@@ -134,6 +134,7 @@ public:
 	void printUsage();
 	/** @brief Outer loop.*/
 	void active();
+	static int testFunction();
 	/** @brief Maps current state to a string.
 	*
 	* @param state current machine state.
