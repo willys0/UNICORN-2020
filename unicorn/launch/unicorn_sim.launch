@@ -9,7 +9,7 @@
 	<arg name="gazebo_gui" default="true"/>
 	<arg name="use_gmapping" default="false"/>
 	<arg name="use_hector" default="true"/>   <!-- Meant to be used if Hector slam is desired -->
-	<arg name="scan_topic" value="scan_filtered"/>
+	<arg name="scan_topic" value="scan"/> <!-- from scan_filtered to scan, nothing found in scan_filtered-->
 	<arg name="map_file" value="$(find unicorn_slam)/maps/gmap_map.yaml"/>
 	<rosparam param="odom_frame">odom_gazebo</rosparam>
 	<rosparam param="global_local">false</rosparam>
