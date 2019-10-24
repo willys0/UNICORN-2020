@@ -7,16 +7,13 @@
 	<arg name="paused" default="false"/>
 	<arg name="debug" default="false"/>  	
 	<arg name="gazebo_gui" default="true"/>
-	<arg name="use_gmapping" default="false"/>
+	<arg name="use_gmapping" default="true"/>
 	<arg name="use_hector" default="true"/>   <!-- Meant to be used if Hector slam is desired -->
 	<arg name="scan_topic" value="scan"/> <!-- from scan_filtered to scan, nothing found in scan_filtered-->
 	<arg name="map_file" value="$(find unicorn_slam)/maps/gmap_map.yaml"/>
 	<rosparam param="odom_frame">odom_gazebo</rosparam>
 	<rosparam param="global_local">false</rosparam>
 	<rosparam param="frame_id">chassis_link</rosparam>
-
-	<!-- Joint pos gui -->
-	<param name="use_gui" value="false"/> 
 
 	<!-- Lidar angle limitations (rad) -->
 	<rosparam param="use_sim_time">true</rosparam>
@@ -39,6 +36,11 @@
 			<remap from="scan" to="$(arg scan_topic)"/>
 		</node>
 	</group>
+
+
+	<!-- start ukf node -->
+	<node pkg="robot_localization" type="ukf_localization_node" name="ukf_node_odom" clear_params="true"><rosparam command="load" file="$(find unicorn)/config/ukf_template_sim.yaml"/>
+	</node>
 	
 	<!-- Launch move_base -->
 	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
@@ -82,6 +84,10 @@
 	<!-- load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
 
+
+	<!-- Joint pos gui -->
+	<param name="use_gui" value="false"/> 
+
 	<!-- source that publishes the joint positions as a sensor_msgs/JointState -->
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 	
@@ -91,22 +97,22 @@
 	</node>
 	
 <!-- Starts laser filter to enable limitation of laserscan angle -->
-<node name="laser_filter" pkg="unicorn" type="laser_scan_filter" output="screen">
+<!--<node name="laser_filter" pkg="unicorn" type="laser_scan_filter" output="screen">
 <rosparam>
  upper_angle: 1.57
  lower_angle: -1.57
 </rosparam>
-</node>
+</node>-->
 	
 	<!-- Starts interface between automower and unicorn to enable backward driving -->
 	<node name="am_unicorn_interface" pkg="unicorn" type="am_unicorn_interface" output="screen"/>
 
 
 	<!-- Starts the Arduino to enable ros and read/ write from it -->
-	<node name="serial_node" pkg="rosserial_python" type="serial_node.py">
+	<!--<node name="serial_node" pkg="rosserial_python" type="serial_node.py">
             <param name="port" value="/dev/ttyACM0"/>
             <param name="baud" value="57600" />
-    </node>
+    </node>-->
 
 	<!-- static transform for the Orbbec camera -->
 <!--	<node name="static_tf_orbbec"
