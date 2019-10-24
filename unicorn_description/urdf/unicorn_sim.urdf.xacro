@@ -333,7 +333,7 @@
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />
 
     <plugin name="imu_plugin" filename="libhector_gazebo_ros_imu.so">
-    <alwaysOn>false</alwaysOn>
+    <alwaysOn>true</alwaysOn>
     <bodyName>chassis_link</bodyName>
     <topicName>imu</topicName>
     <serviceName>imu_service</serviceName>
