@@ -56,41 +56,21 @@
 	bool setPlan(const std::vector<geometry_msgs::PoseStamped>& plan);
 	void initialize (std::string name, tf::TransformListener *tf, costmap_2d::Costmap2DROS *costmap_ros) ;
 
-// MADE BY PETER
-//static std::vector<std::vector<int> > binary_global_map;
-void mapChatterCallback(const nav_msgs::OccupancyGrid msg);
-//static nav_msgs::OccupancyGrid local_occupancy_grid;
-// -- Peter
   private:
+
 	// Made by Peter
 geometry_msgs::Point closestPointOnPath(tf::Stamped<tf::Pose> robot_pose, int *plan_index, float *distance_to_path);
-geometry_msgs::Point closestPointOnPathMatrix(tf::Stamped<tf::Pose> robot_pose, int *plan_index, float *distance_to_path);
 tf::Vector3 unitVectorOfPath(int plan_index);
 void fAttractiveVector(geometry_msgs::Point fa_point_path, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 unit_vector_ni, tf::Vector3 *attractive_vector);
-int makeRepulsiveField(float scale, float gain, float dmax, int pos_x, int pos_y);
+void makeRepulsiveField(int scale, int gain, float dmax, float pos_x, float pos_y, float *repulsive_force, int *deg);
 void repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *repulsive_vector);
 void updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot_pose, float *linear_velocity, float *angular_velocity);
-void staticFlowFieldCalcMatrix(void);
-void getPositionInMatrix(tf::Stamped<tf::Pose> robot_pose, int *coord_x, int *coord_y);
-void repulsiveForceMatrix(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *repulsive_vector);
-void makeRepulsiveFieldMatrix(float scale, float gain, float dmax, float pos_x, float pos_y, float *repulsive_force, int *deg);
-void findClosestObjectEuclidean(float posX, float posY, int *deg, float *distance_to_obstacle);
-//void mapChatterCallback(const nav_msgs::OccupancyGrid msg);
+void findClosestObjectEuclidean(int *deg, float *distance_to_obstacle);
 static const float k1 = 0.01;
 static const float k2 = 1;
 static const float DELTA_T = 1.0;
-std::vector<std::vector<int> > binary_global_map;
-std::vector<std::vector<tf::Vector3> > total_static_flow_field;
-nav_msgs::OccupancyGrid local_occupancy_grid;
-int global_map_cells_x;
-int global_map_cells_y;
 std::vector<geometry_msgs::PoseStamped> transformed_global_plan;
-int generate_new_plan;
 	// -- Peter
-	Eigen::Vector3f computeNewPositions(const Eigen::Vector3f& pos, const Eigen::Vector3f& vel);
-	base_local_planner::Trajectory generateTrajectory(tf::Stamped<tf::Pose> robot_pose, double linear, double angular, double t);
-	tf::Stamped<tf::Pose> findLocalGoal(tf::Stamped<tf::Pose> robot_pose);
-	void drawLocalGoal(tf::Stamped<tf::Pose> local_goal);
 
   	costmap_2d::Costmap2DROS* costmap_ros_; //!< Pointer to the costmap ros wrapper, received from the navigation stack
   	costmap_2d::Costmap2D* costmap_; //!< Pointer to the 2d costmap (obtained from the costmap ros wrapper)
@@ -117,8 +97,10 @@ int generate_new_plan;
 
 	tf::Stamped<tf::Pose> global_goal,global_goal_odom; 
     
-
-
+void drawLocalGoal(tf::Stamped<tf::Pose> local_goal);
+tf::Stamped<tf::Pose> findLocalGoal(tf::Stamped<tf::Pose> robot_pose);
+Eigen::Vector3f computeNewPositions(const Eigen::Vector3f& pos, const Eigen::Vector3f& vel);
+base_local_planner::Trajectory generateTrajectory(tf::Stamped<tf::Pose> robot_pose, double linear, double angular, double t);
 
   };
  };
