@@ -55,33 +55,6 @@ geometry_msgs::Point LocalPlanner::closestPointOnPath(tf::Stamped<tf::Pose> robo
 			*plan_index = i; // Store what index in the path that is closest
 		}
 	}
-	
-	/*std::vector<geometry_msgs::PoseStamped> transformed_plan;
-	if(base_local_planner::transformGlobalPlan(tf_,global_plan_temp,robot_pose,*costmap_,global_frame_,transformed_plan)) //Transforme the plan respect to the robot base
-		{
-		int i = 0;
-		for(std::vector<geometry_msgs::PoseStamped>::iterator it = transformed_plan.begin(); it != transformed_plan.end(); ++it) 
-		{
-			dx =  it->pose.position.x-robot_pose.getOrigin().getX();
-			dy =  it->pose.position.y-robot_pose.getOrigin().getY();
-			std::cout << "Robot position: " << robot_pose.getOrigin().getX() << " " << robot_pose.getOrigin().getY();
-			std::cout << " Plan position: " << it->pose.position.x << " " << it->pose.position.y;
-			std::cout << " Global plan position: " << global_plan_temp[i].pose.position.x << " " << global_plan_temp[i].pose.position.y << endl;
-			dist = std::sqrt(dx*dx + dy*dy);
-			//std::cout << "Iterator it = " << i << endl;
-			if(i==0 || dist <= shortest_dist)
-			{
-				//std::cout << "TransformGlobalPlan 0: " << global_plan_temp[i].pose.position.x << " " << global_plan_temp[i].pose.position.y << endl;
-				closest_point.x = global_plan_temp[i].pose.position.x;
-				closest_point.y = global_plan_temp[i].pose.position.y;
-				closest_point.z = 0;
-				shortest_dist = dist; 
-				*distance_to_path = dist; // Store the shortest distance
-				*plan_index = i; // Store what index in the path that is closest
-			}
-			i++;
-		}
-	}*/
     return closest_point;
 }
 
@@ -102,19 +75,6 @@ tf::Vector3 LocalPlanner::unitVectorOfPath(int plan_index)
 	//std::cout << "unit_vector1" << endl;
     if(global_plan_temp.size() == (plan_index + 1))
 	{
-		//global_plan_temp[i].pose.position.x
-		/*geometry_msgs::PoseStamped temp;
-		temp.pose.position.x = global_plan_temp[plan_index].pose.position.x - global_plan_temp[plan_index-1].pose.position.x;
-		temp.pose.position.y = global_plan_temp[plan_index].pose.position.y - global_plan_temp[plan_index-1].pose.position.y;
-		first_point.pose.position.x = global_plan_temp[plan_index].pose.position.x + temp.pose.position.x;
-		first_point.pose.position.y = global_plan_temp[plan_index].pose.position.y + temp.pose.position.y;
-		second_point = global_plan_temp[plan_index];
-		*/
-		//first_point = global_plan_temp[plan_index-1];
-		//second_point = global_plan_temp[plan_index];
-        //second_point = global_plan_temp[plan_index];
-		//second_point = global_plan_temp[plan_index-1];
-		//std::cout << "unit_vector2" << endl;
 		vector_heading.setValue(0, 0, 0);
 	}
     else
@@ -127,11 +87,6 @@ tf::Vector3 LocalPlanner::unitVectorOfPath(int plan_index)
 		
 	}
 	return vector_heading;
-   /* x_value = second_point.pose.position.x - first_point.pose.position.x;
-    y_value = second_point.pose.position.y - first_point.pose.position.y;
-    tf::Vector3 vector_heading(x_value, y_value, 0);
-    vector_heading.normalize();
-    return vector_heading;*/
 }
 
 /*
@@ -144,15 +99,6 @@ attractive_vector (Vector to return via a pointer)
 */
 void LocalPlanner::fAttractiveVector(geometry_msgs::Point fa_point_path, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 unit_vector_ni, tf::Vector3 *attractive_vector)
 {
-
-    // Mock values
-    /*fa_point_path.x = 1;
-    fa_point_path.y = 1;
-    fa_point_path.z = 0;
-    unit_vector_ni.m_floats[0] = 1;
-    unit_vector_ni.m_floats[1] = 1;
-    unit_vector_ni.m_floats[2] = 0;*/
-    // -- Mock values
 	tf::Stamped<tf::Pose> robot_world_pose;
 	tf_.transformPose("/map", robot_pose, robot_world_pose);
 
@@ -174,6 +120,9 @@ void LocalPlanner::fAttractiveVector(geometry_msgs::Point fa_point_path, tf::Sta
     }
 }
 
+/*
+Function that calculates the repulsive vector of an static obstacle
+*/
 void LocalPlanner::repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *repulsive_vector)
 {
 	// Robot size has a radius of 0.2m in simulation with center at middle.
@@ -195,12 +144,15 @@ void LocalPlanner::repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 
 		z_force = 0;
 		repulsive_vector->setValue(x_force,y_force,z_force);
 	}
-	else
+	else // If there is no repulsive force affecting the robot
 	{
 		repulsive_vector->setValue(0.0,0.0,0.0);
 	}
 }
 
+/*
+Function that calculates the repulsive force affecting the robot
+*/
 void LocalPlanner::makeRepulsiveField(int scale, int gain, float dmax, float pos_x, float pos_y, float *repulsive_force, int *deg)
 {
     float d, d0, d2;
@@ -214,12 +166,15 @@ void LocalPlanner::makeRepulsiveField(int scale, int gain, float dmax, float pos
     d = (1 / d2 - d0);
     d = d*d;
 
-	if (d2 <= dmax)
+	if (d2 <= dmax) // If the robot is close enough to an obstacle to make that obstacle influence with the flow field
 		*repulsive_force = gain*d;
 	else
 		*repulsive_force = 0;
 }
 
+/*
+Function that looks in the local costmap to provide the distance and degree to the closest obstacle
+*/
 void LocalPlanner::findClosestObjectEuclidean(int *deg, float *distance_to_obstacle)
 {
     float min_dist = 2000.0;
@@ -233,12 +188,12 @@ void LocalPlanner::findClosestObjectEuclidean(int *deg, float *distance_to_obsta
     int dist_x = 0;
     int dist_y = 0;	
 
-	int pos_x = costmap_->getSizeInCellsX() / 2;
+	int pos_x = costmap_->getSizeInCellsX() / 2; // Center of the costmap (Robot's position)
 	int pos_y = costmap_->getSizeInCellsY() / 2;
 	
-	for (int h = 0; h < costmap_->getSizeInCellsY(); h++) {
-		for (int w = 0; w < costmap_->getSizeInCellsX(); w++) {
-			if (int(costmap_->getCost(w,h)) == costmap_2d::LETHAL_OBSTACLE)
+	for (int h = 0; h < costmap_->getSizeInCellsY(); h++) { // Height of costmap
+		for (int w = 0; w < costmap_->getSizeInCellsX(); w++) { // Width of costmap
+			if (int(costmap_->getCost(w,h)) == costmap_2d::LETHAL_OBSTACLE) // If the position (w,h) is an obstacle
 			{
 				current_dist = std::sqrt(pow((pos_x - w),2) + pow((pos_y - h),2));
 
@@ -251,16 +206,8 @@ void LocalPlanner::findClosestObjectEuclidean(int *deg, float *distance_to_obsta
 			}			
 		}
 	}
-	
 
-	// Mock Values
-
-	//min_dist = 35.0;
-	//*deg = 90;
-
-	// -- Mock Values
-
-	min_dist = fabs(min_dist - 1);
+	min_dist = fabs(min_dist - 1); // Makes the grid next to an obstacle to have a distance of 0 to an obstacle
 	dist_x = round(pos_x - min_x);
     dist_y = round(pos_y - min_y);
 
@@ -270,6 +217,9 @@ void LocalPlanner::findClosestObjectEuclidean(int *deg, float *distance_to_obsta
 	*distance_to_obstacle = min_dist;
 }
 
+/*
+Function that calculates the linear and angular velocity for the robot. 
+*/
 void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot_pose, float *linear_velocity, float *angular_velocity, double repulsive_field_magnitude) 
 {
 	float u, omega;
@@ -283,20 +233,22 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 
 	float goal_x = global_goal_odom.getOrigin().getX();
 	float goal_y = global_goal_odom.getOrigin().getY();
-	float d = (pos_x - goal_x)*(pos_x - goal_x) + (pos_y - goal_y)*(pos_y - goal_y);
-	d = sqrt(d);// / 20;
+	float d = (pos_x - goal_x)*(pos_x - goal_x) + (pos_y - goal_y)*(pos_y - goal_y); // Distance to goal
+	d = sqrt(d);
 
-	u = 20*k_u*tanh(d)*tanh(1/(repulsive_field_magnitude*40));	
+	u = 20*k_u*tanh(d)*tanh(1/(repulsive_field_magnitude*40)); // Speed is affected by: a constant, distance to goal and the repulsive field 
 	
 
 
-	omega = -k_omega*(theta - atan2(force.m_floats[1], force.m_floats[0]));
+	omega = -k_omega*(theta - atan2(force.m_floats[1], force.m_floats[0])); // Angular velocity is affected by the current orientation and the wanted orientation
 
 	*linear_velocity = u;
 	*angular_velocity = omega;
 }
 
-//Return true if a admisible solution is found
+/*
+Function that calculates everything that the navigation part needs
+*/
 bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 
 	
@@ -314,58 +266,49 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 	costmap_ros_->getRobotPose(robot_pose);	
 	int coord_x, coord_y;
 
-	int plan_index = 0;
-    float distance_to_path;
+	int plan_index = 0; // Will eventually hold the index belonging to the global path which is closest to the robot
+    float distance_to_path; // Will eventually hold the distance to the closest point on path
     tf::Vector3 f_attractive_vector, f_repulsive_vector, final_vector;
 	global_plan_temp = global_plan_;
 
     geometry_msgs::Point fa_point_path = closestPointOnPath(robot_pose, &plan_index, &distance_to_path);
-	std::cout << "Closest point coordinate = " << fa_point_path.x << " " << fa_point_path.y << endl;
-    if (distance_to_path > 100)
+    if (distance_to_path <= 1) // Inside bounds
     {
-        // Re-calculate Thetastar
-    }
+		tf::Vector3 unit_vector_ni(unitVectorOfPath(plan_index));
 
-    tf::Vector3 unit_vector_ni(unitVectorOfPath(plan_index));
+		fAttractiveVector(fa_point_path, robot_pose, unit_vector_ni, &f_attractive_vector);
+		f_attractive_vector.operator*=(1 - exp(-k1*distance_to_path)); 
+		f_attractive_vector.operator+=(unit_vector_ni.operator*=(k2*exp(-k1*distance_to_path)));
 
-	std::cout << "Unit vector : " << unit_vector_ni.m_floats[0] << " " << unit_vector_ni.m_floats[1] << " " << unit_vector_ni.m_floats[2] << endl;
+		repulsiveForce(robot_pose, &f_repulsive_vector);
 
-    fAttractiveVector(fa_point_path, robot_pose, unit_vector_ni, &f_attractive_vector);
-    f_attractive_vector.operator*=(1 - exp(-k1*distance_to_path)); 
-    f_attractive_vector.operator+=(unit_vector_ni.operator*=(k2*exp(-k1*distance_to_path)));
+		final_vector = f_attractive_vector;
+		final_vector.operator+=(f_repulsive_vector);
 
-	repulsiveForce(robot_pose, &f_repulsive_vector);
+		//std::cout << "Attractive vector " << f_attractive_vector.m_floats[0] << " " << f_attractive_vector.m_floats[1] << " " << f_attractive_vector.m_floats[2] << endl;
+		//std::cout << "Repulsive vector " << f_repulsive_vector.m_floats[0] << " " << f_repulsive_vector.m_floats[1] << " " << f_repulsive_vector.m_floats[2] << endl;
+		std::cout << "Final vector " << final_vector.m_floats[0] << " " << f_attractive_vector.m_floats[1] << " " << f_attractive_vector.m_floats[2] << endl;
 
-	final_vector = f_attractive_vector;
-	final_vector.operator+=(f_repulsive_vector);
-
-	std::cout << "Attractive vector " << f_attractive_vector.m_floats[0] << " " << f_attractive_vector.m_floats[1] << " " << f_attractive_vector.m_floats[2] << endl;
-	std::cout << "Repulsive vector " << f_repulsive_vector.m_floats[0] << " " << f_repulsive_vector.m_floats[1] << " " << f_repulsive_vector.m_floats[2] << endl;
-	std::cout << "Final vector " << final_vector.m_floats[0] << " " << f_attractive_vector.m_floats[1] << " " << f_attractive_vector.m_floats[2] << endl;
-
-	if (test_variable == 0)
-	{	
-		for(int i=3; i<15; i++)
-		{
-			
-		}
+		updateVelocity(final_vector, robot_pose, &linear_velocity, &angular_velocity, f_repulsive_vector.length());
+		cmd_vel.angular.z = angular_velocity;
+		cmd_vel.linear.x = linear_velocity;
+		
+		minCost = 255;//std::numeric_limits<double>::max();
+		global_plan_temp.clear();
 	}
-
-	updateVelocity(final_vector, robot_pose, &linear_velocity, &angular_velocity, f_repulsive_vector.length());
-	cmd_vel.angular.z = angular_velocity;
-	cmd_vel.linear.x = linear_velocity;
+	else
+		generate_new_path = 1; // Re-calculate global plan. Out of bounds
 	
-	minCost = 255;//std::numeric_limits<double>::max();
-	global_plan_temp.clear();
-
 	return true;
 }
 
+/*
+Checks of the goal is reached
+*/
 bool LocalPlanner::isGoalReached(){
 	//Get the actual Costmap
 	tf::Stamped<tf::Pose> robot_pose;
 	costmap_ros_->getRobotPose(robot_pose); //frame_id_=odom 
-		
 
 	//Both, globla goal and robot pose are in the same coordinate system, odom.
 	double dx = global_goal_odom.getOrigin().getX() - robot_pose.getOrigin().getX();
@@ -385,6 +328,9 @@ bool LocalPlanner::isGoalReached(){
    	return false;
 }
 
+/*
+Sets the global plan received from the global planner
+*/
 bool LocalPlanner::setPlan(const std::vector<geometry_msgs::PoseStamped>& plan){
    	if(!initialized_)
 	{
@@ -420,6 +366,9 @@ bool LocalPlanner::setPlan(const std::vector<geometry_msgs::PoseStamped>& plan){
 	return true;
 }
 
+/*
+Initialize Local planner
+*/
  void LocalPlanner::initialize(std::string name, tf::TransformListener *tf, costmap_2d::Costmap2DROS *costmap_ros){
   
    	// check if the plugin is already initialized
