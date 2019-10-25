@@ -64,17 +64,17 @@ tf::Vector3 unitVectorOfPath(int plan_index);
 void fAttractiveVector(geometry_msgs::Point fa_point_path, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 unit_vector_ni, tf::Vector3 *attractive_vector);
 void makeRepulsiveField(int scale, int gain, float dmax, float pos_x, float pos_y, float *repulsive_force, int *deg);
 void repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *repulsive_vector);
-void updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot_pose, float *linear_velocity, float *angular_velocity);
+void updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot_pose, float *linear_velocity, float *angular_velocity, double repulsive_field_magnitude);
 void findClosestObjectEuclidean(int *deg, float *distance_to_obstacle);
 static const float k1 = 0.01;
 static const float k2 = 1;
 static const float DELTA_T = 1.0;
-std::vector<geometry_msgs::PoseStamped> transformed_global_plan;
+int test_variable;
+int generate_new_path;
 	// -- Peter
 
   	costmap_2d::Costmap2DROS* costmap_ros_; //!< Pointer to the costmap ros wrapper, received from the navigation stack
   	costmap_2d::Costmap2D* costmap_; //!< Pointer to the 2d costmap (obtained from the costmap ros wrapper)
-	costmap_2d::Costmap2D costmap_peter;
   	tf::TransformListener tf_; //!< pointer to Transform Listener
  
 	std::vector<geometry_msgs::PoseStamped> global_plan_; //!< Store the current global plan
@@ -97,10 +97,6 @@ std::vector<geometry_msgs::PoseStamped> transformed_global_plan;
 
 	tf::Stamped<tf::Pose> global_goal,global_goal_odom; 
     
-void drawLocalGoal(tf::Stamped<tf::Pose> local_goal);
-tf::Stamped<tf::Pose> findLocalGoal(tf::Stamped<tf::Pose> robot_pose);
-Eigen::Vector3f computeNewPositions(const Eigen::Vector3f& pos, const Eigen::Vector3f& vel);
-base_local_planner::Trajectory generateTrajectory(tf::Stamped<tf::Pose> robot_pose, double linear, double angular, double t);
 
   };
  };
