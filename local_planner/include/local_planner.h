@@ -71,6 +71,8 @@ static const float k2 = 1;
 static const float DELTA_T = 1.0;
 int test_variable;
 int generate_new_path;
+float last_linear_velocity_;
+static const float max_linear_acc_ = 0.01;
 	// -- Peter
 
   	costmap_2d::Costmap2DROS* costmap_ros_; //!< Pointer to the costmap ros wrapper, received from the navigation stack
