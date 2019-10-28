@@ -15,9 +15,6 @@
 	<rosparam param="global_local">false</rosparam>
 	<rosparam param="frame_id">chassis_link</rosparam>
 
-	<!-- Joint pos gui -->
-	<param name="use_gui" value="false"/> 
-
 	<!-- Lidar angle limitations (rad) -->
 	<rosparam param="use_sim_time">true</rosparam>
 
@@ -39,6 +36,11 @@
 			<remap from="scan" to="$(arg scan_topic)"/>
 		</node>
 	</group>
+
+
+	<!-- start ukf node -->
+	<node pkg="robot_localization" type="ukf_localization_node" name="ukf_node_odom" clear_params="true"><rosparam command="load" file="$(find unicorn)/config/ukf_template_sim.yaml"/>
+	</node>
 	
 	<!-- Launch move_base -->
 	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
@@ -81,6 +83,10 @@
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
+
+
+	<!-- Joint pos gui -->
+	<param name="use_gui" value="false"/> 
 
 	<!-- source that publishes the joint positions as a sensor_msgs/JointState -->
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />

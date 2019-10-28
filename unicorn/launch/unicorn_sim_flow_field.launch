@@ -2,7 +2,7 @@
 <!-- Launches Gazebo with predefined settings with the Unicorn platform -->
 <launch>
 	<!-- roslaunch arguments -->
-	<arg name="use_teb_planner" default="true"/>
+	<arg name="use_teb_planner" default="false"/>
 	<arg name="show_rviz" default="true"/>
 	<arg name="paused" default="false"/>
 	<arg name="debug" default="false"/>  	
@@ -14,9 +14,6 @@
 	<rosparam param="odom_frame">odom_gazebo</rosparam>
 	<rosparam param="global_local">false</rosparam>
 	<rosparam param="frame_id">chassis_link</rosparam>
-
-	<!-- Joint pos gui -->
-	<param name="use_gui" value="false"/> 
 
 	<!-- Lidar angle limitations (rad) -->
 	<rosparam param="use_sim_time">true</rosparam>
@@ -39,11 +36,17 @@
 			<remap from="scan" to="$(arg scan_topic)"/>
 		</node>
 	</group>
+
+
+	<!-- start ukf node -->
+	<node pkg="robot_localization" type="ukf_localization_node" name="ukf_node_odom" clear_params="true"><rosparam command="load" file="$(find unicorn)/config/ukf_template_sim.yaml"/>
+	</node>
 	
 	<!-- Launch move_base -->
 	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-		<rosparam file="$(find unicorn_description)/config/base_local_planner_teb.yaml" command="load" />
-		<param name="base_local_planner" value="local_planner/LocalPlanner" />
+		<!--<rosparam file="$(find unicorn_description)/config/base_local_planner_teb.yaml" command="load" />--> <!-- OLD PLANER -->
+		<rosparam file="$(find unicorn_description)/config/sim/base_local_LocalPlanner.yaml" command="load" />
+		<param name="base_local_planner" value="local_planner/LocalPlanner" />    <!-- NEW PLANER -->
 		<param name="base_global_planner" value="global_planner/GlobalPlanner"/>
 		<rosparam file="$(find unicorn_description)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
 		<rosparam file="$(find unicorn_description)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
@@ -81,6 +84,10 @@
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
+
+
+	<!-- Joint pos gui -->
+	<param name="use_gui" value="false"/> 
 
 	<!-- source that publishes the joint positions as a sensor_msgs/JointState -->
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
