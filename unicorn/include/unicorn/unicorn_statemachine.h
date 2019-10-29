@@ -182,7 +182,13 @@ public:
 	void clicked_PointCallback(const geometry_msgs::PointStamped &msg); // this functions needs to subscribe to topic /clicked_point, which gets generated in rviz
 	void rvizWPmaker(double posX, double posY);
 	void pathCreator();
-	/* @brief updates the current state and publishes the new state to the unicorn_state topic*/
+	/**
+	 * Updates the FSM state and publishes it to the /TX2_unicorn_state topic. 
+	 * asterisks.
+	 *
+	 * @param new_state The new state to be updated to. 
+	 *               
+	 */
 	void updateAndPublishState(int new_state);
 
 	std_msgs::Int32 state_msg_;
