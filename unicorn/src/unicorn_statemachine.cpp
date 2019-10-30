@@ -441,9 +441,7 @@ void UnicornState::active()
 		if (move_base_clt_.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
 		{
 			ROS_INFO("[unicorn_statemachine] Goal reached");
-			state_ = current_state::IDLE;
-			state_msg_.data = state_;
-			unicorn_state_pub_.publish(state_msg_);	
+			updateAndPublishState(current_state::IDLE);
 
 			//state_= current_state::LIFT;
 			//state_ = current_state::IDLE;
@@ -517,9 +515,8 @@ void UnicornState::active()
 
 		lift_.data = 1;
 		lift_publisher.publish(lift_);
-		state_ = current_state::IDLE;
-		state_msg_.data = state_;
-		unicorn_state_pub_.publish(state_msg_);
+		updateAndPublishState(current_state::IDLE);
+	
 		
 		printUsage();
 		break;
@@ -528,9 +525,6 @@ void UnicornState::active()
 
 		if (!move_base_active_)
 		{
-			state_msg_.data = state_;
-			unicorn_state_pub_.publish(state_msg_);
-
 			ROS_INFO("[unicorn_statemachine] Aligning with garbage disposal...");
 
 			sendGoal(refuse_bin_pose_.x + 1.5 * cos(refuse_bin_pose_.yaw), refuse_bin_pose_.y + 1.5 * sin(refuse_bin_pose_.yaw), refuse_bin_pose_.yaw);
@@ -788,7 +782,7 @@ void UnicornState::lift()
 	ROS_INFO("[unicorn_statemachine] send lift signal %d", lift_.data);
 	lift_pub_.publish(lift_);
 }
-
+/*Function used for debugging purposes.*/
 void UnicornState::updateAndPublishState(int new_state)
 {
 	state_ = new_state;
