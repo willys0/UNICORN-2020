@@ -147,7 +147,7 @@ public:
 	std::string stateToString(int state);
 	void stateCallback(const std_msgs::Int32 &msg);
 	void odomCallback(const nav_msgs::Odometry &msg);
-	void lidarRearCallback(const std_msgs::Bool &msg);
+	void lidarBackCallback(const std_msgs::Bool &msg);
 	// void rangeCallback(const sensor_msgs::Range &msg);
 	// void bumperCallback(const std_msgs::Bool &pushed_msg);
 	void LiftCallback(const std_msgs::Int8 &recieveMsg); // ADDED BY MUJI

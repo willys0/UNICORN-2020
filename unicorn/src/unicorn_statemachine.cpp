@@ -123,9 +123,11 @@ UnicornState::UnicornState()
 	lift_publisher = n_.advertise<std_msgs::Int8>("/Lifting", 0); //ADDED BY MUJI
 	lift_subscriber = n_.subscribe("Lifting", 0, &UnicornState::LiftCallback, this);
 	odom_sub_ = n_.subscribe(odom_topic.c_str(), 0, &UnicornState::odomCallback, this);
+	rear_lidar_sub_ = n_.subscribe("/RIO_lidarBack_state", 0, &UnicornState::lidarBackCallback, this);
+
 	acc_cmd_srv_ = n_.advertiseService("cmd_charlie", &UnicornState::accGoalServer, this);
 	//Change topic to /bumper_state from rearBumper
-	bumper_sub_ = n_.subscribe("/bumper_state", 0, &UnicornState::bumperCallback, this);
+	// bumper_sub_ = n_.subscribe("/bumper_state", 0, &UnicornState::bumperCallback, this);
 
 	/*Legacy Range Sensor Code - START*/
 	/*RangeSensor - migration, if-else clause needs to removed*/
@@ -141,7 +143,6 @@ UnicornState::UnicornState()
 	// }
 	/*Legacy Range Sensor Code - END*/
 
-	rear_lidar_sub_ = n_.subscribe("/RIO_lidarBack_state", &UnicornState::lidarBackCallback, this);
 
 	n_.getParam("global_local", run_global_loc);
 	if (run_global_loc)
@@ -379,7 +380,7 @@ void UnicornState::odomCallback(const nav_msgs::Odometry &msg)
 	current_vel_ = msg.twist.twist.linear.x;
 }
 
-void lidarRearCallback(const std_msgs::Bool &msg)
+void UnicornState::lidarBackCallback(const std_msgs::Bool &msg)
 {
 	if (msg.data)
 	{
@@ -425,6 +426,7 @@ void lidarRearCallback(const std_msgs::Bool &msg)
 // 		}
 // 	}
 // }
+
 void UnicornState::LiftCallback(const std_msgs::Int8 &recieveMsg) // ADDED BY MUJI
 {
 	if (recieveMsg.data == 2)
@@ -436,6 +438,7 @@ void UnicornState::LiftCallback(const std_msgs::Int8 &recieveMsg) // ADDED BY MU
 		ROS_INFO("Lifting is done!");
 	}
 }
+
 void UnicornState::active()
 {
 	int c = getCharacter();
@@ -526,6 +529,7 @@ void UnicornState::active()
 		//}
 		//ROS_INFO("[unicorn_statemachine] send lift signal %d",lift_.data);
 		//lift_pub_.publish(lift_);
+		
 
 		ROS_INFO("Activation of the liftsystem is requested!");
 		ROS_INFO("Sending Messsage to the liftsystem!");
@@ -563,13 +567,13 @@ void UnicornState::active()
 		man_cmd_vel_.linear.x = -0.1;
 		reversing_ = true;
 		ROS_INFO("[unicorn_statemachine] Current vel: %f", current_vel_);
-		ROS_INFO("[unicorn_statemachine] bumperPressed_  %d", atDesiredDistance_);
+		ROS_INFO("[unicorn_statemachine] atDesiredDistance_  %d", atDesiredDistance_);
 		if (atDesiredDistance_)
 		{
 			man_cmd_vel_.linear.x = 0.0;
 			cancelGoal();
 			updateAndPublishState(current_state::LIFT);
-			ROS_INFO("[unicorn_statemachine] Entered lifting mode. Waiting for lift completion signal.");
+			ROS_INFO("[unicorn_statemachine] Entered lifting mode. Waiting for lift completion message.");
 		}
 		cmd_vel_pub_.publish(man_cmd_vel_);
 		break;
@@ -783,8 +787,8 @@ void UnicornState::reverse()
 	man_cmd_vel_.linear.x = -0.2;
 
 	ROS_INFO("Current vel: %f", current_vel_);
-	ROS_INFO("[unicorn_statemachine] bumperPressed_  %d", bumperPressed_);
-	if (bumperPressed_ == 1)
+	ROS_INFO("[unicorn_statemachine] atDesiredDistance_  %d", atDesiredDistance_);
+	if (atDesiredDistance_)
 	{
 		man_cmd_vel_.linear.x = 0.0;
 		cancelGoal();
