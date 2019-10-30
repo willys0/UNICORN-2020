@@ -32,9 +32,14 @@ geometry_msgs::Point LocalPlanner::closestPointOnPath(tf::Stamped<tf::Pose> robo
 {
     geometry_msgs::Point closest_point;
     float dx,dy,dist,shortest_dist;
+	ros::Time now = ros::Time::now();
 
 	tf::Stamped<tf::Pose> robot_world_pose;
+	
+	tf_.waitForTransform("/map", robot_base_frame_, now, ros::Duration(0.2));
 	tf_.transformPose("/map", robot_pose, robot_world_pose);
+ 
+	//std::cout << "Robot position... " << "Robot frame: " << robot_pose.getOrigin().getX() << " " << robot_pose.getOrigin().getY() << " Map frame: " << robot_world_pose.getOrigin().getX() << " " << robot_world_pose.getOrigin().getY() << endl;
 
 	for(int i = 0; i < global_plan_temp.size(); i++) 
 	{
@@ -77,14 +82,21 @@ tf::Vector3 LocalPlanner::unitVectorOfPath(int plan_index)
 	{
 		vector_heading.setValue(0, 0, 0);
 	}
-    else
+	else if(global_plan_temp.size() <= (plan_index + 5))
 	{
         second_point = global_plan_temp[plan_index+1];
 		x_value = second_point.pose.position.x - first_point.pose.position.x;
 		y_value = second_point.pose.position.y - first_point.pose.position.y;
 		vector_heading.setValue(x_value, y_value, 0);
 		vector_heading.normalize();
-		
+	}
+    else
+	{
+        second_point = global_plan_temp[plan_index+5];
+		x_value = second_point.pose.position.x - first_point.pose.position.x;
+		y_value = second_point.pose.position.y - first_point.pose.position.y;
+		vector_heading.setValue(x_value, y_value, 0);
+		vector_heading.normalize();
 	}
 	return vector_heading;
 }
@@ -101,6 +113,7 @@ void LocalPlanner::fAttractiveVector(geometry_msgs::Point fa_point_path, tf::Sta
 {
 	tf::Stamped<tf::Pose> robot_world_pose;
 	tf_.transformPose("/map", robot_pose, robot_world_pose);
+	//tf_.waitForTransform("/map", robot_pose, robot_world_pose);
 
     tf::Vector3 robot_position(robot_world_pose.getOrigin().getX(), robot_world_pose.getOrigin().getY(), 0);
 	//std::cout << "Robot pose : " << robot_world_pose.getOrigin().getX() << " " << robot_world_pose.getOrigin().getY() << endl;
@@ -129,10 +142,11 @@ void LocalPlanner::repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 
 	// In the paper, dmax = 1.25, radius = 0.5m, resolution = 0.1
 	// dmax = 1 + radius / 2
 	// If radius = 0.2, gives dmax = 1+0.2/2 = 1.1;
+	// Every 
     int xt, yt, cost, force_x, force_y, deg;
-    int scale = 100; // 100
-    int gain = 2000; // 2000 // Default 10000
-    float dmax = 1.1; // 1.1
+    int scale = 1; // default 100
+    int gain = 106; // 2000 // Default 10000
+    float dmax = 21; // default 1.25 // 1.1
 	float repulsive_force, x_force, y_force, z_force;
 
 	makeRepulsiveField(scale, gain, dmax, robot_pose.getOrigin().getX(), robot_pose.getOrigin().getY(), &repulsive_force, &deg);
@@ -156,7 +170,7 @@ Function that calculates the repulsive force affecting the robot
 void LocalPlanner::makeRepulsiveField(int scale, int gain, float dmax, float pos_x, float pos_y, float *repulsive_force, int *deg)
 {
     float d, d0, d2;
-    d0 = 1.0/dmax;
+    d0 = 1.0/dmax; 
 	float distance_to_obstacle;
 	//float* p_distance_to_obstacle = &distance_to_obstacle;
 	findClosestObjectEuclidean(deg, &distance_to_obstacle);
@@ -165,6 +179,8 @@ void LocalPlanner::makeRepulsiveField(int scale, int gain, float dmax, float pos
     d2 = d / scale + 1;
     d = (1 / d2 - d0);
     d = d*d;
+
+	//std::cout << "d2: " << d2 << " dmax: " << dmax << " distance to obstacle: " << distance_to_obstacle << endl; 
 
 	if (d2 <= dmax) // If the robot is close enough to an obstacle to make that obstacle influence with the flow field
 		*repulsive_force = gain*d;
@@ -223,8 +239,10 @@ Function that calculates the linear and angular velocity for the robot.
 void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot_pose, float *linear_velocity, float *angular_velocity, double repulsive_field_magnitude) 
 {
 	float u, omega, theta_d;
-	float k_omega = k2;
-	float k_u = k1;
+	//float k_omega = k2;
+	float k_omega;
+	//float k_u = k1;
+	float k_u;
 
 	float pos_x = robot_pose.getOrigin().getX();
 	float pos_y = robot_pose.getOrigin().getY();
@@ -236,7 +254,25 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	float d = (pos_x - goal_x)*(pos_x - goal_x) + (pos_y - goal_y)*(pos_y - goal_y); // Distance to goal
 	d = sqrt(d);
 
-	u = 20*k_u*tanh(d)*tanh(1/(repulsive_field_magnitude*2)); // Speed is affected by: a constant, distance to goal and the repulsive field 
+	k1 = 1;//tanh(0.1*d);
+	k2 = 2-tanh(d/2);
+
+	/*if(d < 1)
+	{
+		k1 = 0.01;
+		k2 = 2;
+	}
+	else
+	{
+		k1 = 1;
+		k2 = 1;
+	}*/
+	k_u = k1;
+	k_omega = k2;
+	
+		
+
+	u = k_u*tanh(0.1*d);//*tanh(1/(repulsive_field_magnitude*2)); // Speed is affected by: a constant, distance to goal and the repulsive field 
 
 	theta_d = atan2(force.m_floats[1], force.m_floats[0]);
 	//omega = -k_omega*(theta - atan2(force.m_floats[1], force.m_floats[0])); // Angular velocity is affected by the current orientation and the wanted orientation
@@ -248,9 +284,13 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 
 	if ((last_linear_velocity_ + max_linear_acc_) < u)
 		u = max_linear_acc_ + last_linear_velocity_;
-
+	if (u > 0.4)
+		u = 0.4;
+	if (omega > 0.4)
+		omega = 0.4;
 	last_linear_velocity_ = u;
-	std::cout << "Linear velocity: " << u << endl;
+	std::cout << "Linear velocity: " << u << " Angular velocity: " << omega << endl;
+	//std::cout << "Angular velocity: " << omega << endl;
 
 	*linear_velocity = u;
 	*angular_velocity = omega;
@@ -280,9 +320,9 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
     float distance_to_path; // Will eventually hold the distance to the closest point on path
     tf::Vector3 f_attractive_vector, f_repulsive_vector, final_vector;
 	global_plan_temp = global_plan_;
-	//generate_new_path = 1;
+	generate_new_path = 1;
     geometry_msgs::Point fa_point_path = closestPointOnPath(robot_pose, &plan_index, &distance_to_path);
-    if (distance_to_path <= 0.5) // Inside bounds
+    if (distance_to_path <= 5) // Inside bounds
     {
 		tf::Vector3 unit_vector_ni(unitVectorOfPath(plan_index));
 
@@ -295,9 +335,11 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 		final_vector = f_attractive_vector;
 		final_vector.operator+=(f_repulsive_vector);
 
-		std::cout << "Attractive vector " << f_attractive_vector.m_floats[0] << " " << f_attractive_vector.m_floats[1] << " " << f_attractive_vector.m_floats[2] << endl;
-		std::cout << "Repulsive vector " << f_repulsive_vector.m_floats[0] << " " << f_repulsive_vector.m_floats[1] << " " << f_repulsive_vector.m_floats[2] << endl;
-		std::cout << "Final vector " << final_vector.m_floats[0] << " " << f_attractive_vector.m_floats[1] << " " << f_attractive_vector.m_floats[2] << endl;
+		
+		//std::cout << "Attractive vector " << f_attractive_vector.m_floats[0] << " " << f_attractive_vector.m_floats[1] << " " << f_attractive_vector.m_floats[2] << endl;
+		std::cout << " Repulsive vector: " << f_repulsive_vector.m_floats[0] << " " << f_repulsive_vector.m_floats[1] << " " << f_repulsive_vector.m_floats[2];
+		std::cout << " Final vector: " << final_vector.m_floats[0] << " " << f_attractive_vector.m_floats[1] << " " << f_attractive_vector.m_floats[2] << endl;
+		
 
 		updateVelocity(final_vector, robot_pose, &linear_velocity, &angular_velocity, f_repulsive_vector.length());
 		cmd_vel.angular.z = angular_velocity;
@@ -326,12 +368,12 @@ bool LocalPlanner::isGoalReached(){
 
 	double delta_orient = base_local_planner::getGoalOrientationAngleDifference (robot_pose, tf::getYaw(global_goal_odom.getRotation()));
 
-	std::cout << "Robot pos: " << robot_pose.getOrigin().getX() << " " << robot_pose.getOrigin().getY() << endl;
-	std::cout << "Goal pos : " << global_goal_odom.getOrigin().getX() << " " << global_goal_odom.getOrigin().getY() << endl;
-	if(fabs(std::sqrt(dx*dx+dy*dy)) < 0.2 && fabs(delta_orient) < (10 * PI / 180))
+	//std::cout << "Robot pos: " << robot_pose.getOrigin().getX() << " " << robot_pose.getOrigin().getY() << endl;
+	//std::cout << "Goal pos : " << global_goal_odom.getOrigin().getX() << " " << global_goal_odom.getOrigin().getY() << endl;
+	if(fabs(std::sqrt(dx*dx+dy*dy)) < 0.2 && fabs(delta_orient) < (30 * PI / 180))
 	{
 		goal_reached_ = true;
-		ROS_INFO("Goal reached!");
+		ROS_INFO("Goal reached close to %f %f", global_goal_odom.getOrigin().getX(), global_goal_odom.getOrigin().getY());
 		generate_new_path = 1;
 		return true;
 
@@ -364,6 +406,7 @@ bool LocalPlanner::setPlan(const std::vector<geometry_msgs::PoseStamped>& plan){
 
 		try{
 			tf_.transformPose(global_frame_, global_goal, global_goal_odom); ////transform the global goal from map to odom 
+			//tf_.waitForTransform(global_frame_, global_goal, global_goal_odom); ////transform the global goal from map to odom 
 		}
 		catch (tf::TransformException ex){
 			ROS_ERROR("IsGoalReached %s",ex.what());
@@ -404,13 +447,22 @@ Initialize Local planner
 
 
 	// Added by Peter
-
+	std::cout << "Local costmap: " << endl;
 	std::cout << "Resolution: " << costmap_->getResolution() << endl;
 	std::cout << "Size in cells x : " << costmap_->getSizeInCellsX() << endl;
 	std::cout << "Size in cells y : " << costmap_->getSizeInCellsY() << endl;
+	std::cout << "Origin costmap: " << costmap_->getOriginX() << " " << costmap_->getOriginY() << endl;
+	double mapx, mapy;
+	//costmap_->mapToWorld(costmap_->getOriginX(),costmap_->getOriginY(),mapx,mapy);
+	costmap_->mapToWorld(0,0,mapx,mapy);
+	std::cout << "Origin costmap world coordinates: " << mapx << " " << mapy << endl;
+	costmap_->mapToWorld(costmap_->getSizeInCellsX()/2,costmap_->getSizeInCellsY()/2,mapx,mapy);
+	std::cout << "World coordinate in middle of costmap: " << mapx << " " << mapy << endl;
 	test_variable = 0;
 	generate_new_path = 1;
 	last_linear_velocity_ = 0;
+	k1 = 0.01;
+	k2 = 1;
 	// -- Peter
 
 

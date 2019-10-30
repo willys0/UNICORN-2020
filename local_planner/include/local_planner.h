@@ -66,8 +66,10 @@ void makeRepulsiveField(int scale, int gain, float dmax, float pos_x, float pos_
 void repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *repulsive_vector);
 void updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot_pose, float *linear_velocity, float *angular_velocity, double repulsive_field_magnitude);
 void findClosestObjectEuclidean(int *deg, float *distance_to_obstacle);
-static const float k1 = 0.01;
-static const float k2 = 1;
+//static const float k1 = 0.01;
+//static const float k2 = 1;
+float k1;
+float k2;
 static const float DELTA_T = 1.0;
 int test_variable;
 int generate_new_path;
