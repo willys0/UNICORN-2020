@@ -62,25 +62,25 @@ RefuseBin::RefuseBin()
 	y = -2.0;
 	yaw = 0;
 }
-/*Legacy Range Sensor Code - START*/
-RangeSensor::RangeSensor(const std::string &sensor_topic)
-	: TOPIC(sensor_topic)
-{
-	range_sub_ = n_.subscribe(TOPIC.c_str(), 0, &RangeSensor::rangeCallback, this);
-	range_ = 2.0;
-}
+// /*Legacy Range Sensor Code - START*/
+// RangeSensor::RangeSensor(const std::string &sensor_topic)
+// 	: TOPIC(sensor_topic)
+// {
+// 	range_sub_ = n_.subscribe(TOPIC.c_str(), 0, &RangeSensor::rangeCallback, this);
+// 	range_ = 2.0;
+// }
 
-void RangeSensor::rangeCallback(const sensor_msgs::Range &msg)
-{
-	range_ = msg.range;
-}
+// void RangeSensor::rangeCallback(const sensor_msgs::Range &msg)
+// {
+// 	range_ = msg.range;
+// }
 
-float RangeSensor::getRange()
-{
-	return range_;
-}
+// float RangeSensor::getRange()
+// {
+// 	return range_;
+// }
 
-/*Legacy Range Sensor Code - END*/
+// /*Legacy Range Sensor Code - END*/
 
 UnicornState::UnicornState()
 	: move_base_clt_("move_base", true)
@@ -130,16 +130,18 @@ UnicornState::UnicornState()
 	/*Legacy Range Sensor Code - START*/
 	/*RangeSensor - migration, if-else clause needs to removed*/
 	/*These topics needs to be either created in the RoboRIO or be substituted*/
-	if (sim_time)
-	{
-		range_sensor_list_["ultrasonic_bm"] = new RangeSensor("ultrasonic_bm");
-	}
-	else
-	{
-		range_sensor_list_["ultrasonic_bmr"] = new RangeSensor("ultrasonic_bmr");
-		range_sensor_list_["ultrasonic_bml"] = new RangeSensor("ultrasonic_bml");
-	}
+	// if (sim_time)
+	// {
+	// 	range_sensor_list_["ultrasonic_bm"] = new RangeSensor("ultrasonic_bm");
+	// }
+	// else
+	// {
+	// 	range_sensor_list_["ultrasonic_bmr"] = new RangeSensor("ultrasonic_bmr");
+	// 	range_sensor_list_["ultrasonic_bml"] = new RangeSensor("ultrasonic_bml");
+	// }
 	/*Legacy Range Sensor Code - END*/
+
+	rear_lidar_sub_ = n_.subscribe("/RIO_lidarBack_state", &UnicornState::lidarBackCallback, this);
 
 	n_.getParam("global_local", run_global_loc);
 	if (run_global_loc)
@@ -325,7 +327,7 @@ void UnicornState::processKey(int c)
 			return;
 		//	state_ = current_state::LOADING;
 		updateAndPublishState(current_state::ALIGNING);
-		
+
 		//loading_state_ = current_state::ALIGNING;
 		//  	man_cmd_vel_.angular.z = 0;
 		//	man_cmd_vel_.linear.x = 0;
@@ -348,11 +350,11 @@ void UnicornState::processKey(int c)
 	}
 	else if (c == '6')
 	{
-		updateAndPublishState(current_state::LIFT);		
+		updateAndPublishState(current_state::LIFT);
 	}
 	else if (c == '7')
 	{
-		updateAndPublishState(current_state::ALIGNING);		
+		updateAndPublishState(current_state::ALIGNING);
 	}
 }
 
@@ -377,37 +379,52 @@ void UnicornState::odomCallback(const nav_msgs::Odometry &msg)
 	current_vel_ = msg.twist.twist.linear.x;
 }
 
-void UnicornState::bumperCallback(const std_msgs::Bool &pushed_msg)
+void lidarRearCallback(const std_msgs::Bool &msg)
 {
-
-	/* bumpsensor activated and stop the agent */
-	bumperPressed_ = 0;
-	if (pushed_msg.data == true)
+	if (msg.data)
 	{
 		if ((state_ == current_state::AUTONOMOUS) || (state_ == current_state::ALIGNING) || (state_ == current_state::ENTERING))
 		{
-			bumperPressed_ = 1;
-			ROS_INFO("BUMPER IS PUSHED");
+			ROS_INFO("Rear lidar message: at desired range halting operation.");
 			cancelGoal();
 			man_cmd_vel_.angular.z = 0;
 			man_cmd_vel_.linear.x = 0;
-		}
-	}
-
-	if (reversing_ == 0)
-	{
-		if (pushed_msg.data == false)
-		{
-			if ((state_ == current_state::AUTONOMOUS) || (state_ == current_state::ALIGNING) || (state_ == current_state::ENTERING))
-			{
-				/* resends the old goal that was cancelled due to bumpsensor */
-				bumperPressed_ = 0;
-				sendGoal(target_x_, target_y_, target_yaw_);
-				updateAndPublishState(current_state::AUTONOMOUS);
-			}
+			atDesiredDistance_ = true;
 		}
 	}
 }
+
+// void UnicornState::bumperCallback(const std_msgs::Bool &pushed_msg)
+// {
+
+// 	/* bumpsensor activated and stop the agent */
+// 	bumperPressed_ = 0;
+// 	if (pushed_msg.data == true)
+// 	{
+// 		if ((state_ == current_state::AUTONOMOUS) || (state_ == current_state::ALIGNING) || (state_ == current_state::ENTERING))
+// 		{
+// 			bumperPressed_ = 1;
+// 			ROS_INFO("BUMPER IS PUSHED");
+// 			cancelGoal();
+// 			man_cmd_vel_.angular.z = 0;
+// 			man_cmd_vel_.linear.x = 0;
+// 		}
+// 	}
+
+// 	if (reversing_ == 0)
+// 	{
+// 		if (pushed_msg.data == false)
+// 		{
+// 			if ((state_ == current_state::AUTONOMOUS) || (state_ == current_state::ALIGNING) || (state_ == current_state::ENTERING))
+// 			{
+// 				/* resends the old goal that was cancelled due to bumpsensor */
+// 				bumperPressed_ = 0;
+// 				sendGoal(target_x_, target_y_, target_yaw_);
+// 				updateAndPublishState(current_state::AUTONOMOUS);
+// 			}
+// 		}
+// 	}
+// }
 void UnicornState::LiftCallback(const std_msgs::Int8 &recieveMsg) // ADDED BY MUJI
 {
 	if (recieveMsg.data == 2)
@@ -424,15 +441,15 @@ void UnicornState::active()
 	int c = getCharacter();
 	processKey(c);
 
-	float current_range = 0;
+	// float current_range = 0;
 
 	/*Legacy Range Sensor Code - START*/
 	/*Needs to be altered*/
-	for (std::map<std::string, RangeSensor *>::iterator it = range_sensor_list_.begin(); it != range_sensor_list_.end(); ++it)
-	{
-		current_range += it->second->getRange();
-	}
-	current_range /= range_sensor_list_.size();
+	// for (std::map<std::string, RangeSensor *>::iterator it = range_sensor_list_.begin(); it != range_sensor_list_.end(); ++it)
+	// {
+	// 	current_range += it->second->getRange();
+	// }
+	// current_range /= range_sensor_list_.size();
 
 	/*Legacy Range Sensor Code - END*/
 	switch (state_)
@@ -516,8 +533,6 @@ void UnicornState::active()
 		lift_.data = 1;
 		lift_publisher.publish(lift_);
 		updateAndPublishState(current_state::IDLE);
-	
-		
 		printUsage();
 		break;
 
@@ -535,40 +550,57 @@ void UnicornState::active()
 		if (move_base_clt_.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
 		{
 			move_base_active_ = 0;
-			reversing_ = 1;
+			// reversing_ = 1;
 			updateAndPublishState(current_state::ENTERING);
-			
+
 			//loading_state_ = current_state::ENTERING;
 			ROS_INFO("[unicorn_statemachine] Entering garbage disposal");
 		}
 		break;
-		/** Moves the machine close to a wall.
-			* Slows down the machine when range to wall is below 30cm.
-			*/
+
 	case current_state::ENTERING:
-
 		man_cmd_vel_.angular.z = 0;
-		reversing_ = 1;
-		man_cmd_vel_.linear.x = -0.2;
-
-		ROS_INFO("Current vel: %f", current_vel_);
-		ROS_INFO("[unicorn_statemachine] bumperPressed_  %d", bumperPressed_);
-		if (bumperPressed_ == 1)
+		man_cmd_vel_.linear.x = -0.1;
+		reversing_ = true;
+		ROS_INFO("[unicorn_statemachine] Current vel: %f", current_vel_);
+		ROS_INFO("[unicorn_statemachine] bumperPressed_  %d", atDesiredDistance_);
+		if (atDesiredDistance_)
 		{
 			man_cmd_vel_.linear.x = 0.0;
 			cancelGoal();
 			updateAndPublishState(current_state::LIFT);
-
-			ROS_INFO("[unicorn_statemachine] Entered garbage disposal. Waiting for exit signal");
+			ROS_INFO("[unicorn_statemachine] Entered lifting mode. Waiting for lift completion signal.");
 		}
-		else
-		{
-			man_cmd_vel_.linear.x = -0.1;
-		}
-
 		cmd_vel_pub_.publish(man_cmd_vel_);
-
 		break;
+
+		/** Moves the machine close to a wall.
+			* Slows down the machine when range to wall is below 30cm.
+	// 		*/
+		// case current_state::ENTERING:
+
+		// 	man_cmd_vel_.angular.z = 0;
+		// 	reversing_ = 1;
+		// 	man_cmd_vel_.linear.x = -0.2;
+
+		// 	ROS_INFO("Current vel: %f", current_vel_);
+		// 	ROS_INFO("[unicorn_statemachine] bumperPressed_  %d", bumperPressed_);
+		// 	if (bumperPressed_ == 1)
+		// 	{
+		// 		man_cmd_vel_.linear.x = 0.0;
+		// 		cancelGoal();
+		// 		updateAndPublishState(current_state::LIFT);
+
+		// 		ROS_INFO("[unicorn_statemachine] Entered garbage disposal. Waiting for exit signal");
+		// 	}
+		// 	else
+		// 	{
+		// 		man_cmd_vel_.linear.x = -0.1;
+		// 	}
+
+		// 	cmd_vel_pub_.publish(man_cmd_vel_);
+
+		// 	break;
 
 	case current_state::EXITING:
 		printUsage();
@@ -788,5 +820,5 @@ void UnicornState::updateAndPublishState(int new_state)
 	state_ = new_state;
 	state_msg_.data = state_;
 	unicorn_state_pub_.publish(state_msg_);
-	return;	
+	return;
 }

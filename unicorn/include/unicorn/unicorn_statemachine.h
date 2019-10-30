@@ -147,8 +147,9 @@ public:
 	std::string stateToString(int state);
 	void stateCallback(const std_msgs::Int32 &msg);
 	void odomCallback(const nav_msgs::Odometry &msg);
-	void rangeCallback(const sensor_msgs::Range &msg);
-	void bumperCallback(const std_msgs::Bool &pushed_msg);
+	void lidarRearCallback(const std_msgs::Bool &msg);
+	// void rangeCallback(const sensor_msgs::Range &msg);
+	// void bumperCallback(const std_msgs::Bool &pushed_msg);
 	void LiftCallback(const std_msgs::Int8 &recieveMsg); // ADDED BY MUJI
 	/** @brief Sends a goal on the map to move_base.
 	*
@@ -195,6 +196,7 @@ public:
 private:
 	ros::NodeHandle n_;
 	ros::Publisher unicorn_state_pub_;
+	ros::Subscriber rear_lidar_sub_;
 	// ros::Subscriber unicorn_state_sub_;
 	ros::Publisher cmd_vel_pub_;
 	ros::ServiceClient amcl_global_clt_;
@@ -221,7 +223,8 @@ private:
 
 	double MAX_ANGULAR_VEL;
 	double MAX_LINEAR_VEL;
-	bool bumperPressed_;
+	// bool bumperPressed_;
+	bool atDesiredDistance_;
 	float target_x_;
 	float target_y_;
 	float target_yaw_;
