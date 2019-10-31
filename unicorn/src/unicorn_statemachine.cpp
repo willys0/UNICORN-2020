@@ -124,7 +124,6 @@ UnicornState::UnicornState()
 	lift_subscriber = n_.subscribe("Lifting", 0, &UnicornState::LiftCallback, this);
 	odom_sub_ = n_.subscribe(odom_topic.c_str(), 0, &UnicornState::odomCallback, this);
 	rear_lidar_sub_ = n_.subscribe("/RIO_lidarBack_state", 0, &UnicornState::lidarBackCallback, this);
-
 	acc_cmd_srv_ = n_.advertiseService("cmd_charlie", &UnicornState::accGoalServer, this);
 	//Change topic to /bumper_state from rearBumper
 	// bumper_sub_ = n_.subscribe("/bumper_state", 0, &UnicornState::bumperCallback, this);
@@ -384,6 +383,7 @@ void UnicornState::lidarBackCallback(const std_msgs::Bool &msg)
 {
 	if (msg.data)
 	{
+		ROS_INFO("Rear lidar message: at desired range!");
 		if ((state_ == current_state::AUTONOMOUS) || (state_ == current_state::ALIGNING) || (state_ == current_state::ENTERING))
 		{
 			ROS_INFO("Rear lidar message: at desired range halting operation.");
@@ -393,6 +393,11 @@ void UnicornState::lidarBackCallback(const std_msgs::Bool &msg)
 			atDesiredDistance_ = true;
 		}
 	}
+	else
+	{
+		ROS_INFO("Rear lidar message: not at desired range!");
+	}
+	
 }
 
 // void UnicornState::bumperCallback(const std_msgs::Bool &pushed_msg)
