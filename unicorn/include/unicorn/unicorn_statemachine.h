@@ -147,8 +147,20 @@ public:
 	std::string stateToString(int state);
 	void stateCallback(const std_msgs::Int32 &msg);
 	void odomCallback(const nav_msgs::Odometry &msg);
-	void rangeCallback(const sensor_msgs::Range &msg);
-	void bumperCallback(const std_msgs::Bool &pushed_msg);
+
+
+	void lidarBackCallback(const std_msgs::Bool &msg);
+	/**
+	 * 
+	 * @brief Callback method used to catch messages sent by the node 
+	 * managing the rear lidar sensor connected to the RoboRIO. Halts operation whenever 
+	 * the desired operation has been reached. 
+	 *
+	 * @param msg Boolean type message sent by the rear lidar node. 
+	 *               
+	 */
+	// void rangeCallback(const sensor_msgs::Range &msg);
+	// void bumperCallback(const std_msgs::Bool &pushed_msg);
 	void LiftCallback(const std_msgs::Int8 &recieveMsg); // ADDED BY MUJI
 	/** @brief Sends a goal on the map to move_base.
 	*
@@ -182,6 +194,8 @@ public:
 	void clicked_PointCallback(const geometry_msgs::PointStamped &msg); // this functions needs to subscribe to topic /clicked_point, which gets generated in rviz
 	void rvizWPmaker(double posX, double posY);
 	void pathCreator();
+
+	void updateAndPublishState(int new_state);
 	/**
 	 * Updates the FSM state and publishes it to the /TX2_unicorn_state topic. 
 	 * asterisks.
@@ -189,12 +203,11 @@ public:
 	 * @param new_state The new state to be updated to. 
 	 *               
 	 */
-	void updateAndPublishState(int new_state);
-
 	std_msgs::Int32 state_msg_;
 private:
 	ros::NodeHandle n_;
 	ros::Publisher unicorn_state_pub_;
+	ros::Subscriber rear_lidar_sub_;
 	// ros::Subscriber unicorn_state_sub_;
 	ros::Publisher cmd_vel_pub_;
 	ros::ServiceClient amcl_global_clt_;
@@ -221,7 +234,8 @@ private:
 
 	double MAX_ANGULAR_VEL;
 	double MAX_LINEAR_VEL;
-	bool bumperPressed_;
+	// bool bumperPressed_;
+	bool atDesiredDistance_;
 	float target_x_;
 	float target_y_;
 	float target_yaw_;
