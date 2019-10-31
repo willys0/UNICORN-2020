@@ -380,7 +380,7 @@ void UnicornState::odomCallback(const nav_msgs::Odometry &msg)
 }
 
 void UnicornState::lidarBackCallback(const std_msgs::Bool &msg)
-{
+{	
 	if (msg.data)
 	{
 		ROS_INFO("Rear lidar message: at desired range!");
@@ -395,9 +395,8 @@ void UnicornState::lidarBackCallback(const std_msgs::Bool &msg)
 	}
 	else
 	{
-		ROS_INFO("Rear lidar message: not at desired range!");
+		atDesiredDistance_ = false;
 	}
-	
 }
 
 // void UnicornState::bumperCallback(const std_msgs::Bool &pushed_msg)
