@@ -289,11 +289,22 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	if (omega > 0.4)
 		omega = 0.4;
 	last_linear_velocity_ = u;
-	std::cout << "Linear velocity: " << u << " Angular velocity: " << omega << endl;
+	//std::cout << "Linear velocity: " << u << " Angular velocity: " << omega << endl;
 	//std::cout << "Angular velocity: " << omega << endl;
 
 	*linear_velocity = u;
 	*angular_velocity = omega;
+}
+
+/*void LocalPlanner::chatterCallback(const std_msgs::String::ConstPtr& msg)
+{
+  ROS_INFO("I heard: [%s]", msg->data.c_str());
+}*/
+
+void LocalPlanner::dynamicObstacleCallback(const vector_creation::vector msg)
+{
+  std::cout << "Obstacle Position: " << msg.xposition << " " << msg.yposition << " " << msg.zposition << " Veclocity: " << msg.xvelocity << " " << msg.yvelocity << " " << msg.zvelocity << endl;
+  //local_occupancy_grid = msg;
 }
 
 /*
@@ -337,9 +348,15 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 
 		
 		//std::cout << "Attractive vector " << f_attractive_vector.m_floats[0] << " " << f_attractive_vector.m_floats[1] << " " << f_attractive_vector.m_floats[2] << endl;
-		std::cout << " Repulsive vector: " << f_repulsive_vector.m_floats[0] << " " << f_repulsive_vector.m_floats[1] << " " << f_repulsive_vector.m_floats[2];
-		std::cout << " Final vector: " << final_vector.m_floats[0] << " " << f_attractive_vector.m_floats[1] << " " << f_attractive_vector.m_floats[2] << endl;
-		
+		//std::cout << " Repulsive vector: " << f_repulsive_vector.m_floats[0] << " " << f_repulsive_vector.m_floats[1] << " " << f_repulsive_vector.m_floats[2];
+		//std::cout << " Final vector: " << final_vector.m_floats[0] << " " << f_attractive_vector.m_floats[1] << " " << f_attractive_vector.m_floats[2] << endl;
+
+		ros::NodeHandle test_node_peter;
+		//ros::Subscriber test_sub = test_node_peter.subscribe("chatter", 1000, LocalPlanner::chatterCallback);
+		//ros::spinOnce();
+		LocalPlanner map_listener;
+		test_subscriber = test_node_peter.subscribe<vector_creation::vector>("/vector_generation/vector", 1, &LocalPlanner::dynamicObstacleCallback, &map_listener);
+			//ros::spinOnce();
 
 		updateVelocity(final_vector, robot_pose, &linear_velocity, &angular_velocity, f_repulsive_vector.length());
 		cmd_vel.angular.z = angular_velocity;

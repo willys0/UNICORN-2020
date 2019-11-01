@@ -23,6 +23,14 @@
 //Added by Peter
 #include <costmap_2d/layered_costmap.h>
 #include <nav_msgs/OccupancyGrid.h>
+#include <std_msgs/String.h>
+#include <geometry_msgs/Point.h>
+#include <vector_creation/vectors.h>
+#include <vector_creation/vector.h>
+//#include "vectors.h"
+//#include "vector.h"
+//#include "../../../../devel/include/vector_creation/vectors.h"
+//#include "vector_creation/vector.h"
 //#include <costmap_2d>
 // -- Peter
 
@@ -55,6 +63,8 @@
 	bool isGoalReached();
 	bool setPlan(const std::vector<geometry_msgs::PoseStamped>& plan);
 	void initialize (std::string name, tf::TransformListener *tf, costmap_2d::Costmap2DROS *costmap_ros) ;
+void dynamicObstacleCallback(const vector_creation::vector msg);
+//static void chatterCallback(const std_msgs::String::ConstPtr& msg);
 
   private:
 

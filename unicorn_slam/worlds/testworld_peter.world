@@ -332,7 +332,7 @@
         <kinematic>0</kinematic>
         <gravity>1</gravity>
       </link>
-        <script>
+        <!--script>
           <loop>true</loop>
           <auto_start>true</auto_start>
           <trajectory id="0" type="square">
@@ -357,7 +357,7 @@
                 <pose>-1 -1 1 0 0 0</pose>
              </waypoint>
           </trajectory>
-        </script>
+        </script-->
 	<plugin name="push_animate" filename="libanimated_box.so"/>
     </model>
 <!-- Peter -->

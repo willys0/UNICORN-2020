@@ -59,8 +59,6 @@
 <!--<rosparam file="$(find unicorn)/launch/move_base_params_peter.yaml" command="load" />-->
 		<remap from="cmd_vel" to="/unicorn/cmd_vel"/> 
 	</node>
-
-
 	
 
 	<node name="voxel_grid_2_point_cloud" pkg="costmap_2d" type="costmap_2d_cloud">

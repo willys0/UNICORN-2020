@@ -15,6 +15,8 @@ find_package(catkin REQUIRED COMPONENTS
   costmap_2d 
   rospy 
   roscpp
+  genmsg
+  vector_creation
 )
 
 ## System dependencies are found with CMake's conventions
