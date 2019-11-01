@@ -5,6 +5,9 @@
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "unicorn_statemachine");
+
+	IDLEState IDLE();
+
 	UnicornState statemachine;
 	statemachine.printUsage();
 	ros::Rate r(50);
@@ -444,7 +447,7 @@ void UnicornState::LiftCallback(const std_msgs::Int8 &recieveMsg) // ADDED BY MU
 }
 
 void UnicornState::active()
-{
+{	
 	int c = getCharacter();
 	processKey(c);
 
