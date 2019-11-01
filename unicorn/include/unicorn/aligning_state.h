@@ -3,7 +3,7 @@
 class AligningState : public State
 {
 public:
-    AligningState(std::vector<std::string> topic_names);
+    AligningState();
     ~AligningState();
     int run();
 protected:

@@ -3,7 +3,7 @@
 class LiftingState : public State
 {
 public:
-    LiftingState(std::vector<std::string> topic_names);
+    LiftingState();
     ~LiftingState();
     int run();
 

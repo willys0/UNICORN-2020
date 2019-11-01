@@ -3,7 +3,7 @@
 class NavigatingState : public State
 {
 public:
-    NavigatingState(std::vector<std::string> topic_names);
+    NavigatingState();
     ~NavigatingState();
     int run();
 
