@@ -6,7 +6,6 @@ public:
     NavigatingState();
     ~NavigatingState();
     int run();
-
 protected:
 private:
 };

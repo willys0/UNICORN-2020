@@ -23,31 +23,17 @@
 #include <boost/lexical_cast.hpp>
 #include <string>
 
-namespace current_state
-{
-	enum
-	{
-		AUTONOMOUS,
-		MANUAL,
-		LOADING,
-		IDLE,
-		ALIGNING,
-		EXITING,
-		ENTERING,
-		LIFT,
-		REVERSING
-	};
-}
-
 class State
 {
     public:
         State();
         ~State();
         virtual int run() = 0;
+        cmd_msg_struct parseMsg();
+        std::string * cmd_msg_str_;        
+        struct cmd_msg_struct * cmd_struct_;
     protected:
         int abort_state_;
     private:
-        ros::Subscriber abort_sub_;
-        void AbortCallback(const std_msgs::Int32 &msg);
+
 };

@@ -5,9 +5,6 @@
 int main(int argc, char **argv)
 {
 	ros::init(argc, argv, "unicorn_statemachine");
-
-	IDLEState IDLE();
-
 	UnicornState statemachine;
 	statemachine.printUsage();
 	ros::Rate r(50);

@@ -6,7 +6,6 @@ public:
     LiftingState();
     ~LiftingState();
     int run();
-
 protected:
 private:
 };
