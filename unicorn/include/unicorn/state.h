@@ -23,17 +23,27 @@
 #include <boost/lexical_cast.hpp>
 #include <string>
 
+/*JSON*/
+#include <nlohmann/json.hpp>
+
+/*UNICORN*/
+#include "state_machine.h"
+
+// for convenience
+using json = nlohmann::json;
+
 class State
 {
     public:
         State();
         ~State();
-        virtual int run() = 0;
-        cmd_msg_struct parseMsg();
-        std::string * cmd_msg_str_;        
-        struct cmd_msg_struct * cmd_struct_;
+        virtual cmd_struct_ run() = 0;
+        cmd_msg_struct parseMsg(std::string &msg);
+
     protected:
         int abort_state_;
+        std::string cmd_msg_str_;        
+        struct cmd_msg_struct cmd_struct_;
     private:
 
 };

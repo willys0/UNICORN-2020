@@ -20,7 +20,10 @@ namespace state_enum
 }
 
 typedef struct cmd_struct {
-    int state_;
+    int state;
+    float param1;
+    float param2;
+    float param3;
 } cmd_struct;
 
 class StateMachine
