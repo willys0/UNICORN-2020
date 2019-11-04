@@ -6,7 +6,6 @@ IDLEState::IDLEState()
 
 IDLEState::~IDLEState()
 {
-    
 }
 
 cmd_struct_ IDLEState::Run()

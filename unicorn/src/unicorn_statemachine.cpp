@@ -119,10 +119,12 @@ UnicornState::UnicornState()
 	move_base_cancel_pub_ = n_.advertise<actionlib_msgs::GoalID>("/move_base/cancel", 0);
 	amcl_global_clt_ = n_.serviceClient<std_srvs::Empty>("/global_localization");
 	cmd_vel_pub_ = n_.advertise<geometry_msgs::Twist>("/unicorn/cmd_vel", 0);
+
 	lift_pub_ = n_.advertise<std_msgs::Int8>("/lift", 0);
 	lift_publisher = n_.advertise<std_msgs::Int8>("/Lifting", 0); //ADDED BY MUJI
 	lift_subscriber = n_.subscribe("Lifting", 0, &UnicornState::LiftCallback, this);
 	odom_sub_ = n_.subscribe(odom_topic.c_str(), 0, &UnicornState::odomCallback, this);
+	
 	rear_lidar_sub_ = n_.subscribe("/RIO_lidarBack_state", 0, &UnicornState::lidarBackCallback, this);
 	acc_cmd_srv_ = n_.advertiseService("cmd_charlie", &UnicornState::accGoalServer, this);
 	//Change topic to /bumper_state from rearBumper
