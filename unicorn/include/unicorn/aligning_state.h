@@ -13,7 +13,7 @@ class AligningState : public State
 public:
     AligningState();
     ~AligningState();
-    int run();
+    cmd_struct_ run();
 protected:
 private:
     
