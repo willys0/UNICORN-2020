@@ -38,7 +38,6 @@ class State
         State();
         ~State();
         virtual cmd_struct_ run() = 0;
-        cmd_msg_struct parseMsg(std::string &msg);
 
     protected:
         int abort_state_;
