@@ -13,12 +13,12 @@ class LiftingState : public State
 public:
     LiftingState();
     ~LiftingState();
-    int run();
+    Command run();
 
 protected:
 private:
     void liftCallback(const std_msgs::Int8 &recieveMsg);
-    void reverseFromBinSite();
+    void reverseFromBin();
     ros::Subscriber lift_complete_sub_;
     ros::Publisher lift_init_pub_;
 };

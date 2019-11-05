@@ -83,11 +83,11 @@ private:
     
     /*Methods*/
     void initGlobalLocalisation();
-    void initNextState(struct cmd_struct cmd_struct_);
+    void initNextState(struct Command cmd_struct_);
     void cmdCallback(const std_msgs::String &msg);
     void odomCallback(const nav_msgs::Odometry &msg);
     void updateAndPublishState(const int new_state);
-    cmd_struct parseCmdMsg(std::string cmd_msg);
+    Command parseCmdMsg(std::string cmd_msg);
     std::string getStateString();
 };
 #endif // !ST

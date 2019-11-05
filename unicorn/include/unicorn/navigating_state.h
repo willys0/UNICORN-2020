@@ -14,7 +14,7 @@ class NavigatingState : public State
 public:
     NavigatingState();
     ~NavigatingState();
-    cmd_struct_ run();
+    Command run();
 protected:
 private:
     void cancelGoal();

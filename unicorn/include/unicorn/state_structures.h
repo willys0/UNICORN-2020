@@ -1,4 +1,4 @@
-namespace state_enum
+namespace state_identifier
 {
 enum
 {
@@ -20,21 +20,20 @@ typedef struct cmd_struct
     float param1;
     float param2;
     float param3;
-} cmd_struct;
+} Command;
 
 typedef struct goal_struct
 {
     const float x;
     const float y;
     const float yaw;
-}Goal;
+} Goal;
 
-class RefuseBin
+typedef struct refuse_bin
 {
-public:
-    RefuseBin();
-    float x;
-    float y;
-    float yaw;
-};
+    const float x;
+    const float y;
+    const float yaw;
+} RefuseBin;
+
 

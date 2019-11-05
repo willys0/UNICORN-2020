@@ -15,6 +15,7 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8.h>
 #include <std_msgs/Int32.h>
+#include <std_msgs/Float32.h>
 
 /* C / C++ */
 #include <iostream>
@@ -23,11 +24,11 @@
 #include <boost/lexical_cast.hpp>
 #include <string>
 
-/*JSON*/
+/* JSON */
 #include <nlohmann/json.hpp>
 
-/*UNICORN*/
-#include "state_machine.h"
+/* UNICORN */
+#include "state_structures.h"
 
 // for convenience
 using json = nlohmann::json;
@@ -37,13 +38,13 @@ class State
     public:
         State();
         ~State();
-        virtual cmd_struct_ run() = 0;
+        virtual Command run() = 0;
 
     protected:
         int abort_state_;
         int state_identifier_;
         std::string cmd_msg_str_;        
-        struct cmd_msg_struct cmd_struct_;
+        struct Command cmd_struct_;
     private:
 
 };

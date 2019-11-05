@@ -173,9 +173,9 @@ cmd_struct StateMachine::parseCmdMsg(std::string cmd_msg)
     return new_cmd;
 }
 
-std::string StateMachine::getStateString(int state)
+std::string StateMachine::getStateString(int state_identifier_)
 {
-    switch (state)
+    switch (state_identifier_)
     {
     case current_state::AUTONOMOUS:
         return "AUTONOMOUS";

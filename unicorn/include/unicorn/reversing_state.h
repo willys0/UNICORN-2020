@@ -7,17 +7,18 @@
         2 alt. if abort message was recieved exit with new state set to IDLE
 */
 
-class ResversingState : public State
+class ReversingState : public State
 {
 public:
     /*Methods*/
-    ResversingState();
-    ~ResversingState();
-    cmd_struct run();
+    ReversingState(const float dist_to_bin);
+    ~ReversingState();
+    Command run();
 
 private:
     /*Members*/
     ros::Subscriber rear_lidar_sub_;
+    const float desired_distance_;
     /*Methods*/
     void rearLidarCallback(const std_msgs::Float32 &msg);
 };

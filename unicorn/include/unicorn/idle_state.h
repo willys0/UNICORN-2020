@@ -11,9 +11,8 @@ class IDLEState : public State
 public:
     IDLEState();
     ~IDLEState();
-    cmd_struct_ run();
+    Command run();
 
 protected:
 private:
-    void CmdCallback(const std_msgs::string &cmd);
 };

@@ -1,3 +1,10 @@
+#include <ros/ros.h>
+#include "state_structures.h"
+
+/*
+    Command interface: Runs as a seperate node connected to the same network as 
+    the robot. 
+ */
 class UNICORNCmdInterface
 {
 public:
@@ -5,8 +12,8 @@ public:
     ~UNICORNCmdInterface();
     void displayUserInterface();
     int getUserInput();
-    cmd_struct_ processUserInput(int choice);
-    void sendUNICORNCommand(cmd_struct_ cmd);
+    Command processUserInput(int choice);
+    void sendUNICORNCommand(Command cmd);
 
 protected:
 private:
