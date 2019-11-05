@@ -2,10 +2,9 @@
 
 /* State description: 
     The aligning state is instansiated when a goal has been reached, alt has been issued manually. 
-    1. Reverse towards bin 
-    2. Await message with distance from bin sent by RIO
-    3. When Distance has reached 10cm halt
-    4. Exit state with next state set to LIFTING
+    1. Align the robot so it stands perpendicular with the refuse bin
+    2. Exit state with new state set to REVERSING
+        2 alt. if abort message was recieved exit with new state set to IDLE
 */
 
 class AligningState : public State

@@ -42,6 +42,7 @@ class State
 
     protected:
         int abort_state_;
+        int state_identifier_;
         std::string cmd_msg_str_;        
         struct cmd_msg_struct cmd_struct_;
     private:

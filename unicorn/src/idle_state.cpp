@@ -32,19 +32,4 @@ cmd_struct_ IDLEState::Run()
     return cmd;
 }
 
-void IDLEState::CmdCallback(const std_msgs::String &msg)
-{
-    cmd_msg_str_ = msg.data;
-}
-
-cmd_struct IDLEState::parseMsg(std::string &msg)
-{
-    json cmd_object = msg_json;
-    cmd_struct new_cmd{
-        cmd_object["state"].get<int>(),
-        cmd_object["param1"].get<float>(),
-        cmd_object["param2"].get<float>(),
-        cmd_object["param3"].get<float>()};
-    return new_cmd;
-}
 //terminate
