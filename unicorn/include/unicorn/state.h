@@ -1,3 +1,6 @@
+#ifndef STATE_H
+#define STATE_H
+
 /**
  * Base class for states in UNICORN
  */
@@ -36,15 +39,15 @@ using json = nlohmann::json;
 class State
 {
     public:
-        State();
-        ~State();
+        State(){};
+        ~State(){};
         virtual Command run() = 0;
-
+        int state_identifier_;
     protected:
         int abort_state_;
-        int state_identifier_;
         std::string cmd_msg_str_;        
         struct Command cmd_struct_;
     private:
 
 };
+#endif // !ST

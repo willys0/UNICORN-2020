@@ -1,4 +1,6 @@
-namespace state_identifier
+#ifndef STATE_STRUCTURES_H
+#define STATE_STRUCTURES_H
+namespace state_enum
 {
 enum
 {
@@ -14,7 +16,7 @@ enum
 };
 }
 
-typedef struct cmd_struct
+typedef struct Command
 {
     int state;
     float param1;
@@ -22,18 +24,18 @@ typedef struct cmd_struct
     float param3;
 } Command;
 
-typedef struct goal_struct
+typedef struct Goal
 {
-    const float x;
-    const float y;
-    const float yaw;
+    float x;
+    float y;
+    float yaw;
 } Goal;
 
-typedef struct refuse_bin
+typedef struct RefuseBin
 {
-    const float x;
-    const float y;
-    const float yaw;
+    float x;
+    float y;
+    float yaw;
 } RefuseBin;
 
-
+#endif // !ST

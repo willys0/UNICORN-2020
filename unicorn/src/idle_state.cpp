@@ -1,8 +1,8 @@
-#include <idle_state.h>
+#include "unicorn/idle_state.h"
 
 IDLEState::IDLEState()
 {
-    state_identifier_ = state_identifier::IDLE;
+    state_identifier_ = state_enum::IDLE;
     
 }
 
@@ -10,7 +10,7 @@ IDLEState::~IDLEState()
 {
 }
 
-Command IDLEState::Run()
+Command IDLEState::run()
 {
    
 }

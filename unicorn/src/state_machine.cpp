@@ -1,5 +1,13 @@
 #include "unicorn/state_machine.h"
 
+int main(int argc, char** argv) {
+    std::string name = "unicorn_statemachine";
+	ros::init(argc, argv, name);    
+    StateMachine state_machine;
+    //state_machine.start();
+    return 0;
+}
+
 StateMachine::StateMachine() : move_base_clt_("move_base", true)
 {
     bool run_global_loc, sim_time;
@@ -10,16 +18,16 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
     }
     ROS_INFO("[UNICORN State Machine] sim_time: %i", sim_time);
 
-    if (!n_.getParam("max_angular_vel", MAX_ANGULAR_VEL))
+    if (!n_.getParam("max_angular_vel", max_angular_vel_))
     {
         max_angular_vel_ = 0.5;
     }
-    ROS_INFO("[UNICORN State Machine] MAX_ANGULAR_VEL: %f", MAX_ANGULAR_VEL);
-    if (!n_.getParam("max_linear_vel", MAX_LINEAR_VEL))
+    ROS_INFO("[UNICORN State Machine] MAX_ANGULAR_VEL: %f", max_angular_vel_);
+    if (!n_.getParam("max_linear_vel", max_linear_vel_))
     {
         max_linear_vel_ = 0.3;
     }
-    ROS_INFO("[UNICORN State Machine] MAX_LINEAR_VEL: %f", MAX_LINEAR_VEL);
+    ROS_INFO("[UNICORN State Machine] MAX_LINEAR_VEL: %f", max_linear_vel_);
     if (!n_.getParam("odometry_topic", odom_topic))
     {
         odom_topic = "odom";
@@ -29,7 +37,7 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
         frame_id_ = "base_link";
     }
 
-    if(!n_.getParma("global_local", run_global_loc))
+    if(!n_.getParam("global_local", run_global_loc))
     {
         run_global_loc = false;
     }
@@ -57,20 +65,20 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
     current_state_ = new IDLEState();
 }
 
-~StateMachine::StateMachine() {}
+StateMachine::~StateMachine() {}
 
 int StateMachine::start() 
 {
-    cmd_struct_ new_cmd;
+    Command new_cmd;
     while (true)
     {
-        new_cmd = current_state_.run();
+        new_cmd = current_state_->run();
         initNextState(new_cmd);
     }
     return 1;   
 }
 
-void initGlobalLocalisation()
+void StateMachine::initGlobalLocalisation()
 {
     std_srvs::Empty srv;
     ros::service::waitForService("/global_localization", 1);
@@ -85,9 +93,11 @@ void initGlobalLocalisation()
     }
 }
 
-void StateMachine::CmdCallback(const std_msgs::String &msg)
+void StateMachine::initNextState(Command cmd)
+{}
+
+void StateMachine::cmdCallback(const std_msgs::String &msg)
 {
-    cmd_msg_str_ = msg.data;
 }
 
 void StateMachine::odomCallback(const nav_msgs::Odometry &msg)
@@ -96,21 +106,23 @@ void StateMachine::odomCallback(const nav_msgs::Odometry &msg)
     tf::poseMsgToTF(msg.pose.pose, pose);
     current_yaw_ = tf::getYaw(pose.getRotation());
     current_vel_ = msg.twist.twist.linear.x;
+    return;
 }
 
 void StateMachine::updateAndPublishState(int new_state)
 {
-    state_msg_.data = new_state;
-    unicorn_state_pub_.publish(state_msg_);
+    std_msgs::Int32 new_state_msg;
+    new_state_msg.data = new_state;
+    state_pub_.publish(new_state_msg);
     return;
 }
 
-void StateMachine::cancelGoal()
-{
-    actionlib_msgs::GoalID cancel_all;
-    move_base_cancel_pub_.publish(cancel_all);
-    ROS_INFO("[unicorn_statemachine] Canceling move_base goal");
-}
+// void StateMachine::cancelGoal()
+// {
+//     actionlib_msgs::GoalID cancel_all;
+//     move_base_cancel_pub_.publish(cancel_all);
+//     ROS_INFO("[unicorn_statemachine] Canceling move_base goal");
+// }
 
 int StateMachine::sendGoal(const float x, const float y, const float yaw)
 {
@@ -122,7 +134,7 @@ int StateMachine::sendGoal(const float x, const float y, const float yaw)
     {
         ROS_INFO("%s", e.what());
         ROS_ERROR("[unicorn_statemachine] x is undefined");
-        updateAndPublishState(current_state::IDLE);
+        updateAndPublishState(state_enum::IDLE);
         return -1;
     }
     try
@@ -132,7 +144,7 @@ int StateMachine::sendGoal(const float x, const float y, const float yaw)
     catch (boost::bad_lexical_cast &)
     {
         ROS_ERROR("[unicorn_statemachine] y is undefined");
-        updateAndPublishState(current_state::IDLE);
+        updateAndPublishState(state_enum::IDLE);
         return -1;
     }
     try
@@ -142,7 +154,7 @@ int StateMachine::sendGoal(const float x, const float y, const float yaw)
     catch (boost::bad_lexical_cast &)
     {
         ROS_ERROR("[unicorn_statemachine] yaw is undefined");
-        updateAndPublishState(current_state::IDLE);
+        updateAndPublishState(state_enum::IDLE);
         return -1;
     }
     while (!move_base_clt_.waitForServer(ros::Duration(5.0)))
@@ -162,14 +174,15 @@ int StateMachine::sendGoal(const float x, const float y, const float yaw)
     return 1;
 }
 
-cmd_struct StateMachine::parseCmdMsg(std::string cmd_msg)
+Command StateMachine::parseCmdMsg(std::string cmd_msg)
 {
-    json cmd_object = msg_json;
-    cmd_struct new_cmd{
-        cmd_object["state"].get<int>(),
-        cmd_object["param1"].get<float>(),
-        cmd_object["param2"].get<float>(),
-        cmd_object["param3"].get<float>()};
+    Command new_cmd;
+    // json cmd_object = (cmd_msg.c_str())_json;
+    // Command new_cmd{
+    //     cmd_object["state"].get<int>(),
+    //     cmd_object["param1"].get<float>(),
+    //     cmd_object["param2"].get<float>(),
+    //     cmd_object["param3"].get<float>()};
     return new_cmd;
 }
 
@@ -177,31 +190,31 @@ std::string StateMachine::getStateString(int state_identifier_)
 {
     switch (state_identifier_)
     {
-    case current_state::AUTONOMOUS:
+    case state_enum::AUTONOMOUS:
         return "AUTONOMOUS";
 
-    case current_state::MANUAL:
+    case state_enum::MANUAL:
         return "MANUAL";
 
-    case current_state::LOADING:
+    case state_enum::LOADING:
         return "LOADING";
 
-    case current_state::IDLE:
+    case state_enum::IDLE:
         return "IDLE";
 
-    case current_state::LIFT:
+    case state_enum::LIFT:
         return "LIFT";
 
-    case current_state::REVERSING:
+    case state_enum::REVERSING:
         return "REVERSING";
 
-    case current_state::ALIGNING:
+    case state_enum::ALIGNING:
         return "ALIGNING";
 
-    case current_state::ENTERING:
+    case state_enum::ENTERING:
         return "ENTERING";
 
-    case current_state::EXITING:
+    case state_enum::EXITING:
         return "EXITING";
 
     default:
@@ -211,7 +224,7 @@ std::string StateMachine::getStateString(int state_identifier_)
 
 bool StateMachine::accGoalServer(unicorn::CharlieCmd::Request &req, unicorn::CharlieCmd::Response &res)
 {
-    if (current_state_.state_identifier_ == current_state::MANUAL)
+    if (current_state_->state_identifier_ == state_enum::MANUAL)
     {
         res.response = 0;
         return false;

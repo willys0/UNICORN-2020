@@ -23,19 +23,20 @@
 #include <termios.h>
 #include <cmath>
 #include <boost/lexical_cast.hpp>
+#include <cstdlib>
 
 /*State classes*/
-#include "idle_state.h"
-#include "navigating_state.h"
-#include "aligning_state.h"
-#include "reversing_state.h"
-#include "lifting_state.h"
+#include "unicorn/idle_state.h"
+#include "unicorn/navigating_state.h"
+#include "unicorn/aligning_state.h"
+#include "unicorn/reversing_state.h"
+#include "unicorn/lifting_state.h"
 
 /*Structure defintions*/
-#include "state_structures.h"
+#include "unicorn/state_structures.h"
 
 /*PID controller*/
-#include "pid_controller.h"
+#include "unicorn/pid_controller.h"
 
 /*Type definitons*/
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient; /**< Client that calls actions from move_base */
@@ -64,30 +65,32 @@ private:
     /*Members*/
     double current_yaw_;
 	double current_vel_;
-    const double max_angular_vel_;
-	const double max_linear_vel_;
+    double max_angular_vel_;
+	double max_linear_vel_;
     ros::NodeHandle n_;
     ros::ServiceClient amcl_global_clt_;
     ros::ServiceServer acc_cmd_srv_;
     ros::Publisher state_pub_;
     ros::Publisher cmd_vel_pub_;
+    ros::Publisher move_base_cancel_pub_;
     ros::Subscriber cmd_sub_;
-    ros::Subscriber move_base_cancel_pub_;
     ros::Subscriber odom_sub_;
 	std::string frame_id_;
     tf::TransformListener tf_listener_;
 	PidController *velocity_pid_; /**< PID to control position in x*/
 	RefuseBin refuse_bin_pose_;
     MoveBaseClient move_base_clt_;
-    State current_state_;
+    State * current_state_;
     
     /*Methods*/
     void initGlobalLocalisation();
-    void initNextState(struct Command cmd_struct_);
+    void initNextState(Command cmd_struct_);
     void cmdCallback(const std_msgs::String &msg);
     void odomCallback(const nav_msgs::Odometry &msg);
     void updateAndPublishState(const int new_state);
+    int sendGoal(const float x, const float y, const float yaw);
+    bool accGoalServer(unicorn::CharlieCmd::Request &req, unicorn::CharlieCmd::Response &res);
     Command parseCmdMsg(std::string cmd_msg);
-    std::string getStateString();
+    std::string getStateString(int state_identifier_);
 };
 #endif // !ST
