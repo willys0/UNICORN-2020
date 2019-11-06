@@ -21,6 +21,7 @@
 
 std::vector<geometry_msgs::PointStamped> position_vector;
 
+
 // START OF CLASS MOVEMENTCOMPENSATION
 class VectorCreation {
 	public:
@@ -82,6 +83,7 @@ void positionCallback(ConstPosesStampedPtr &posesStamped)
 
   	position_vector.push_back(position_point);
 
+	//std::cout << "Position vector size: " << position_vector.size() << std::endl;
 	//std::cout << "Position vector: " << std::endl;
 	//for (int i=0; i < position_vector.size(); i++)
 	//	std::cout << i << " Time: " << position_vector[i].header.stamp.sec << " " << position_vector[i].header.stamp.nsec << " Position: " << position_vector[i].point.x << " " << position_vector[i].point.y << " " << position_vector[i].point.z << std::endl;
@@ -107,15 +109,17 @@ int main(int argc, char** argv) {
     ros::NodeHandle n;
 	VectorCreation nc;
 	vector_creation::vector msg;
+	//std::vector<vector_creation::vector> msg_to_send;
 	position_vector.clear();
 
 	//ros::Subscriber subPosition    	= n.subscribe("movement_compensation/position", 1, &VectorCreation::positionCallback, &nc);
 	
 	//ros::Subscriber subPosition    	= n.subscribe("~/pose/info", 1, &VectorCreation::positionCallback, &nc);
-	//ros::Publisher pubVector	= n.advertise<vector_creation::vector>("/vector_generation/vector",1);
+	ros::Publisher pubVector	= n.advertise<vector_creation::vector>("/vector_generation/vector",1);
  	//ros::Publisher pubVector	= n.advertise<std_msgs::String>("chatter",1000);
+	gazebo::transport::SubscriberPtr sub = node->Subscribe("~/pose/info", positionCallback);
 
-	ros::Rate loop_rate(10);
+	ros::Rate loop_rate(5);
 	//int count = 0;
 	while(ros::ok()){
 		/*
@@ -126,18 +130,18 @@ int main(int argc, char** argv) {
 		ROS_INFO("%s", msg.data.c_str());
 		*/
 
-		gazebo::transport::SubscriberPtr sub = node->Subscribe("~/pose/info", positionCallback);
+		//gazebo::transport::SubscriberPtr sub = node->Subscribe("~/pose/info", positionCallback);
 		//gazebo::common::Time::MSleep(10);
 		
 
-		ros::spinOnce();
+		
 
-		msg.xposition = 0;
+		/*msg.xposition = 0;
 		msg.yposition = 0;
 		msg.zposition = 0;
 		msg.xvelocity = 0;
 		msg.yvelocity = 0;
-		msg.zvelocity = 0;
+		msg.zvelocity = 0;*/
 
 		//create_vector()
 		std::cout << "Vector creation loop" << std::endl;
@@ -162,9 +166,10 @@ int main(int argc, char** argv) {
 				msg.yvelocity += (position_vector[i+1].point.y - position_vector[i].point.y) / total_time;//(position_vector[i+1].header.stamp.nsec - position_vector[i].header.stamp.nsec);
 				msg.zvelocity += (position_vector[i+1].point.z - position_vector[i].point.z) / total_time;//(position_vector[i+1].header.stamp.nsec - position_vector[i].header.stamp.nsec);
 				
-				std::cout << "Time sec: " << position_vector[i+1].header.stamp.sec << " - " << position_vector[i].header.stamp.sec << std::endl;
+				/*std::cout << "Time sec: " << position_vector[i+1].header.stamp.sec << " - " << position_vector[i].header.stamp.sec << std::endl;
 				std::cout << "Time nsec: " << position_vector[i+1].header.stamp.nsec << " - " << position_vector[i].header.stamp.nsec << std::endl;
 				std::cout << "Time difference: " << total_time << std::endl;
+				*/
 			}
 			msg.xvelocity /= (position_vector.size()-1);
 			msg.yvelocity /= (position_vector.size()-1);
@@ -177,10 +182,12 @@ int main(int argc, char** argv) {
 			msg.yposition = position_vector[position_vector.size()-1].point.y;
 			msg.zposition = position_vector[position_vector.size()-1].point.z;
 
-			std::cout << "Position: " << msg.xposition << " " << msg.yposition << " " << msg.zposition << " Velocity: " << msg.xvelocity << " " << msg.yvelocity << " " << msg.zvelocity << std::endl;
+			//std::cout << "Position: " << msg.xposition << " " << msg.yposition << " " << msg.zposition << " Velocity: " << msg.xvelocity << " " << msg.yvelocity << " " << msg.zvelocity << std::endl;
+			std::cout << "Message sent where position x = " << msg.xposition << std::endl;;
+			pubVector.publish(msg);
 		}
 		
-		//pubVector.publish(msg);
+	
 
 		/*msg.xposition = nc.x;
 		msg.yposition = nc.y;
@@ -195,7 +202,7 @@ int main(int argc, char** argv) {
 		//gazebo::common::Time::MSleep(10);
 		
 
-		//ros::spinOnce();
+		ros::spinOnce();
 		loop_rate.sleep();
 		//++count;
 	}

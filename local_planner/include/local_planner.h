@@ -43,6 +43,8 @@
 #define MIN_LINEAR_VEL 0.0
 #define MAX_ANGULAR_VEL 0.5
 #define MIN_ANGULAR_VEL -0.5
+#define GAMA 1.0
+#define PI 3.14159265358979323846264338327950288
 
 #define MAX_ACC_LINEAR 1.0
 #define MAX_ACC_ANGULAR 2.0
@@ -74,8 +76,9 @@ tf::Vector3 unitVectorOfPath(int plan_index);
 void fAttractiveVector(geometry_msgs::Point fa_point_path, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 unit_vector_ni, tf::Vector3 *attractive_vector);
 void makeRepulsiveField(int scale, int gain, float dmax, float pos_x, float pos_y, float *repulsive_force, int *deg);
 void repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *repulsive_vector);
-void updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot_pose, float *linear_velocity, float *angular_velocity, double repulsive_field_magnitude);
+void updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot_pose, float *linear_velocity, float *angular_velocity, double repulsive_field_magnitude, double dipole_field_magnitude, float distance_to_path);
 void findClosestObjectEuclidean(int *deg, float *distance_to_obstacle);
+void dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *dipole_force);
 //static const float k1 = 0.01;
 //static const float k2 = 1;
 float k1;
@@ -84,7 +87,13 @@ static const float DELTA_T = 1.0;
 int test_variable;
 int generate_new_path;
 float last_linear_velocity_;
-static const float max_linear_acc_ = 0.01;
+static const float max_linear_vel = 0.4; // default 0.4
+static const float max_angular_vel = 0.4;
+static const float max_linear_acc_ = 0.05;
+vector_creation::vector obstacle_vector_;
+bool close_to_goal;
+std::vector<tf::Vector3> final_vectors_vector;
+double last_repulsive_field_magnitude_;
 	// -- Peter
 
   	costmap_2d::Costmap2DROS* costmap_ros_; //!< Pointer to the costmap ros wrapper, received from the navigation stack
@@ -102,7 +111,7 @@ static const float max_linear_acc_ = 0.01;
 	bool initialized_; //!< Keeps track about the correct initialization of this class
 	
 	ros::Publisher l_plan_pub_,marker_pub;
-	ros::Subscriber odom_sub_,test_subscriber;
+	ros::Subscriber odom_sub_,moving_obstacle_subscriber_;
 
 	uint32_t shape; //Marker to represent local goal
 

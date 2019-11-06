@@ -204,7 +204,7 @@ bool ThetaStarPlanner::ThetaPotentials(unsigned char* costs, double start_x, dou
 std::vector< std::pair<float, float> > ThetaStarPlanner::makeThetaStarPlan(int start_x, int start_y, int goal_x, int goal_y) {
 
 		ROS_ERROR("Start Theta %d %d to %d %d",start_x,start_y,goal_x,goal_y);
-
+		
 		grid_graph_.SetGridStep(GRID_SIZE);
 		grid_graph_.IntializeMap(cost_array_, nx, ny);
 		if (!grid_graph_.MakeGrid())
@@ -332,6 +332,7 @@ void ThetaStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* co
       world_model_ = new base_local_planner::CostmapModel(*costmap_); 
       plan_pub_ = private_nh.advertise<nav_msgs::Path>("plan", 1);
       //make_plan_srv_ = private_nh.advertiseService("make_plan", &ThetaStarPlanner::makePlanService, this);
+std::cout << "Thetastar Initialized" << std::endl;
       initialized_ = true;
     }
     else

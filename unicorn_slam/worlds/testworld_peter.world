@@ -298,7 +298,7 @@
         <collision name='collision'>
           <geometry>
             <box>
-              <size>1 1 1</size>
+              <size>0.1 0.1 1</size>
             </box>
           </geometry>
           <max_contacts>10</max_contacts>
@@ -318,7 +318,7 @@
         <visual name='visual'>
           <geometry>
             <box>
-              <size>1 1 1</size>
+              <size>0.1 0.1 1</size>
             </box>
           </geometry>
           <material>
