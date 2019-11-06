@@ -4,7 +4,7 @@ namespace state_enum
 {
 enum
 {
-    AUTONOMOUS,
+    NAVIGATING,
     MANUAL,
     LOADING,
     IDLE,

@@ -12,7 +12,7 @@ public:
     IDLEState();
     ~IDLEState();
     Command run();
-
+    Command setNewCmd(Command new_cmd);
 protected:
 private:
 };

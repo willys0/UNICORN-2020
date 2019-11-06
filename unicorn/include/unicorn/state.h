@@ -19,6 +19,7 @@
 #include <std_msgs/Int8.h>
 #include <std_msgs/Int32.h>
 #include <std_msgs/Float32.h>
+#include <std_msgs/String.h>
 
 /* C / C++ */
 #include <iostream>
@@ -38,16 +39,17 @@ using json = nlohmann::json;
 
 class State
 {
-    public:
-        State(){};
-        ~State(){};
-        virtual Command run() = 0;
-        int state_identifier_;
-    protected:
-        int abort_state_;
-        std::string cmd_msg_str_;        
-        struct Command cmd_struct_;
-    private:
+public:
+    State(){};
+    ~State(){};
+    Command setNewCmd(Command new_cmd) { command = new_cmd; };
+    virtual Command run() = 0;
 
+protected:
+    int abort_state_;
+    std::string cmd_msg_str_;
+    Command command;
+
+private:
 };
 #endif // !ST

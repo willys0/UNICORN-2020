@@ -150,11 +150,11 @@ include_directories(
 #add_executable(range_sensor_driver src/range_sensor_driver.cpp)
 #target_link_libraries(range_sensor_driver ${catkin_LIBRARIES})
 
-add_library(idle_state_lib src/idle_state.cpp include/unicorn/idle_state.h)
+add_library(state_lib src/idle_state.cpp include/unicorn/idle_state.h include/unicorn/state_factory.h src/state_factory.cpp include/unicorn/aligning_state.h src/aligning_state.cpp)
 add_library(pid_controller_lib src/pid_controller.cpp)
 
 add_executable(unicorn_statemachine src/state_machine.cpp)
-target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES} pid_controller_lib idle_state_lib)
+target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES} pid_controller_lib state_lib)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries

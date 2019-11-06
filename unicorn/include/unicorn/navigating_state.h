@@ -9,11 +9,11 @@
         4. Exit State with next state set to IDLE if goal was canceled.
 
 */
-class NavigatingState : public State
+class NAVIGATINGState : public State
 {
 public:
-    NavigatingState();
-    ~NavigatingState();
+    NAVIGATINGState();
+    ~NAVIGATINGState();
     Command run();
 protected:
 private:

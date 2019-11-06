@@ -4,7 +4,7 @@ int main(int argc, char** argv) {
     std::string name = "unicorn_statemachine";
 	ros::init(argc, argv, name);    
     StateMachine state_machine;
-    //state_machine.start();
+    state_machine.start();
     return 0;
 }
 
@@ -50,7 +50,7 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
     cmd_vel_pub_ = n_.advertise<geometry_msgs::Twist>("/unicorn/cmd_vel", 0);
     odom_sub_ = n_.subscribe(odom_topic.c_str(), 0, &StateMachine::odomCallback, this);
     acc_cmd_srv_ = n_.advertiseService("cmd_charlie", &StateMachine::accGoalServer, this);
-
+    cmd_sub_ = n_.subscribe(command_topic_, 0, &StateMachine::cmdCallback, this);
     /*Init global localisation if param has been set*/
     if (run_global_loc)
     {
@@ -62,19 +62,21 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
 	velocity_pid_->setLimit(-0.3, 0.3);
 
     /*Set the current state to be IDLE*/
-    current_state_ = new IDLEState();
+    current_state_ = StateFactory::CreateStateInstance(state_enum::IDLE);
 }
 
 StateMachine::~StateMachine() {}
 
 int StateMachine::start() 
 {
-    Command new_cmd;
-    while (true)
-    {
-        new_cmd = current_state_->run();
-        initNextState(new_cmd);
-    }
+    Command cmd = current_state_->run();
+
+    // Command new_cmd;
+    // while (true)
+    // {
+    //     new_cmd = current_state_->run();
+    //     initNextState(new_cmd);
+    // }
     return 1;   
 }
 
@@ -93,11 +95,18 @@ void StateMachine::initGlobalLocalisation()
     }
 }
 
+/*
+    Init a new state based on the state value sent in cmd, and set current_state_ to the new state instance.
+ */
+
 void StateMachine::initNextState(Command cmd)
-{}
+{
+    
+}
 
 void StateMachine::cmdCallback(const std_msgs::String &msg)
 {
+    current_state_->setNewCmd(parseCmdMsg(msg.data));
 }
 
 void StateMachine::odomCallback(const nav_msgs::Odometry &msg)

@@ -8,13 +8,12 @@
     4. Exit State with next state set to IDLE
 */
 
-class LiftingState : public State
+class LIFTState : public State
 {
 public:
-    LiftingState();
-    ~LiftingState();
+    LIFTState();
+    ~LIFTState();
     Command run();
-
 protected:
 private:
     void liftCallback(const std_msgs::Int8 &recieveMsg);

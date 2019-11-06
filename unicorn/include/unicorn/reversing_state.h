@@ -7,12 +7,12 @@
         2 alt. if abort message was recieved exit with new state set to IDLE
 */
 
-class ReversingState : public State
+class REVERSINGState : public State
 {
 public:
     /*Methods*/
-    ReversingState(const float dist_to_bin);
-    ~ReversingState();
+    REVERSINGState(const float dist_to_bin);
+    ~REVERSINGState();
     Command run();
 
 private:

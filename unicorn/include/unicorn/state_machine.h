@@ -26,11 +26,13 @@
 #include <cstdlib>
 
 /*State classes*/
+// #include "unicorn/state.h"
 #include "unicorn/idle_state.h"
 #include "unicorn/navigating_state.h"
 #include "unicorn/aligning_state.h"
 #include "unicorn/reversing_state.h"
 #include "unicorn/lifting_state.h"
+#include "unicorn/state_factory.h"
 
 /*Structure defintions*/
 #include "unicorn/state_structures.h"
@@ -76,11 +78,12 @@ private:
     ros::Subscriber cmd_sub_;
     ros::Subscriber odom_sub_;
 	std::string frame_id_;
+    const std::string command_topic_ = "unicorn_cmd";
     tf::TransformListener tf_listener_;
 	PidController *velocity_pid_; /**< PID to control position in x*/
 	RefuseBin refuse_bin_pose_;
     MoveBaseClient move_base_clt_;
-    State * current_state_;
+    std::shared_ptr<State> current_state_;
     
     /*Methods*/
     void initGlobalLocalisation();
