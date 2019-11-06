@@ -2,7 +2,7 @@
 // Created by Lana on 04/2017.
 //
 #pragma once
-#include "MinSearchHeap.h"
+#include "thetastar_planner/MinSearchHeap.h"
 #define CONNECT4 5  //4+1 (END FLAG)
 #define BUFFER_SIZE 16000000 //For a map of size 4000x4000
 # define INF 0x3f3f3f3f  

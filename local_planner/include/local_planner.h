@@ -89,11 +89,12 @@ int generate_new_path;
 float last_linear_velocity_;
 static const float max_linear_vel = 0.4; // default 0.4
 static const float max_angular_vel = 0.4;
-static const float max_linear_acc_ = 0.05;
+static const float max_linear_acc_ = 0.01;
 vector_creation::vector obstacle_vector_;
 bool close_to_goal;
 std::vector<tf::Vector3> final_vectors_vector;
 double last_repulsive_field_magnitude_;
+geometry_msgs::PoseStamped check_if_done_;
 	// -- Peter
 
   	costmap_2d::Costmap2DROS* costmap_ros_; //!< Pointer to the costmap ros wrapper, received from the navigation stack
@@ -110,7 +111,7 @@ double last_repulsive_field_magnitude_;
 	// flags
 	bool initialized_; //!< Keeps track about the correct initialization of this class
 	
-	ros::Publisher l_plan_pub_,marker_pub;
+	ros::Publisher l_plan_pub_,marker_pub,new_map_pub;
 	ros::Subscriber odom_sub_,moving_obstacle_subscriber_;
 
 	uint32_t shape; //Marker to represent local goal

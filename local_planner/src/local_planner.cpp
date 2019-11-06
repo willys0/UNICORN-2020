@@ -82,17 +82,9 @@ tf::Vector3 LocalPlanner::unitVectorOfPath(int plan_index)
 	{
 		vector_heading.setValue(0, 0, 0);
 	}
-	else if(global_plan_temp.size() <= (plan_index + 3))
-	{
-        second_point = global_plan_temp[plan_index+1];
-		x_value = second_point.pose.position.x - first_point.pose.position.x;
-		y_value = second_point.pose.position.y - first_point.pose.position.y;
-		vector_heading.setValue(x_value, y_value, 0);
-		vector_heading.normalize();
-	}
 	else if(global_plan_temp.size() <= (plan_index + 5))
 	{
-        second_point = global_plan_temp[plan_index+2];
+        second_point = global_plan_temp[plan_index+1];
 		x_value = second_point.pose.position.x - first_point.pose.position.x;
 		y_value = second_point.pose.position.y - first_point.pose.position.y;
 		vector_heading.setValue(x_value, y_value, 0);
@@ -106,6 +98,14 @@ tf::Vector3 LocalPlanner::unitVectorOfPath(int plan_index)
 		vector_heading.setValue(x_value, y_value, 0);
 		vector_heading.normalize();
 	}
+    /*else
+	{
+        second_point = global_plan_temp[plan_index+1];
+		x_value = second_point.pose.position.x - first_point.pose.position.x;
+		y_value = second_point.pose.position.y - first_point.pose.position.y;
+		vector_heading.setValue(x_value, y_value, 0);
+		vector_heading.normalize();
+	}*/
 	return vector_heading;
 }
 
@@ -153,7 +153,7 @@ void LocalPlanner::repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 
 	// Every 
     int xt, yt, cost, force_x, force_y, deg;
     int scale = 1; // default 100
-    int gain = 213; // 2000 // Default 10000
+    int gain = 71; // 2000 // Default 10000
     float dmax = 21; // default 1.25 // 1.1
 	float repulsive_force, x_force, y_force, z_force;
 
@@ -266,8 +266,10 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	double delta_orient = base_local_planner::getGoalOrientationAngleDifference (robot_pose, tf::getYaw(global_goal_odom.getRotation()));
 
 
-	k1 = 1;//tanh(0.1*d);
-	k2 = 2-tanh(d/2);
+	k1 = 0.01+tanh(1/d);//0.01;//tanh(0.1*d);
+	k2 = tanh(d)+tanh(repulsive_field_magnitude*1);//2-tanh(d/2);
+	//k1 = 0.01;
+	//k2 = 1;
 
 	/*if(d < 1)
 	{
@@ -298,13 +300,19 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	else if (omega < -max_angular_vel)
 		omega = -max_angular_vel;
 
-	//if(dipole_field_magnitude < 0.1)
-	if(repulsive_field_gradient>0)
-		u = k_u*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1))*tanh(1/(repulsive_field_gradient*3+1e-12));//*tanh(1/(repulsive_field_magnitude*2)); // Speed is affected by: a constant, distance to goal and the repulsive field 
-	else 
-		u = k_u*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1));
-	//else
-	//	u = k_u*tanh(0.2*d)*tanh(1/(repulsive_field_magnitude*4));
+	if(dipole_field_magnitude < 0.1)
+	{
+		if(repulsive_field_gradient>0)
+			u = tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1))*tanh(1/(repulsive_field_gradient*100+1e-12));//*tanh(1/(repulsive_field_magnitude*2)); // Speed is affected by: a constant, distance to goal and the repulsive field 
+			//u = k_u*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1))*tanh(1/(repulsive_field_gradient*20+1e-12));//*tanh(1/(repulsive_field_magnitude*2)); // Speed is affected by: a constant, distance to goal and the repulsive field 
+		else 
+			u = tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1));
+			//u = k_u*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1));
+
+	}
+	else
+		u = tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1));//*tanh(1/dipole_field_magnitude);
+		//u = k_u*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1));//*tanh(1/dipole_field_magnitude);
 	
 
 
@@ -576,11 +584,16 @@ bool LocalPlanner::isGoalReached(){
 		ROS_INFO("Goal reached close to %f %f", global_goal_odom.getOrigin().getX(), global_goal_odom.getOrigin().getY());
 		generate_new_path = 1;
 		close_to_goal = false;
+		geometry_msgs::PoseStamped check_if_done_ = global_plan_.back();
+		std::cout << "Sending: " << check_if_done_.pose.position.x << " " << check_if_done_.pose.position.y << endl;
+		new_map_pub.publish(check_if_done_);
 		return true;
 
 	}
 	else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.1)	
+	{
 		close_to_goal = true;
+	}
 	else
 		close_to_goal = false;
 		
@@ -655,6 +668,7 @@ Initialize Local planner
         l_plan_pub_ = pn.advertise<nav_msgs::Path>("local_plan", 1);
 	marker_pub = pn.advertise<visualization_msgs::Marker>("visualization_marker", 1);
 	shape = visualization_msgs::Marker::CUBE;
+	new_map_pub	= pn.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal",1);
 
 
 	// Added by Peter

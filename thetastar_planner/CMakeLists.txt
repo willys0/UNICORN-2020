@@ -28,7 +28,7 @@ catkin_package(
         nav_core
 )
 
-add_library(thetastar_planner src/thetastar_planner.cpp src/ThetaStar4Grid.cpp src/MinSearchHeap.cpp)
+add_library(thetastar_planner src/thetastar_planner.cpp src/ThetaStar4Grid.cpp src/MinSearchHeap.cpp src/types.cpp src/ThetaPath.cpp)
 add_dependencies(thetastar_planner ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(thetastar_planner
     ${catkin_LIBRARIES}

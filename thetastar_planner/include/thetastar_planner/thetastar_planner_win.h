@@ -65,6 +65,7 @@ struct greater1 {
     std::string frame_id_;
     
 	inline void FillLinePotential(int x1, int y1, int x2, int y2, float *ptr);
+    
 private:
       //costmap_2d::Costmap2DROS* costmap_ros_;
       double step_size_, min_dist_from_robot_;
