@@ -94,7 +94,6 @@ vector_creation::vector obstacle_vector_;
 bool close_to_goal;
 std::vector<tf::Vector3> final_vectors_vector;
 double last_repulsive_field_magnitude_;
-geometry_msgs::PoseStamped check_if_done_;
 	// -- Peter
 
   	costmap_2d::Costmap2DROS* costmap_ros_; //!< Pointer to the costmap ros wrapper, received from the navigation stack
