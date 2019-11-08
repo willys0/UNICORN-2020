@@ -40,6 +40,9 @@
 /*PID controller*/
 #include "unicorn/pid_controller.h"
 
+/*User-defined ROS messages*/
+#include "unicorn/command.h"
+
 /*Type definitons*/
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient; /**< Client that calls actions from move_base */
 
