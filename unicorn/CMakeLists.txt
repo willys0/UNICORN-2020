@@ -61,6 +61,11 @@ find_package(Boost REQUIRED)
 #   Message2.msg
 # )
 
+add_message_files(
+  FILES
+  command.msg
+)
+
 ## Generate services in the 'srv' folder
   add_service_files(
   	DIRECTORY
