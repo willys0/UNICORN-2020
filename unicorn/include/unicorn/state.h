@@ -28,7 +28,9 @@
 #include <cmath>
 #include <boost/lexical_cast.hpp>
 #include <cstdlib>
-/* JSON */
+
+/* User-defined message */
+#include "unicorn/command.h"
 
 /* UNICORN */
 #include "unicorn/state_structures.h"
