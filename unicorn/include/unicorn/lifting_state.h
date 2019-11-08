@@ -1,4 +1,4 @@
-#include "state.h"
+#include "unicorn/state.h"
 
 /* State description: 
     The lifting state is instansiated when the lift is to be activated. 
@@ -11,13 +11,21 @@
 class LIFTState : public State
 {
 public:
-    LIFTState();
+    LIFTState(ros::NodeHandle node);
     ~LIFTState();
     Command run();
 protected:
 private:
-    void liftCallback(const std_msgs::Int8 &recieveMsg);
+    /*Methods*/
+    void liftCallback(const std_msgs::Bool &recieveMsg);
     void reverseFromBin();
+    void cancelGoal();
+    /*Members*/
     ros::Subscriber lift_complete_sub_;
     ros::Publisher lift_init_pub_;
+    ros::Publisher cmd_vel_pub_;
+    ros::Publisher move_base_cancel_pub_;
+    MoveBaseClient move_base_clt_;
+	geometry_msgs::Twist man_cmd_vel_;
+    bool lift_complete_ = false;
 };

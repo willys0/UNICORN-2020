@@ -150,7 +150,17 @@ include_directories(
 #add_executable(range_sensor_driver src/range_sensor_driver.cpp)
 #target_link_libraries(range_sensor_driver ${catkin_LIBRARIES})
 
-add_library(state_lib src/idle_state.cpp include/unicorn/idle_state.h include/unicorn/state_factory.h src/state_factory.cpp include/unicorn/aligning_state.h src/aligning_state.cpp)
+add_library(state_lib 
+  include/unicorn/aligning_state.h src/aligning_state.cpp
+  include/unicorn/reversing_state.h src/reversing_state.cpp
+  include/unicorn/idle_state.h src/idle_state.cpp 
+  include/unicorn/navigating_state.h src/navigating_state.cpp
+  include/unicorn/lifting_state.h src/lifting_state.cpp
+  include/unicorn/state_factory.h src/state_factory.cpp
+  include/unicorn/state_structures.h
+  include/unicorn/state_machine.h
+  ) 
+
 add_library(pid_controller_lib src/pid_controller.cpp)
 
 add_executable(unicorn_statemachine src/state_machine.cpp)

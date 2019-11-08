@@ -6,30 +6,30 @@
 #include "unicorn/reversing_state.h"
 
 
-std::shared_ptr<State> StateFactory::CreateStateInstance(int state)
+std::shared_ptr<State> StateFactory::CreateStateInstance(Command cmd, ros::NodeHandle node, RefuseBin bin)
 {
     State * instance = nullptr;
 
-    switch (state)
+    switch (cmd.state)
     {
     case state_enum::IDLE:
         instance = new IDLEState();
         break;
 
     case state_enum::NAVIGATING:
-        instance = new NAVIGATINGState();
+        instance = new NAVIGATINGState(cmd.param1, cmd.param2, cmd.param3, node);
         break;
     
     case state_enum::ALIGNING:
-        instance = new ALIGNINGState();
+        instance = new ALIGNINGState(node, bin);
         break;
 
     case state_enum::REVERSING:
-        instance = new REVERSINGState();
+        instance = new REVERSINGState(node);
         break;
 
     case state_enum::LIFT:
-        instance = new LIFTState();
+        instance = new LIFTState(node);
         break;
 
     default:

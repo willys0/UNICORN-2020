@@ -18,38 +18,38 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Int8.h>
 #include <std_msgs/Int32.h>
-#include <std_msgs/Float32.h>
 #include <std_msgs/String.h>
+#include <std_msgs/Float32.h>
 
-/* C / C++ */
+/*Standard Libraries*/
+#include <string>
 #include <iostream>
 #include <termios.h>
 #include <cmath>
 #include <boost/lexical_cast.hpp>
-#include <string>
-
+#include <cstdlib>
 /* JSON */
-#include <nlohmann/json.hpp>
 
 /* UNICORN */
-#include "state_structures.h"
+#include "unicorn/state_structures.h"
 
 // for convenience
-using json = nlohmann::json;
+
+typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient; /**< Client that calls actions from move_base */
 
 class State
 {
 public:
     State(){};
+    State(ros::NodeHandle node);
     ~State(){};
-    Command setNewCmd(Command new_cmd) { command = new_cmd; };
+    Command setNewCmd(Command new_cmd) { ROS_INFO("New command has been set"); command = new_cmd; };
     virtual Command run() = 0;
-
+    int state_identifier_;
 protected:
-    int abort_state_;
     std::string cmd_msg_str_;
     Command command;
-
+    
 private:
 };
 #endif // !ST

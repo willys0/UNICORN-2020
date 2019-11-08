@@ -2,10 +2,6 @@
 
 IDLEState::IDLEState()
 {
-    command = 
-    {
-       -1,-1,-1,-1
-    };
 }
 
 IDLEState::~IDLEState()

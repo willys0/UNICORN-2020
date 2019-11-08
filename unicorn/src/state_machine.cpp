@@ -1,8 +1,8 @@
 #include "unicorn/state_machine.h"
 
-int main(int argc, char** argv) {
-    std::string name = "unicorn_statemachine";
-	ros::init(argc, argv, name);    
+int main(int argc, char** argv) 
+{
+	ros::init(argc, argv, "TX2_unicornStatemachine");    
     StateMachine state_machine;
     state_machine.start();
     return 0;
@@ -41,11 +41,10 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
     {
         run_global_loc = false;
     }
-
-    ROS_INFO("[unicorn_statemachine] Robot frame_id: %s", frame_id_.c_str());
-    ROS_INFO("[unicorn_statemachine] Listening to %s", odom_topic.c_str());
+    ROS_INFO("[UNICORN State Machine] Robot frame_id: %s", frame_id_.c_str());
+    ROS_INFO("[UNICORN State Machine] Listening to %s", odom_topic.c_str());
     state_pub_ = n_.advertise<std_msgs::Int32>("/TX2_unicorn_state", 0);
-    move_base_cancel_pub_ = n_.advertise<actionlib_msgs::GoalID>("/move_base/cancel", 0);
+    // move_base_cancel_pub_ = n_.advertise<actionlib_msgs::GoalID>("/move_base/cancel", 0);
     amcl_global_clt_ = n_.serviceClient<std_srvs::Empty>("/global_localization");
     cmd_vel_pub_ = n_.advertise<geometry_msgs::Twist>("/unicorn/cmd_vel", 0);
     odom_sub_ = n_.subscribe(odom_topic.c_str(), 0, &StateMachine::odomCallback, this);
@@ -61,22 +60,28 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
     velocity_pid_ = new PidController(0.3, 0.1, 0.0, 0.05);
 	velocity_pid_->setLimit(-0.3, 0.3);
 
+    /*Refuse bin location*/
+    refuse_bin_pose_.x = 0;
+    refuse_bin_pose_.y = 0;
+    refuse_bin_pose_.yaw = 0;
+
     /*Set the current state to be IDLE*/
-    current_state_ = StateFactory::CreateStateInstance(state_enum::IDLE);
+    Command initial_cmd;
+    initial_cmd.state = state_enum::IDLE;
+    current_state_ = StateFactory::CreateStateInstance(initial_cmd, n_, refuse_bin_pose_);
 }
 
 StateMachine::~StateMachine() {}
 
 int StateMachine::start() 
 {
-    Command cmd = current_state_->run();
-
-    // Command new_cmd;
-    // while (true)
-    // {
-    //     new_cmd = current_state_->run();
-    //     initNextState(new_cmd);
-    // }
+    Command new_cmd;
+ 
+    while (ros::ok())
+    {
+        new_cmd = current_state_->run();
+        current_state_ = StateFactory::CreateStateInstance(new_cmd, n_, refuse_bin_pose_);
+    }
     return 1;   
 }
 
@@ -87,26 +92,23 @@ void StateMachine::initGlobalLocalisation()
 
     if (amcl_global_clt_.call(srv))
     {
-        ROS_INFO("[am_unicorn_interface]: Initialized amcl global localization");
+        ROS_INFO("[AM Unicorn Interface]: Initialized amcl global localization");
     }
     else
     {
-        ROS_ERROR("[am_unicorn_interface]: Failed to initialize amcl global localization");
+        ROS_ERROR("[AM Unicorn Interface]: Failed to initialize amcl global localization");
     }
-}
-
-/*
-    Init a new state based on the state value sent in cmd, and set current_state_ to the new state instance.
- */
-
-void StateMachine::initNextState(Command cmd)
-{
-    
 }
 
 void StateMachine::cmdCallback(const std_msgs::String &msg)
 {
-    current_state_->setNewCmd(parseCmdMsg(msg.data));
+    ROS_INFO("[Unicorn State Machine]: New command has been received.");
+    //Command new_cmd = parseCmdMsg(msg.data);
+    Command new_cmd;
+    new_cmd.state = state_enum::IDLE;
+    current_state_->setNewCmd(new_cmd);
+    // new_cmd.state = msg.data;
+    // current_state_->setNewCmd(parseCmdMsg(msg.data));
 }
 
 void StateMachine::odomCallback(const nav_msgs::Odometry &msg)
@@ -125,13 +127,6 @@ void StateMachine::updateAndPublishState(int new_state)
     state_pub_.publish(new_state_msg);
     return;
 }
-
-// void StateMachine::cancelGoal()
-// {
-//     actionlib_msgs::GoalID cancel_all;
-//     move_base_cancel_pub_.publish(cancel_all);
-//     ROS_INFO("[unicorn_statemachine] Canceling move_base goal");
-// }
 
 int StateMachine::sendGoal(const float x, const float y, const float yaw)
 {
@@ -183,24 +178,26 @@ int StateMachine::sendGoal(const float x, const float y, const float yaw)
     return 1;
 }
 
-Command StateMachine::parseCmdMsg(std::string cmd_msg)
-{
-    Command new_cmd;
-    // json cmd_object = (cmd_msg.c_str())_json;
-    // Command new_cmd{
-    //     cmd_object["state"].get<int>(),
-    //     cmd_object["param1"].get<float>(),
-    //     cmd_object["param2"].get<float>(),
-    //     cmd_object["param3"].get<float>()};
-    return new_cmd;
-}
+// Command StateMachine::parseCmdMsg(std::string cmd_msg)
+// {
+//     Command new_cmd;
+//     std::string str = "{ \"happy\": true, \"pi\": 3.141 }";
+//     json cmd_obj = json::parse(str);
+//     std::cout << cmd_obj["happy"] << std::endl;
+//     // Command new_cmd{
+//     //     cmd_object["state"].get<int>(),
+//     //     cmd_object["param1"].get<float>(),
+//     //     cmd_object["param2"].get<float>(),
+//     //     cmd_object["param3"].get<float>()};
+//     return new_cmd;
+// }
 
-std::string StateMachine::getStateString(int state_identifier_)
+std::string StateMachine::getStateString()
 {
-    switch (state_identifier_)
+    switch (current_state_->state_identifier_)
     {
-    case state_enum::AUTONOMOUS:
-        return "AUTONOMOUS";
+    case state_enum::NAVIGATING:
+        return "NAVIGATING";
 
     case state_enum::MANUAL:
         return "MANUAL";

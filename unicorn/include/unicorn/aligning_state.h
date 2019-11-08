@@ -1,4 +1,4 @@
-#include "state.h"
+#include "unicorn/state.h"
 
 /* State description: 
     The ALIGNING state is instansiated when a goal has been reached, alt has been issued manually. 
@@ -10,9 +10,15 @@
 class ALIGNINGState : public State
 {
 public:
-    ALIGNINGState();
+    ALIGNINGState(ros::NodeHandle node, RefuseBin bin);
     ~ALIGNINGState();
     Command run();
 protected:
 private:
+    int sendGoal(Goal new_goal);
+    void cancelGoal();
+    MoveBaseClient move_base_clt_;
+    ros::Publisher move_base_cancel_pub_;
+    ros::NodeHandle node_;
+    RefuseBin bin_location_;
 };
