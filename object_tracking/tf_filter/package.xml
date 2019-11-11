@@ -1,0 +1,25 @@
+<package format="2">
+  <name>tf_filter</name>
+  <version>2.7.0</version>
+  <description>
+    This package will compensate for movement of the camera and create an absolute point in sapce which represent the closest point in the bounding box.
+  </description>
+
+  <maintainer email="jnn13008@student.mdh.se">STEREOLABS</maintainer>
+  <license>MIT</license>
+
+  <url type="website">http://wiki.ros.org/tf/Tutorials/Using%20Stamped%20datatypes%20with%20tf%3A%3AMessageFilter</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>darknet_ros_msgs</depend>
+  <depend>message_filters</depend>
+  <depend>message_runtime</depend>
+  <depend>cmake_modules</depend>
+  <depend>tf</depend>
+
+</package>
