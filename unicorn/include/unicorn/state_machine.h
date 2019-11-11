@@ -69,8 +69,6 @@ public:
 protected:
 private:
     /*Members*/
-    // double current_yaw_;
-	// double current_vel_;
     double max_angular_vel_;
 	double max_linear_vel_;
     ros::NodeHandle n_;
@@ -78,7 +76,6 @@ private:
     ros::ServiceServer acc_cmd_srv_;
     ros::Publisher state_pub_;
     ros::Publisher cmd_vel_pub_;
-    // ros::Publisher move_base_cancel_pub_;
     ros::Subscriber cmd_sub_;
     ros::Subscriber odom_sub_;
 	std::string frame_id_;
