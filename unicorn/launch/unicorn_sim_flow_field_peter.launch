@@ -69,7 +69,8 @@
 
 	<!-- Launch gazebo world -->
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-		<arg name="world_name" value="$(find husky_gazebo)/worlds/clearpath_playpen.world"/>
+		<!--arg name="world_name" value="$(find husky_gazebo)/worlds/clearpath_playpen.world"/-->
+<arg name="world_name" value="$(find unicorn_slam)/worlds/clearpath_playpen_moving_obstacle.world"/>
 				<!--arg name="world_name" value="$(find unicorn_slam)/worlds/testworld_peter.world"/-->
 <arg name="paused" value="false"/>
 		<arg name="use_sim_time" value="true"/>

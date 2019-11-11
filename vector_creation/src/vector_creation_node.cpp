@@ -60,7 +60,7 @@ void positionCallback(ConstPosesStampedPtr &posesStamped)
 	{
 		const ::gazebo::msgs::Pose &pose = posesStamped->pose(i);
 		std::string name = pose.name();
-		if (name == std::string("unit_box_1_clone_peter"))
+		if (name == std::string("Construction Barrel_moving"))
 		{
 			const ::gazebo::msgs::Vector3d &position = pose.position();
 

@@ -51,6 +51,9 @@
 
 #define DT 0.10000 //It defines the granularity to create a trajectory. A higher value will create a few points on a trajectory.
 
+#define DIPOLE_FIELD_THRESHOLD 1.0
+#define REPULSIVE_FIELD_THRESHOLD 0.5
+
 
  namespace local_planner {
 
@@ -94,6 +97,7 @@ vector_creation::vector obstacle_vector_;
 bool close_to_goal;
 std::vector<tf::Vector3> final_vectors_vector;
 double last_repulsive_field_magnitude_;
+float shortest_distance_to_obstacle_;
 	// -- Peter
 
   	costmap_2d::Costmap2DROS* costmap_ros_; //!< Pointer to the costmap ros wrapper, received from the navigation stack
