@@ -25,27 +25,28 @@ Command LIFTState::run()
     while (ros::ok())
     {
         ros::spinOnce();
-        if(command.state != -1)
+        if (command.state != -1)
         {
             cancelGoal();
             ROS_INFO("[Unicorn State Machine] New command was issued, halting navigation.");
             return command;
         }
-        if(lift_complete_)
+        if (lift_complete_)
         {
             break;
         }
         lift_init_pub_.publish(msg);
         rate.sleep();
     }
-
     reverseFromBin();
+    ROS_INFO("[Unicorn State Machine] Exiting to IDLE state.");
     return new_cmd;
 }
 
 void LIFTState::liftCallback(const std_msgs::Bool &recieveMsg)
 {
-    if(recieveMsg.data)
+    ROS_INFO("[Unicorn State Machine] Lift completion signal recieved.");
+    if (recieveMsg.data)
     {
         lift_complete_ = true;
     }

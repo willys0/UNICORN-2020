@@ -5,10 +5,9 @@
 #include "unicorn/navigating_state.h"
 #include "unicorn/reversing_state.h"
 
-
 std::shared_ptr<State> StateFactory::CreateStateInstance(Command cmd, ros::NodeHandle node, RefuseBin bin)
 {
-    State * instance = nullptr;
+    State *instance = nullptr;
 
     switch (cmd.state)
     {
@@ -19,7 +18,7 @@ std::shared_ptr<State> StateFactory::CreateStateInstance(Command cmd, ros::NodeH
     case state_enum::NAVIGATING:
         instance = new NAVIGATINGState(cmd.param1, cmd.param2, cmd.param3, node);
         break;
-    
+
     case state_enum::ALIGNING:
         instance = new ALIGNINGState(node, bin);
         break;
@@ -35,9 +34,9 @@ std::shared_ptr<State> StateFactory::CreateStateInstance(Command cmd, ros::NodeH
     default:
         break;
     }
-    if(instance != nullptr)
+    if (instance != nullptr)
     {
         return std::shared_ptr<State>(instance);
     }
-    return nullptr;    
+    return nullptr;
 }

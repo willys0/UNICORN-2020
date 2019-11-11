@@ -4,7 +4,8 @@ int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "TX2_unicornStatemachine");    
     StateMachine state_machine;
-    state_machine.start();
+    int exit_code = state_machine.start();
+    ROS_INFO("[UNICORN] State machine exited with: %d", exit_code);
     return 0;
 }
 
@@ -12,6 +13,7 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
 {
     bool run_global_loc, sim_time;
     std::string odom_topic;
+    /*Extract params specified in the launch file*/
     if (!n_.getParam("use_sim_time", sim_time))
     {
         sim_time = false;
@@ -43,14 +45,16 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
     }
     ROS_INFO("[UNICORN State Machine] Robot frame_id: %s", frame_id_.c_str());
     ROS_INFO("[UNICORN State Machine] Listening to %s", odom_topic.c_str());
+
+    /*Setup ROS subscribers and publishers*/
     state_pub_ = n_.advertise<std_msgs::Int32>("/TX2_unicorn_state", 0);
-    // move_base_cancel_pub_ = n_.advertise<actionlib_msgs::GoalID>("/move_base/cancel", 0);
     amcl_global_clt_ = n_.serviceClient<std_srvs::Empty>("/global_localization");
     cmd_vel_pub_ = n_.advertise<geometry_msgs::Twist>("/unicorn/cmd_vel", 0);
     odom_sub_ = n_.subscribe(odom_topic.c_str(), 0, &StateMachine::odomCallback, this);
     acc_cmd_srv_ = n_.advertiseService("cmd_charlie", &StateMachine::accGoalServer, this);
     cmd_sub_ = n_.subscribe(command_topic_, 0, &StateMachine::cmdCallback, this);
-    /*Init global localisation if param has been set*/
+
+    /*Init global localisation if param is set*/
     if (run_global_loc)
     {
         initGlobalLocalisation();
@@ -67,7 +71,7 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
 
     /*Set the current state to be IDLE*/
     Command initial_cmd;
-    initial_cmd.state = state_enum::IDLE;
+    initial_cmd.state = state_enum::LIFT;
     current_state_ = StateFactory::CreateStateInstance(initial_cmd, n_, refuse_bin_pose_);
 }
 
@@ -76,9 +80,9 @@ StateMachine::~StateMachine() {}
 int StateMachine::start() 
 {
     Command new_cmd;
- 
     while (ros::ok())
     {
+        updateAndPublishState(current_state_->state_identifier_);
         new_cmd = current_state_->run();
         current_state_ = StateFactory::CreateStateInstance(new_cmd, n_, refuse_bin_pose_);
     }
