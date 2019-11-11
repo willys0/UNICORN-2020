@@ -104,15 +104,15 @@ void StateMachine::initGlobalLocalisation()
     }
 }
 
-void StateMachine::cmdCallback(const std_msgs::String &msg)
+void StateMachine::cmdCallback(const unicorn::command &msg)
 {
     ROS_INFO("[Unicorn State Machine]: New command has been received.");
-    //Command new_cmd = parseCmdMsg(msg.data);
     Command new_cmd;
-    new_cmd.state = state_enum::IDLE;
+    new_cmd.state = std::stoi(msg.command);
+    new_cmd.param1 = msg.param1;
+    new_cmd.param2 = msg.param2;
+    new_cmd.param3 = msg.param3;
     current_state_->setNewCmd(new_cmd);
-    // new_cmd.state = msg.data;
-    // current_state_->setNewCmd(parseCmdMsg(msg.data));
 }
 
 void StateMachine::odomCallback(const nav_msgs::Odometry &msg)
@@ -181,20 +181,6 @@ int StateMachine::sendGoal(const float x, const float y, const float yaw)
 
     return 1;
 }
-
-// Command StateMachine::parseCmdMsg(std::string cmd_msg)
-// {
-//     Command new_cmd;
-//     std::string str = "{ \"happy\": true, \"pi\": 3.141 }";
-//     json cmd_obj = json::parse(str);
-//     std::cout << cmd_obj["happy"] << std::endl;
-//     // Command new_cmd{
-//     //     cmd_object["state"].get<int>(),
-//     //     cmd_object["param1"].get<float>(),
-//     //     cmd_object["param2"].get<float>(),
-//     //     cmd_object["param3"].get<float>()};
-//     return new_cmd;
-// }
 
 std::string StateMachine::getStateString()
 {

@@ -88,7 +88,7 @@ private:
     float current_vel_;
     /*Methods*/
     void initGlobalLocalisation();
-    void cmdCallback(const std_msgs::String &msg);
+    void cmdCallback(const unicorn::command &msg);
     void odomCallback(const nav_msgs::Odometry &msg);
     void updateAndPublishState(const int new_state);
     int sendGoal(const float x, const float y, const float yaw);
