@@ -173,8 +173,7 @@ void LocalPlanner::makeRepulsiveField(int scale, int gain, float dmax, float pos
     d0 = 1.0/dmax; 
 	float distance_to_obstacle;
 	findClosestObjectEuclidean(deg, &distance_to_obstacle);
-
-	d = distance_to_obstacle;
+	d = distance_to_obstacle * costmap_->getResolution() * 10; // Convert distance to decimeters
     d2 = d / scale + 1;
     d = (1 / d2 - d0);
     d = d*d;
@@ -276,14 +275,14 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	if(dipole_field_magnitude < DIPOLE_FIELD_THRESHOLD) // If we do not care about the dipole field
 	{
 		if(repulsive_field_gradient>0) // If we're reaching towards an obstacle
-			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1))*tanh(1/(repulsive_field_gradient*100+1e-12)); // Speed is affected by: a constant, distance to goal, the repulsive field, the angular velocity and the change of repulsive field 
+			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1))*tanh(1/(repulsive_field_gradient*200+1e-12)); // Speed is affected by: a constant, distance to goal, the repulsive field, the angular velocity and the change of repulsive field 
 		else 
 			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1)); // Speed is affected by: a constant, distance to goal, the repulsive field and the angular velocity 
 	}
 	else
 	{
 		if(repulsive_field_gradient>0)
-			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_gradient*100+1e-12)); // Speed is affected by: a constant, distance to goal and the repulsive field 
+			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_gradient*200+1e-12)); // Speed is affected by: a constant, distance to goal and the repulsive field 
 		else 
 			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1)); // Speed is affected by: a constant, distance to goal, the repulsive field and the angular velocity
 	}
@@ -304,7 +303,7 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	}
 	else // If only the orientation is not good
 	{
-		float angular_vel_orientation = MAX_ANGULAR_VEL;
+		float angular_vel_orientation = MAX_ANGULAR_VEL/2;
 		if (delta_orient >= 0)
 			*angular_velocity = angular_vel_orientation;
 		else
@@ -401,14 +400,22 @@ void LocalPlanner::dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> r
 	float sign = (fx*rx + fy*ry);
 	//if (sign > 0)
 	//	dipole_force->setValue(-fx,-fy,0);
+	dipole_force->setValue(fx,fy,0);
+	std::cout << "Original dipole force: " << dipole_force->m_floats[0] << " " << dipole_force->m_floats[1] << " " << dipole_force->m_floats[2] << endl;
 	if (sign < 0)
 	{
 		dipole_force->setValue(fx,fy,0);
 		//ROS_INFO("Sign negative, negative");
 		if (fx*rx > 0)
-			dipole_force->setValue(-fx,fy,0);
+		{
+			dipole_force->setValue(fx,fy,0); //-fx,fy
+			ROS_INFO("Changed nothing");
+		}
 		else if (fy*ry > 0)
-			dipole_force->setValue(fx,-fy,0);
+		{
+			dipole_force->setValue(fx,fy,0);
+			ROS_INFO("Changed fy");
+		}
 		/*if (fx*rx < 0)
 		{
 			dipole_force->setValue(fx,fy,0);
@@ -427,9 +434,15 @@ void LocalPlanner::dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> r
 		//std::cout << "If negative: " << fx << " " << fy << endl;
 		dipole_force->setValue(-fx,-fy,0);
 		if (fx*rx < 0)
-			dipole_force->setValue(fx,-fy,0);
+		{
+			dipole_force->setValue(-fx,-fy,0);
+			ROS_INFO("Changed fx");
+		}
 		else if (fy*ry < 0)
-			dipole_force->setValue(-fx,fy,0);
+		{
+			dipole_force->setValue(-fx,-fy,0);
+			ROS_INFO("Changed fy");
+		}
 		//std::cout << "Alternative dipole force: " << fx*cos(reversed_angles)-fx*sin(reversed_angles) << " " << fy*sin(reversed_angles)+fy*cos(reversed_angles) << endl;
 		//dipole_force->setValue(fx*cos(reversed_angles)-fx*sin(reversed_angles),fx*sin(reversed_angles)+fx*cos(reversed_angles),0);
 		//dipole_force->setValue(fx*cos(reversed_angles)-fx*sin(reversed_angles),fy*sin(reversed_angles)+fy*cos(reversed_angles),0);
@@ -466,6 +479,9 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 		ROS_ERROR("MDH Local_Planner has not been initialized, please call initialize() before using this planner");
 		return false;
 	}
+
+	//ros::Time now = ros::Time::now();
+ 	//unsigned int  now.sec
 
 	//Get where we are
 	tf::Stamped<tf::Pose> robot_pose;
@@ -516,6 +532,14 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 		std::cout << "Repulsive force: " << f_repulsive_vector.m_floats[0] << " " << f_repulsive_vector.m_floats[1] << " " << f_repulsive_vector.m_floats[2] << endl;
 		std::cout << "Final vector: " << final_vector.m_floats[0] << " " << final_vector.m_floats[1] << " " << final_vector.m_floats[2] << endl;
 
+		/*double mapx, mapy;
+		costmap_->mapToWorld(costmap_->getSizeInCellsX()/2,costmap_->getSizeInCellsY()/2,mapx,mapy);
+		std::cout << "Middle of costmap: " << mapx << " " << mapy << endl;
+
+		unsigned int coordx,coordy;
+		costmap_->worldToMap(global_goal_odom.getOrigin().getX(),global_goal_odom.getOrigin().getY(),coordx,coordy);
+		std::cout << "Cost of goal: " << (int)costmap_->getCost(coordx,coordy) << endl;*/
+
 		updateVelocity(final_vector, robot_pose, &linear_velocity, &angular_velocity, f_repulsive_vector.length(), dipole_force.length(), distance_to_path);
 		cmd_vel.angular.z = angular_velocity;
 		cmd_vel.linear.x = linear_velocity;
@@ -538,48 +562,71 @@ Checks of the goal is reached
 */
 bool LocalPlanner::isGoalReached(){
 
-	tf::Stamped<tf::Pose> robot_pose;
-	costmap_ros_->getRobotPose(robot_pose); //frame_id_=odom 
-
-	//Both, global goal and robot pose are in the same coordinate system, odom.
-	double dx = global_goal_odom.getOrigin().getX() - robot_pose.getOrigin().getX();
-	double dy = global_goal_odom.getOrigin().getY() - robot_pose.getOrigin().getY();
-
-	double delta_orient = base_local_planner::getGoalOrientationAngleDifference (robot_pose, tf::getYaw(global_goal_odom.getRotation()));
-
-	if(fabs(std::sqrt(dx*dx+dy*dy)) < 0.2 && fabs(delta_orient) < (30 * PI / 180))
+	if (!goal_reached_)
 	{
-		goal_reached_ = true;
-		ROS_INFO("Goal reached close to %f %f", global_goal_odom.getOrigin().getX(), global_goal_odom.getOrigin().getY());
-		close_to_goal = false;
-		/*geometry_msgs::PoseStamped check_if_done_;
-		check_if_done_.pose.position.x = -2500000.0;
-		check_if_done_.pose.position.y = -2500000.0;
-        check_if_done_.pose.position.z = 0.0;
-        check_if_done_.pose.orientation.x = 0.0;
-        check_if_done_.pose.orientation.y = 0.0;
-        check_if_done_.pose.orientation.z = 0.0;
-        check_if_done_.pose.orientation.w = 1.0;
-		//std::cout << "Sending: " << check_if_done_.pose.position.x << " " << check_if_done_.pose.position.y << endl;
-		new_map_pub.publish(check_if_done_);*/
-		generate_new_path = 1;
-		return true;
+		tf::Stamped<tf::Pose> robot_pose;
+		costmap_ros_->getRobotPose(robot_pose); //frame_id_=odom 
 
-	}
-	else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.1) // If we only need to adjust the orientation
-	{
-		close_to_goal = true;
-	}
-	else
-		close_to_goal = false;
-		
-			
-		
-		
-	
+		//Both, global goal and robot pose are in the same coordinate system, odom.
+		double dx = global_goal_odom.getOrigin().getX() - robot_pose.getOrigin().getX();
+		double dy = global_goal_odom.getOrigin().getY() - robot_pose.getOrigin().getY();
 
-	
-   	return false;
+		double delta_orient = base_local_planner::getGoalOrientationAngleDifference (robot_pose, tf::getYaw(global_goal_odom.getRotation()));
+
+		unsigned int coordx,coordy;
+		if (!global_plan_.empty())
+			costmap_->worldToMap(global_goal_odom.getOrigin().getX(),global_goal_odom.getOrigin().getY(),coordx,coordy);
+
+		if(fabs(std::sqrt(dx*dx+dy*dy)) < 0.2 && fabs(delta_orient) < (30 * PI / 180))
+		{
+			goal_reached_ = true;
+			ROS_INFO("Goal reached close to %f %f", global_goal_odom.getOrigin().getX(), global_goal_odom.getOrigin().getY());
+			close_to_goal = false;
+			geometry_msgs::PoseStamped check_if_done_;
+			check_if_done_.header.frame_id = global_frame_;
+			check_if_done_.header.stamp = ros::Time::now();
+			check_if_done_.pose.position.x = -2500000.0;
+			check_if_done_.pose.position.y = -2500000.0;
+			check_if_done_.pose.position.z = 0.0;
+			check_if_done_.pose.orientation.x = 0.0;
+			check_if_done_.pose.orientation.y = 0.0;
+			check_if_done_.pose.orientation.z = 0.0;
+			check_if_done_.pose.orientation.w = 1.0;
+			new_map_pub.publish(check_if_done_);
+			generate_new_path = 1;
+			return true;
+
+		}
+		else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.1) // If we only need to adjust the orientation
+		{
+			close_to_goal = true;
+		}
+		else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.5)
+		{
+			if (((int)costmap_->getCost(coordx,coordy)) > 0)
+			{
+				ROS_INFO("Could not fully reach the goal. The goal is too close to an obstacle at %f %f", global_goal_odom.getOrigin().getX(), global_goal_odom.getOrigin().getY());
+				goal_reached_ = true;
+				close_to_goal = false;
+				geometry_msgs::PoseStamped check_if_done_;
+				check_if_done_.header.frame_id = global_frame_;
+				check_if_done_.header.stamp = ros::Time::now();
+				check_if_done_.pose.position.x = -2500000.0;
+				check_if_done_.pose.position.y = -2500000.0;
+				check_if_done_.pose.position.z = 0.0;
+				check_if_done_.pose.orientation.x = 0.0;
+				check_if_done_.pose.orientation.y = 0.0;
+				check_if_done_.pose.orientation.z = 0.0;
+				check_if_done_.pose.orientation.w = 1.0;
+				new_map_pub.publish(check_if_done_);
+				generate_new_path = 1;
+				return true;
+			}		
+		}
+		else
+			close_to_goal = false;
+	}
+   	return goal_reached_;
 }
 
 /*
@@ -591,30 +638,33 @@ bool LocalPlanner::setPlan(const std::vector<geometry_msgs::PoseStamped>& plan){
 		ROS_ERROR("Please call initialize() before using this planner");
 		return false;
 	}
-
-	if(generate_new_path == 1)
+	if (plan.size() > 1)
 	{
-		global_plan_.clear();
-		global_plan_ = plan;
+		std::cout << "Plan not empty " << " Size of plan: " << plan.size() << endl;
+		if(generate_new_path == 1)
+		{
+			global_plan_.clear();
+			global_plan_ = plan;
 
-		//Get where we are
-		tf::Stamped<tf::Pose> robot_pose;
-		costmap_ros_->getRobotPose(robot_pose);	
+			//Get where we are
+			tf::Stamped<tf::Pose> robot_pose;
+			costmap_ros_->getRobotPose(robot_pose);	
 
 
-		tf::poseStampedMsgToTF(global_plan_.back(), global_goal);
+			tf::poseStampedMsgToTF(global_plan_.back(), global_goal);
 
-		try{
-			tf_.transformPose(global_frame_, global_goal, global_goal_odom); ////transform the global goal from map to odom 
-			//tf_.waitForTransform(global_frame_, global_goal, global_goal_odom); ////transform the global goal from map to odom 
+			try{
+				tf_.transformPose(global_frame_, global_goal, global_goal_odom); ////transform the global goal from map to odom 
+				//tf_.waitForTransform(global_frame_, global_goal, global_goal_odom); ////transform the global goal from map to odom 
+			}
+			catch (tf::TransformException ex){
+				ROS_ERROR("IsGoalReached %s",ex.what());
+				return false;
+			}
+
+			goal_reached_ = false;
+			generate_new_path = 0;
 		}
-		catch (tf::TransformException ex){
-			ROS_ERROR("IsGoalReached %s",ex.what());
-			return false;
-		}
-
-		goal_reached_ = false;
-		generate_new_path = 0;
 	}
 	
 

@@ -17,12 +17,9 @@ namespace thetastar_planner{
 
     class ThetaStarPlanner : public nav_core::BaseGlobalPlanner {
         public:
-            ThetaStar4Grid grid_graph_;
-            ros::Publisher plan_pub_;
-            std::string frame_id_;
-
             ThetaStarPlanner();
             ThetaStarPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
+            ~ThetaStarPlanner();
             void initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros);
             bool makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan);
 
@@ -31,21 +28,26 @@ namespace thetastar_planner{
 
             void mapToWorld(double mx, double my, double& wx, double& wy);
             bool worldToMap(double wx, double wy, double& mx, double& my);
+
+            void outlineMap(unsigned char* costarr, int nx, int ny, unsigned char value);
     
         private:
+            ThetaStar4Grid grid_graph_;
+            ThetaPath theta_path_;
+
             ros::ServiceServer make_plan_srv_;
             costmap_2d::Costmap2DROS* costmap_ros_;
             costmap_2d::Costmap2D* costmap_;
             base_local_planner::WorldModel* world_model_;
-            bool initialized_;
+            geometry_msgs::PoseStamped old_goal_;
+            ros::Publisher plan_pub_;
+            std::string frame_id_;
+            
             double step_size_;
             double min_dist_from_robot_;
-            unsigned char lethal_cost_, neutral_cost_;
-            bool unknown_;
             float convert_offset_;
-            int try_;
-
-            ThetaPath theta_path_;
+            bool initialized_;   
+            bool recalc_old_goal_; 
     };
 };  
 

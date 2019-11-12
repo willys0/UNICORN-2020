@@ -10,18 +10,17 @@ PLUGINLIB_EXPORT_CLASS(thetastar_planner::ThetaStarPlanner, nav_core::BaseGlobal
 namespace thetastar_planner {
 
     ThetaStarPlanner::ThetaStarPlanner() : 
-        costmap_ros_(NULL), initialized_(false),unknown_(true), lethal_cost_(253), neutral_cost_(50),convert_offset_(0.5){ try_=0;}
+        costmap_ros_(NULL), initialized_(false),convert_offset_(0.5){}
 
     ThetaStarPlanner::ThetaStarPlanner(std::string name, costmap_2d::Costmap2DROS* costmap_ros) : 
-        costmap_ros_(NULL), initialized_(false),unknown_(true), lethal_cost_(253), neutral_cost_(50),convert_offset_(0.5){
-        try_=0;
+        costmap_ros_(NULL), initialized_(false),convert_offset_(0.5){
         initialize(name, costmap_ros);
     }
 
+    ThetaStarPlanner::~ThetaStarPlanner(){}
 
     void ThetaStarPlanner::initialize(std::string name, costmap_2d::Costmap2DROS* costmap_ros)
     {
-        std::cout << "Init." << std::endl;
         // Initialize parameters
         if(!initialized_){
             costmap_ros_ = costmap_ros;
@@ -34,12 +33,14 @@ namespace thetastar_planner {
             make_plan_srv_ = private_nh.advertiseService("make_plan", &ThetaStarPlanner::makePlanService, this);
             initialized_ = true;
             frame_id_ = costmap_ros->getGlobalFrameID();
+            recalc_old_goal_ = false;
         }
         else{
             ROS_WARN("This planner has already been initialized... doing nothing");
             return;
         }
 
+        // Initialize the grid graph
         grid_graph_.SetGridStep(GRID_SIZE);
         grid_graph_.IntializeMap(costmap_->getCharMap(), costmap_->getSizeInCellsY(), costmap_->getSizeInCellsX());
         if(!grid_graph_.MakeGrid()) {
@@ -51,109 +52,137 @@ namespace thetastar_planner {
 
     bool ThetaStarPlanner::makePlan(const geometry_msgs::PoseStamped& start, const geometry_msgs::PoseStamped& goal, std::vector<geometry_msgs::PoseStamped>& plan)
     {
-        //std::cout << "makePlan" << std::endl;
-        //std::cout << "Received goal: " << goal.pose.position.x << " " << goal.pose.position.y << std::endl;
-        if(goal.pose.position.x != -2500000 && goal.pose.position.y != -2500000)
+        ros::Time plan_time = ros::Time::now();
+        geometry_msgs::PoseStamped new_goal;
+        new_goal.pose.position.z = 0.0;
+        new_goal.pose.orientation.x = 0.0;
+        new_goal.pose.orientation.y = 0.0;
+        new_goal.pose.orientation.z = 0.0;
+        new_goal.pose.orientation.w = 1.0;
+        new_goal.header.stamp = plan_time;
+        new_goal.header.frame_id = frame_id_;
+
+        geometry_msgs::PoseStamped current_goal;
+        double start_x, start_y, goal_x, goal_y;
+        double world_x, world_y;
+        double next_world_x, next_world_y;
+        float length_of_segment;
+        int goal_cost;
+        bool goal_is_removed;
+
+        current_goal = goal;
+
+        std::vector<geometry_msgs::Point> fp = costmap_ros_->getRobotFootprint();
+
+        std::cout << "FP Size: " << fp.size();
+
+        /*for (int i = 0; i < fp.size(); i++) {
+            std::cout << "FP(" << i << "): " << fp.at(i) << std::endl;
+        }*/
+
+        // The robot has reached the goal
+        if(current_goal.pose.position.x <= -2400000.0 && current_goal.pose.position.y <= -2400000.0) 
         {
-            costmap_ = costmap_ros_->getCostmap();
-            grid_graph_.SetGridStep(GRID_SIZE);
-            grid_graph_.IntializeMap(costmap_->getCharMap(), costmap_->getSizeInCellsY(), costmap_->getSizeInCellsX());
-            std::cout << "Total size: " << costmap_->getSizeInCellsY() * costmap_->getSizeInCellsX() << std::endl;
-            if(!grid_graph_.MakeGrid()) {
-                std::cout << "Failed to make grid (grid_graph_)" << std::endl;
-            } else {
-                std::cout << "Make grid (grid_graph_), ok!" << std::endl;
-            }
+            // The original goal was not reached, because it was in unknown space
+            if(recalc_old_goal_) {
+                current_goal = old_goal_;
+                recalc_old_goal_ = false;
+            } 
+            // The original goal was reached, publish empty plan
+            else {
+                plan.clear();
+                plan.push_back(start);
+                publishPlan(plan);
+                return true;
+            }        
+        }
 
+        // Convert postions
+        worldToMap(start.pose.position.x, start.pose.position.y, start_x, start_y);
+        worldToMap(current_goal.pose.position.x, current_goal.pose.position.y, goal_x, goal_y);
+
+        // Find the costmap index of the current goal position
+        goal_cost = (int)costmap_->getCost((unsigned int)goal_x, (unsigned int)goal_y);
+
+        //std::cout << "Cost: " << goal_cost << std::endl;
+        // Current goal point is inside an obstacle, push empty plan
+        if (goal_cost >= 250 && goal_cost <= 254) {
             plan.clear();
+            plan.push_back(start);
+            publishPlan(plan);
+            return true;
+        }
+        // Update the grid since the cost map might have been updated
+        if(!grid_graph_.MakeGrid()) {
+            std::cout << "Failed to make grid (grid_graph_)" << std::endl;
+        }
 
-            Types::Point startCell;
-            Types::Point goalCell;
+        plan.clear();
+        
+        // std::cout << "Startcell XY: " << start_x << " " << start_y << std::endl;
+        // std::cout << "goalCell XY: " << goal_x << " " << goal_y << std::endl;
 
-            double start_x, start_y, goal_x, goal_y;
-            worldToMap(start.pose.position.x, start.pose.position.y, start_x, start_y);
-            worldToMap(goal.pose.position.x, goal.pose.position.y, goal_x, goal_y);
+        // Calculate path
+        theta_path_.setInitPath(&grid_graph_);
+        int theta_ret_ = 0;
+        theta_ret_ = theta_path_.InitFlowField(Types::Point(start_x, start_y), Types::Point(goal_x, goal_y), costmap_);
 
-            startCell.x = start_x;
-            startCell.y = start_y;
-            goalCell.x = goal_x;
-            goalCell.y = goal_y;
-            
-            std::cout << "Startcell XY: " << start_x << " " << start_y << std::endl;
+        // No path found
+        if(theta_ret_ == -1) {
+            plan.push_back(start);
+            publishPlan(plan);
+            return true;
+        }
 
-            std::cout << "goalCell XY: " << goal_x << " " << goal_y << std::endl;
+        // Create sub-points in the path since the local planner needs the path to look like that
+        for(int i = 0; i < theta_path_.getNumOfSegment(); i++){
 
-            theta_path_.setInitPath(&grid_graph_);
+            //mapToWorld(theta_path_.x[i], theta_path_.y[i], world_x, world_y);
+            mapToWorld(theta_path_.getX(i), theta_path_.getY(i), world_x, world_y);
+            //std::cout << "X: " << world_x << std::endl;
+            //std::cout << "Y: " << world_y << std::endl;
 
-            theta_path_.InitFlowField(startCell, goalCell);
+            if(i < theta_path_.getNumOfSegment() - 1)
+                mapToWorld(theta_path_.getX(i + 1), theta_path_.getY(i + 1), next_world_x, next_world_y);
 
-            // Create a mock up plan (for now)
-            //std::cout << "Current plan" << std::endl;
-            //std::cout << "Num segment: " << theta_path_.num_of_segment << std::endl;
-
-            ros::Time plan_time = ros::Time::now();
-
-            double world_x, world_y;
-            double next_world_x, next_world_y;
-
-            //std::vector<float> length_of_segment;
-            float length_of_segment;
-
-            geometry_msgs::PoseStamped new_goal = goal;
-            new_goal.pose.position.z = 0.0;
-            new_goal.pose.orientation.x = 0.0;
-            new_goal.pose.orientation.y = 0.0;
-            new_goal.pose.orientation.z = 0.0;
-            new_goal.pose.orientation.w = 1.0;
-
-            for(int i = 0; i < theta_path_.num_of_segment; i++){
-
-                mapToWorld(theta_path_.x[i], theta_path_.y[i], world_x, world_y);
-
-                std::cout << "X: " << world_x << std::endl;
-                std::cout << "Y: " << world_y << std::endl;
-
-                if(i < theta_path_.num_of_segment - 1)
-                    mapToWorld(theta_path_.x[i+1], theta_path_.y[i+1], next_world_x, next_world_y);
-                else
-                {
-                    next_world_x = goal.pose.position.x;
-                    next_world_y = goal.pose.position.y;
+            else
+            {
+                // Goal is removed, save old goal so we can recalculate it next call if we need to
+                if (theta_ret_ == 1) {
+                    old_goal_ = current_goal;
+                    recalc_old_goal_ = true;
+                    break;
+                }
+                else if (theta_ret_ == 0) {
+                    recalc_old_goal_ = false;
                 }
 
-                    length_of_segment = std::sqrt(pow(world_x-next_world_x,2)+pow(world_y-next_world_y,2));
-                    int divide_path_number = round(length_of_segment*100 / 10); // Get length in cm
-                    Types::Point2f heading_vector;
-                    heading_vector.x = next_world_x - world_x;
-                    heading_vector.y = next_world_y - world_y;
-                    std::cout << "Lenght segment: " << length_of_segment << " Divide_path_number: " << divide_path_number << std::endl;
-                    std::cout << "Heading vector: " << heading_vector.x << " " << heading_vector.y << std::endl; 
-                    std::cout << "Start:" << start_x << " " << start_y << " Goal " << goal_x << " " << goal_y << std::endl;
-
-                    for (int j = 0; j < divide_path_number; j++)
-                    {            
-                        new_goal.header.stamp = plan_time;
-                        new_goal.header.frame_id = frame_id_;
-                        new_goal.pose.position.x = world_x + (heading_vector.x/divide_path_number)*j;
-                        new_goal.pose.position.y = world_y + (heading_vector.y/divide_path_number)*j;
-                        
-                        //std::cout << "Heading vector: " << heading_vector.x << " " << heading_vector.y << std::endl; 
-                        std::cout << "Added: " << new_goal.pose.position.x << " " << new_goal.pose.position.y << std::endl;
-                        plan.push_back(new_goal);
-                    }
+                next_world_x = current_goal.pose.position.x;
+                next_world_y = current_goal.pose.position.y;
             }
 
-            plan.push_back(goal);
-            publishPlan(plan);
+            // Calculate the length of the segment in order to split it into smaller parts
+            length_of_segment = std::sqrt(pow(world_x-next_world_x,2)+pow(world_y-next_world_y,2));
+            int divide_path_number = round(length_of_segment * 100 / 10); // Get length in cm
+            Types::Point2f heading_vector;
+            heading_vector.x = next_world_x - world_x;
+            heading_vector.y = next_world_y - world_y;
+            new_goal.pose.orientation.z = atan2(heading_vector.y,heading_vector.x);
+            std::cout << "Orientation: " << new_goal.pose.orientation.z;
+            for (int j = 0; j < divide_path_number; j++)
+            {            
+                new_goal.pose.position.x = world_x + (heading_vector.x/divide_path_number)*j;
+                new_goal.pose.position.y = world_y + (heading_vector.y/divide_path_number)*j;
+                plan.push_back(new_goal);
+            }
         }
-        else
-            return false;
+
+        publishPlan(plan);
 
         return true;
     }
 
     void ThetaStarPlanner::publishPlan(const std::vector<geometry_msgs::PoseStamped>& path) {
-        std::cout << "publishPlan" << std::endl;
         if (!initialized_) {
             ROS_ERROR(
                     "This planner has not been initialized yet, but it is being used, please call initialize() before use");
@@ -184,12 +213,13 @@ namespace thetastar_planner {
 
         return true;
     }
-
+    //Convert map coordinates to world coordinates
     void ThetaStarPlanner::mapToWorld(double mx, double my, double& wx, double& wy) {
         wx = costmap_->getOriginX() + (mx+convert_offset_) * costmap_->getResolution();
         wy = costmap_->getOriginY() + (my+convert_offset_) * costmap_->getResolution();
     }
 
+    //Convert world coordinates to map coordinates
     bool ThetaStarPlanner::worldToMap(double wx, double wy, double& mx, double& my) {
         double origin_x = costmap_->getOriginX(), origin_y = costmap_->getOriginY();
         double resolution = costmap_->getResolution();
@@ -204,6 +234,29 @@ namespace thetastar_planner {
             return true;
 
         return false;
+    }
+
+    //Create a barrier around the map
+    void ThetaStarPlanner::outlineMap(unsigned char* costarr, int nx, int ny, unsigned char value) {
+        unsigned char* pc = costarr;
+        
+        for (int i = 0; i < nx; i++)
+            *pc++ = value;
+
+        pc = costarr + (ny - 1) * nx;
+
+        for (int i = 0; i < nx; i++)
+            *pc++ = value;
+
+        pc = costarr;
+
+        for (int i = 0; i < ny; i++, pc += nx)
+            *pc = value;
+
+        pc = costarr + nx - 1;
+
+        for (int i = 0; i < ny; i++, pc += nx)
+            *pc = value;
     }
 }
 

@@ -2,25 +2,26 @@
 #include <vector>
 #include <thetastar_planner/ThetaStar4Grid.h>
 #include <thetastar_planner/types.h>
+#include <costmap_2d/costmap_2d_ros.h>
+#include <costmap_2d/costmap_2d.h>
 
 #define FLOWFIELD_SCOPE 20
 
 class ThetaPath
 {
-	ThetaStar4Grid *grid_graph_;
+	private:
+		ThetaStar4Grid *grid_graph_;
+		std::vector<Types::Point> path_;
 
-public:
-	float *x, *y;
-	float *nx, *ny;
-	float *segment_len;
-	Types::Point2f end;
-	int num_of_segment;
-	ThetaPath();
-	void BuildPath(std::vector<Types::Point> path_);
-	Types::Point2f Theta2FlowForce(Types::Point2f s);
-	void setInitPath(ThetaStar4Grid *g);
-	void InitFlowField(Types::Point s,Types::Point d);
-	~ThetaPath();
+	public:
+		ThetaPath();
+		~ThetaPath();
+
+		void setInitPath(ThetaStar4Grid *g);
+		int InitFlowField(Types::Point s,Types::Point d, costmap_2d::Costmap2D* costmap_);
+		int getNumOfSegment();
+		int getX(int index);
+		int getY(int index);
 };
 
  

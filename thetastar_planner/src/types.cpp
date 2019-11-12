@@ -17,7 +17,7 @@ void Types::Point2f::operator=(const Types::Point& rhs)
 
 Types::Point2f Types::Point2f::operator+(const Types::Point2f& rhs)
 {
-        return Types::Point2f(this->x + rhs.x, this->y + rhs.y);
+    return Types::Point2f(this->x + rhs.x, this->y + rhs.y);
 }
 
 Types::Point2f Types::Point2f::operator-(const Types::Point2f& rhs)
