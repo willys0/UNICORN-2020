@@ -10,6 +10,6 @@ class StateFactory
 private:
     /* data */
 public:
-    static std::shared_ptr<State> CreateStateInstance(Command cmd, ros::NodeHandle node, RefuseBin bin);
+    static std::unique_ptr<State> CreateStateInstance(Command cmd, ros::NodeHandle node, RefuseBin bin);
 };
 #endif // !STATE_FAC

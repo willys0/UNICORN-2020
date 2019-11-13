@@ -6,7 +6,7 @@ LIFTState::LIFTState(ros::NodeHandle node) : move_base_clt_("move_base", false)
     lift_complete_sub_ = node.subscribe("RIO_liftPublisher_state", 0, &LIFTState::liftCallback, this);
     cmd_vel_pub_ = node.advertise<geometry_msgs::Twist>("/unicorn/cmd_vel", 0);
     move_base_cancel_pub_ = node.advertise<actionlib_msgs::GoalID>("/move_base/cancel", 0);
-    state_identifier_ = 2;
+    state_identifier_ = STATE_LIFT;
 }
 
 LIFTState::~LIFTState()
@@ -19,14 +19,11 @@ Command LIFTState::run()
     std_msgs::Bool msg;
     msg.data = true;
     Command new_cmd;
-    new_cmd.state = state_enum::IDLE;
+    new_cmd.state = STATE_IDLE;
     ROS_INFO("[UNICORN State Machine] Lifting refuse bin, awaiting completion signal...");
     ros::Rate rate(10);
-    //lift_init_pub_.publish(msg);
-    //ros::spinOnce();
     while (ros::ok())
     {
-        
         ros::spinOnce();
         if (command.state != -1)
         {
@@ -38,7 +35,6 @@ Command LIFTState::run()
         {
             break;
         }
-       //lift_init_pub_.publish(msg);
        rate.sleep();
     }
     reverseFromBin();

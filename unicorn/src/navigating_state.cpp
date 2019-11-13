@@ -8,6 +8,7 @@ NAVIGATINGState::NAVIGATINGState(float x, float y, float yaw, ros::NodeHandle no
     ROS_INFO("[UNICORN State Machine] New goal set to x=%f, y=%f, yaw=%f", x, y, yaw);
     node_ = node;
     move_base_cancel_pub_ = node_.advertise<actionlib_msgs::GoalID>("/move_base/cancel", 0);
+    state_identifier_ = STATE_NAVIGATING;
 }
 
 NAVIGATINGState::~NAVIGATINGState()
@@ -72,7 +73,7 @@ void NAVIGATINGState::cancelGoal()
 Command NAVIGATINGState::run()
 {
     Command new_cmd;
-    new_cmd.state = state_enum::IDLE;
+    new_cmd.state = STATE_IDLE;
     int err = sendGoal(current_goal_);
     if(err == 1)
     {

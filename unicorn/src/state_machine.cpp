@@ -71,7 +71,7 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
 
     /*Set the current state to be IDLE*/
     Command initial_cmd;
-    initial_cmd.state = state_enum::LIFT;
+    initial_cmd.state = STATE_ALIGNING;
     current_state_ = StateFactory::CreateStateInstance(initial_cmd, n_, refuse_bin_pose_);
 }
 
@@ -80,10 +80,12 @@ StateMachine::~StateMachine() {}
 int StateMachine::start() 
 {
     Command new_cmd;
+    ROS_INFO("[UNICORN State Machine] Starting state machine...");
     while (ros::ok())
     {
         updateAndPublishState(current_state_->state_identifier_);
         new_cmd = current_state_->run();
+        current_state_.reset();
         current_state_ = StateFactory::CreateStateInstance(new_cmd, n_, refuse_bin_pose_);
     }
     return 1;   
@@ -126,6 +128,8 @@ void StateMachine::odomCallback(const nav_msgs::Odometry &msg)
 
 void StateMachine::updateAndPublishState(int new_state)
 {
+    std::string state_str = getStateString();
+    ROS_INFO("[UNICORN State Machine] Setting new state to: %s", state_str.c_str());
     std_msgs::Int32 new_state_msg;
     new_state_msg.data = new_state;
     state_pub_.publish(new_state_msg);
@@ -141,8 +145,8 @@ int StateMachine::sendGoal(const float x, const float y, const float yaw)
     catch (boost::bad_lexical_cast &e)
     {
         ROS_INFO("%s", e.what());
-        ROS_ERROR("[unicorn_statemachine] x is undefined");
-        updateAndPublishState(state_enum::IDLE);
+        ROS_ERROR("[UNICORN State Machine] x is undefined");
+        updateAndPublishState(STATE_IDLE);
         return -1;
     }
     try
@@ -151,8 +155,8 @@ int StateMachine::sendGoal(const float x, const float y, const float yaw)
     }
     catch (boost::bad_lexical_cast &)
     {
-        ROS_ERROR("[unicorn_statemachine] y is undefined");
-        updateAndPublishState(state_enum::IDLE);
+        ROS_ERROR("[UNICORN State Machine] y is undefined");
+        updateAndPublishState(STATE_IDLE);
         return -1;
     }
     try
@@ -161,8 +165,9 @@ int StateMachine::sendGoal(const float x, const float y, const float yaw)
     }
     catch (boost::bad_lexical_cast &)
     {
-        ROS_ERROR("[unicorn_statemachine] yaw is undefined");
-        updateAndPublishState(state_enum::IDLE);
+        ROS_ERROR("[UNICORN State Machine] yaw is undefined");
+        updateAndPublishState(STATE_IDLE);
+
         return -1;
     }
     while (!move_base_clt_.waitForServer(ros::Duration(5.0)))
@@ -186,32 +191,20 @@ std::string StateMachine::getStateString()
 {
     switch (current_state_->state_identifier_)
     {
-    case state_enum::NAVIGATING:
+    case STATE_NAVIGATING:
         return "NAVIGATING";
 
-    case state_enum::MANUAL:
-        return "MANUAL";
-
-    case state_enum::LOADING:
-        return "LOADING";
-
-    case state_enum::IDLE:
+    case STATE_IDLE:
         return "IDLE";
 
-    case state_enum::LIFT:
+    case STATE_LIFT:
         return "LIFT";
 
-    case state_enum::REVERSING:
+    case STATE_REVERSING:
         return "REVERSING";
 
-    case state_enum::ALIGNING:
+    case STATE_ALIGNING:
         return "ALIGNING";
-
-    case state_enum::ENTERING:
-        return "ENTERING";
-
-    case state_enum::EXITING:
-        return "EXITING";
 
     default:
         return "INVALID STATE";
@@ -220,7 +213,7 @@ std::string StateMachine::getStateString()
 
 bool StateMachine::accGoalServer(unicorn::CharlieCmd::Request &req, unicorn::CharlieCmd::Response &res)
 {
-    if (current_state_->state_identifier_ == state_enum::MANUAL)
+    if (current_state_->state_identifier_ == STATE_IDLE)
     {
         res.response = 0;
         return false;

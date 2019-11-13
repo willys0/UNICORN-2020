@@ -29,7 +29,6 @@ private:
     /*Methods*/
     void rearLidarCallback(const std_msgs::Float32 &msg);
     void odomCallback(const nav_msgs::Odometry &msg);
-    int sendGoal(Goal new_goal);
     void cancelGoal();
 
 };

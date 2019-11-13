@@ -1,20 +1,23 @@
 #ifndef STATE_STRUCTURES_H
 #define STATE_STRUCTURES_H
-namespace state_enum
-{
-enum
-{
-    NAVIGATING,
-    MANUAL,
-    LOADING,
-    IDLE,
-    ALIGNING,
-    EXITING,
-    ENTERING,
-    LIFT,
-    REVERSING
-};
-}
+
+#define STATE_IDLE 0
+#define STATE_NAVIGATING 1
+#define STATE_LIFT 2
+#define STATE_ALIGNING 3
+#define STATE_REVERSING 4
+
+// namespace state_enum
+// {
+// enum
+// {
+//     IDLE,
+//     NAVIGATING,
+//     LIFT,
+//     ALIGNING,
+//     REVERSING
+// };
+// }
 
 typedef struct command
 {

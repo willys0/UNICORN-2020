@@ -2,7 +2,7 @@
 
 IDLEState::IDLEState()
 {
-   state_identifier_ = 0;
+   state_identifier_ = STATE_IDLE;
 }
 
 IDLEState::~IDLEState()
