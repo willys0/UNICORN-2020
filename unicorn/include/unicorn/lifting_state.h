@@ -17,7 +17,7 @@ public:
 protected:
 private:
     /*Methods*/
-    void liftCallback(const std_msgs::Bool &recieveMsg);
+    void liftCallback(const std_msgs::Int32 &recieveMsg);
     void reverseFromBin();
     void cancelGoal();
     /*Members*/

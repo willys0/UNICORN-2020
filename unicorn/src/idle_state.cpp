@@ -2,6 +2,7 @@
 
 IDLEState::IDLEState()
 {
+   state_identifier_ = 0;
 }
 
 IDLEState::~IDLEState()
