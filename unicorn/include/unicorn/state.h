@@ -42,15 +42,34 @@ typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseCl
 class State
 {
 public:
+    /** @brief Default Constructor to initialise the base state class
+	*	
+	*/
     State(){};
+	/** @brief Constructor taking a node handle as param.
+	*	
+	*	@param node ros::NodeHandle
+	*/
     State(ros::NodeHandle node);
+    /**
+        @brief Default de-constructor
+    */
     ~State(){};
+    /**
+     * @brief Sets the states command to the provided command.
+     * 
+     * @param new_cmd Command
+    */
     Command setNewCmd(Command new_cmd) { ROS_INFO("New command has been set"); command = new_cmd; };
+    /**
+     * @brief Pure Virtual function which is called to by the state machine. Intended purpose is to run the state logic and exit upon finished. 
+    */
     virtual Command run() = 0;
-    int state_identifier_;
+
+    int state_identifier_; //! Integer representation of the instiated state
 protected:
-    std::string cmd_msg_str_;
-    Command command;
+    std::string cmd_msg_str_; //! Command string
+    Command command; //! Used to contain the next command
     
 private:
 };
