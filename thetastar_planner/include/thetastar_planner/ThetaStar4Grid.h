@@ -13,15 +13,14 @@ class ThetaStar4Grid {
 //Use to store information of grid
 	private:
 		MinSearchHeap *open_heap = NULL;
-		float *edge_w_;
-		float *vertice_w_;
-		float *g_score_;
-		int *parent_list_;
-		
-		int *edge_;
-		int *index_;
-		int *mapping_;
-		int *close_heap;
+		float *edge_w_ = NULL;
+		float *g_score_ = NULL;
+		int *parent_list_ = NULL;
+		int *real_parent_list_ = NULL;
+		int *edge_ = NULL;
+		int *index_ = NULL;
+		int *mapping_ = NULL;
+		int *close_heap = NULL;
 
 		//Configuration of grid
 		int ns; 					//number of vertices of the grid
@@ -29,21 +28,21 @@ class ThetaStar4Grid {
 		int grid_width, grid_height;//height and width of the grid
 		int res;
 
-		unsigned char* cost_map_;
+		unsigned char* cost_map_ = NULL;
 
 	public:
 		ThetaStar4Grid();
 		~ThetaStar4Grid();
 
-		int *real_parent_list_;
-		
 		void IntializeMap(unsigned char* cost_img, int h, int w);
 		void SetGridStep(int s);
 		void GetNodeCoordinate(int ix,int &x,int &y);
 		bool Theta(int start,int goal);
+		bool LazyTheta(int start,int goal);
 
 		int GetNodeIndex(int x, int y);
 		int getParent(int index);
+		int getRealParent(int index);
 
 		bool MakeGrid();
 		bool LoS_Calc(int xs, int xg, int ys, int yg, int dy, int dx, int width, int threshold, unsigned char *ptr, int ptr_sign);

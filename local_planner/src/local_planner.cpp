@@ -145,7 +145,7 @@ void LocalPlanner::repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 
 	// Every 
     int xt, yt, cost, force_x, force_y, deg;
     int scale = 1; // default 100
-    int gain = 71; // 2000 // Default 10000
+    int gain = 106; // 71 = 1meter // 2000 // Default 10000
     float dmax = 21; // default 1.25 // 1.1
 	float repulsive_force, x_force, y_force, z_force;
 
@@ -174,6 +174,8 @@ void LocalPlanner::makeRepulsiveField(int scale, int gain, float dmax, float pos
 	float distance_to_obstacle;
 	findClosestObjectEuclidean(deg, &distance_to_obstacle);
 	d = distance_to_obstacle * costmap_->getResolution() * 10; // Convert distance to decimeters
+	if (d < 3)
+		d = 3;
     d2 = d / scale + 1;
     d = (1 / d2 - d0);
     d = d*d;
@@ -200,6 +202,9 @@ void LocalPlanner::findClosestObjectEuclidean(int *deg, float *distance_to_obsta
     int dist_x = 0;
     int dist_y = 0;	
 
+	unsigned int coordx = 0,coordy = 0;
+	int deg_moving_obstacle = 100;
+
 	int pos_x = costmap_->getSizeInCellsX() / 2; // Center of the costmap (Robot's position)
 	int pos_y = costmap_->getSizeInCellsY() / 2;
 	
@@ -208,17 +213,29 @@ void LocalPlanner::findClosestObjectEuclidean(int *deg, float *distance_to_obsta
 			if (int(costmap_->getCost(w,h)) == costmap_2d::LETHAL_OBSTACLE) // If the position (w,h) is an obstacle
 			{
 				current_dist = std::sqrt(pow((pos_x - w),2) + pow((pos_y - h),2));
+				//costmap_->worldToMap(obstacle_vector_.xposition,obstacle_vector_.yposition,coordx,coordy);
 
-				// Update shortest distance
+				//if ((std::sqrt(pow((coordx - w),2) + pow((coordy - h),2))*costmap_->getResolution()) > 2.0)
+				//{
+				//if (fabs(int(round(atan2(pos_y-h, pos_x-w) * 180 / PI)) - int(round(atan2(coordy, coordx) * 180 / PI))) > 30)
+					// Update shortest distance
 				if (current_dist < min_dist) {
 					min_y = h;
 					min_x = w;
 					min_dist = current_dist;
 				}
+				//}
+				/*else
+				{
+					std::cout << "Skipped obstacle at position: " << coordx << " " << coordy << " Obstacle position at: " << w << " " << h << endl;
+					std::cout << "Distance between points is: " << std::sqrt(pow((coordx - w),2) + pow((coordy - h),2))*costmap_->getResolution() << endl;
+				}*/
+				
 			}			
 		}
 	}
 
+	std::cout << "Added obstacle at position: " << min_x << " " << min_y << endl;
 	min_dist = fabs(min_dist - 1); // Makes the grid next to an obstacle to have a distance of 0 to an obstacle
 	dist_x = round(pos_x - min_x);
     dist_y = round(pos_y - min_y);
@@ -281,8 +298,9 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	}
 	else
 	{
+		std::cout << "Dipole field activated" << endl;
 		if(repulsive_field_gradient>0)
-			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_gradient*200+1e-12)); // Speed is affected by: a constant, distance to goal and the repulsive field 
+			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*0.5));//tanh(1/(repulsive_field_gradient*200+1e-12)); // Speed is affected by: a constant, distance to goal and the repulsive field 
 		else 
 			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1)); // Speed is affected by: a constant, distance to goal, the repulsive field and the angular velocity
 	}
@@ -573,35 +591,15 @@ bool LocalPlanner::isGoalReached(){
 
 		double delta_orient = base_local_planner::getGoalOrientationAngleDifference (robot_pose, tf::getYaw(global_goal_odom.getRotation()));
 
-		unsigned int coordx,coordy;
-		if (!global_plan_.empty())
-			costmap_->worldToMap(global_goal_odom.getOrigin().getX(),global_goal_odom.getOrigin().getY(),coordx,coordy);
+		unsigned int coordx = 0,coordy = 0;
 
-		if(fabs(std::sqrt(dx*dx+dy*dy)) < 0.2 && fabs(delta_orient) < (30 * PI / 180))
-		{
-			goal_reached_ = true;
-			ROS_INFO("Goal reached close to %f %f", global_goal_odom.getOrigin().getX(), global_goal_odom.getOrigin().getY());
-			close_to_goal = false;
-			geometry_msgs::PoseStamped check_if_done_;
-			check_if_done_.header.frame_id = global_frame_;
-			check_if_done_.header.stamp = ros::Time::now();
-			check_if_done_.pose.position.x = -2500000.0;
-			check_if_done_.pose.position.y = -2500000.0;
-			check_if_done_.pose.position.z = 0.0;
-			check_if_done_.pose.orientation.x = 0.0;
-			check_if_done_.pose.orientation.y = 0.0;
-			check_if_done_.pose.orientation.z = 0.0;
-			check_if_done_.pose.orientation.w = 1.0;
-			new_map_pub.publish(check_if_done_);
-			generate_new_path = 1;
-			return true;
+		costmap_->worldToMap(global_goal_odom.getOrigin().getX(),global_goal_odom.getOrigin().getY(),coordx,coordy);
 
-		}
-		else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.1) // If we only need to adjust the orientation
-		{
-			close_to_goal = true;
-		}
-		else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.5)
+		std::cout << "Goal coordinate costmap: " << coordx << " " << coordy << endl;
+		std::cout << "Final orientation: " << tf::getYaw(global_goal_odom.getRotation()) << endl;
+		std::cout << "Cost: " << ((int)costmap_->getCost(coordx,coordy)) << " At position: " << coordx << " " << coordy << endl;
+
+		if (fabs(std::sqrt(dx*dx+dy*dy)) < 1.0)
 		{
 			if (((int)costmap_->getCost(coordx,coordy)) > 0)
 			{
@@ -622,9 +620,33 @@ bool LocalPlanner::isGoalReached(){
 				generate_new_path = 1;
 				return true;
 			}		
+			else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.2 && fabs(delta_orient) < (30 * PI / 180))
+			{
+				goal_reached_ = true;
+				ROS_INFO("Goal reached close to %f %f", global_goal_odom.getOrigin().getX(), global_goal_odom.getOrigin().getY());
+				close_to_goal = false;
+				geometry_msgs::PoseStamped check_if_done_;
+				check_if_done_.header.frame_id = global_frame_;
+				check_if_done_.header.stamp = ros::Time::now();
+				check_if_done_.pose.position.x = -2500000.0;
+				check_if_done_.pose.position.y = -2500000.0;
+				check_if_done_.pose.position.z = 0.0;
+				check_if_done_.pose.orientation.x = 0.0;
+				check_if_done_.pose.orientation.y = 0.0;
+				check_if_done_.pose.orientation.z = 0.0;
+				check_if_done_.pose.orientation.w = 1.0;
+				new_map_pub.publish(check_if_done_);
+				generate_new_path = 1;
+				return true;
+
+			}
+			else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.1) // If we only need to adjust the orientation
+			{
+				close_to_goal = true;
+			}
+			else
+				close_to_goal = false;
 		}
-		else
-			close_to_goal = false;
 	}
    	return goal_reached_;
 }

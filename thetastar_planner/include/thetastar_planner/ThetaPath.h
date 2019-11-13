@@ -5,8 +5,6 @@
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
 
-#define FLOWFIELD_SCOPE 20
-
 class ThetaPath
 {
 	private:

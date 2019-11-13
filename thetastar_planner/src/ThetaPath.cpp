@@ -28,8 +28,8 @@ int ThetaPath::InitFlowField(Types::Point s, Types::Point d, costmap_2d::Costmap
 	// std::cout << "src (X,Y,VAL): " << s.x << " " << s.y << " " << src << std::endl;
 	// std::cout << "dst (X,Y,VAL): " << d.x << " " << d.y << " " << dst << std::endl;
 
-	if (!grid_graph_->Theta(src, dst)) {
-		return -1;
+	if(!grid_graph_->Theta(src, dst)){
+		return -1; // No path
 	}
 
 	// Push back goal
@@ -42,46 +42,41 @@ int ThetaPath::InitFlowField(Types::Point s, Types::Point d, costmap_2d::Costmap
 
 	// Find shortest path
 	while (u != src && grid_graph_->GetGCost(u) != INF) {
-		
-		
 		// Checks if the goal node is in unknown, if it is remove all the nodes in
 		// unkown so the goal position will be on the edge of unkown.
 		// All other nodes in the path that are in unknown will be considered in LoS,
 		// this is to avoid the path sticking to unknown regions.
 		if(!unkownDone) {
-			grid_graph_->GetNodeCoordinate(grid_graph_->real_parent_list_[u],x,y);
+			grid_graph_->GetNodeCoordinate(grid_graph_->getRealParent(u),x,y);
 
+			// Check if node is in unknown (255)
 			if((int)costmap_->getCost((unsigned int)x, (unsigned int)y) == 255) {
-				//u = grid_graph_->getParent(u);
-				u = grid_graph_->real_parent_list_[u];
+				u = grid_graph_->getRealParent(u);
 				continue;
 			}
 
+			// Set unkownDone to true since our new goal pos is not in unknown
 			unkownDone = true;
 			
-			grid_graph_->GetNodeCoordinate(grid_graph_->real_parent_list_[u],x,y);
+			// Add node with no LoS
+			grid_graph_->GetNodeCoordinate(grid_graph_->getRealParent(u),x,y);
 			path_.push_back(Types::Point(x,y));
-			u = grid_graph_->real_parent_list_[u];
-
-			// Break if we added the source node
-			if(grid_graph_->real_parent_list_[u] == src) {
-				break;
-			}
+			u = grid_graph_->getRealParent(u);
 
 			continue;
 		}
 
+		// Add node with LoS
 		grid_graph_->GetNodeCoordinate(grid_graph_->getParent(u),x,y);
 		path_.push_back(Types::Point(x,y));
 		u = grid_graph_->getParent(u);
 		
 	}
 
-	//BuildPath();
 	// Reverse the path since we're building it from goal to start
 	std::reverse(path_.begin(), path_.end());
-
-	return goalIsInUnknown ? 1 : 0;
+	
+	return (int)goalIsInUnknown;
 }
 
 int ThetaPath::getNumOfSegment()

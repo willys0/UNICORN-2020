@@ -2,15 +2,15 @@
 // Created by Lana on 04/2017.
 //
 #include "thetastar_planner/ThetaStar4Grid.h"
-#include <queue>
+//#include <queue>
 #include <functional>
-#include <time.h>
+//#include <time.h>
 #include <math.h>
-#include <ros/ros.h>
+//#include <ros/ros.h>
 
 ThetaStar4Grid::ThetaStar4Grid()
 { 
-    ns = 0;
+	map_height = map_width = grid_width = grid_height = ns = 0;
 	res = 1;
 	open_heap = new MinSearchHeap(BUFFER_SIZE);
 	index_= new int[BUFFER_SIZE];
@@ -44,7 +44,7 @@ int ThetaStar4Grid::GetNodeIndex(int x, int y)
 {
 	x = x / res;
 	y = y / res;
-	return mapping_[y*(map_width/res) + x];
+	return mapping_[y * (map_width / res) + x];
 }
 
 void ThetaStar4Grid::IntializeMap(unsigned char* cost_img, int h, int w)
@@ -58,9 +58,7 @@ void ThetaStar4Grid::IntializeMap(unsigned char* cost_img, int h, int w)
 bool ThetaStar4Grid::MakeGrid()
 {
 	float *weight_ptr = edge_w_;
-	int i, ix, x, y;
-	int n = 0;
-	int ys = 0;
+	int i = 0, ix = 0, x = 0, y = 0, n = 0, ys = 0;
 	grid_width = map_width / res;
 	grid_height = map_height / res;
 	int grid_size = grid_width * grid_height;
@@ -80,6 +78,7 @@ bool ThetaStar4Grid::MakeGrid()
 		// Check if the space is either free or unknown
 		// 253 == LETHAL, 255 == UNKNOWN
 		if (cost_map_[y * map_width + x] <= 128 || cost_map_[y * map_width + x] == 255) { // Higher value == pathings is able to get closer to obstacles
+			//vertice_w_[i] = 1;
 			index_[ns] = i;
 			mapping_[i] = ns;
 			ns++;
@@ -135,7 +134,7 @@ inline bool ThetaStar4Grid::LoS_Calc(int xs, int xg, int ys, int yg, int dy, int
 {
 	int f = 0;
 	if (dx > dy) {
-		for (int x = xs; x <xg; x++, ptr += ptr_sign) {
+		for (int x = xs; x < xg; x++, ptr += ptr_sign) {
 			f += dy;
 			if (f >= dx) {
 				ptr += width;
@@ -161,9 +160,9 @@ inline bool ThetaStar4Grid::LoS_Calc(int xs, int xg, int ys, int yg, int dy, int
 inline bool ThetaStar4Grid::LoS_Check(int start, int goal)
 {
 
-	int threshold = 160; // LoS threshold, that is, how close to an object you have LoS (Lower == farther)
+	int threshold = 160; // LoS threshold, that is, how close to an object you have LoS (Higher == closer)
 	unsigned char *ptr = cost_map_;
-	int xs, xg, ys, yg;
+	int xs = 0, xg = 0, ys = 0, yg = 0;
 
 	GetNodeCoordinate(start,xs,ys);
 	GetNodeCoordinate(goal,xg,yg);
@@ -262,7 +261,7 @@ inline bool ThetaStar4Grid::LoS_Check_F(int start, int goal) {
 
 inline float ThetaStar4Grid::Cost(int start, int goal)
 {
-	int xs, ys, xg, yg;
+	int xs = 0, ys = 0, xg = 0, yg = 0;
 	int s = index_[start];
 	xs = (s % grid_width)*res;
 	ys = (s / grid_width)*res;
@@ -277,8 +276,8 @@ inline float ThetaStar4Grid::Cost(int start, int goal)
 bool ThetaStar4Grid::Theta(int start,int goal)
 {
 	HeapElement tmp;
-	float gold, w;
-	int i, u,parent_list_of_s, tries = 0;
+	float gold = 0, w = 0;
+	int i = 0, u = 0, parent_list_of_s = 0, tries = 0;
 	
 	open_heap->Clear();
 
@@ -294,17 +293,17 @@ bool ThetaStar4Grid::Theta(int start,int goal)
 	open_heap->Insert(tmp);
 
 	while (!open_heap->IsEmpty()) {
-
-		if(tries++ == 100000) {
-			std::cout << "No path" << std::endl;
-			return false;
-		}
-
 		tmp = open_heap->SearchMin(); 
 		int s = tmp.data;
 
+		// Number of tries before aborting (If a path is not possible or too complex)
+		if(tries++ == 100000) {
+			std::cout << "Tries False" << std::endl;
+			return false;
+		}
+
 		if (s == goal) {
-			std::cout << "Path found" << std::endl;
+			std::cout << "True" << std::endl;
 			return true;
 		}
 			
@@ -351,7 +350,7 @@ bool ThetaStar4Grid::Theta(int start,int goal)
 		}
 	}
 
-	std::cout << "No path" << std::endl;
+	std::cout << "False" << std::endl;
 	return false;
 }
 
@@ -369,4 +368,9 @@ float ThetaStar4Grid::GetGCost(int index)
 int ThetaStar4Grid::getParent(int index)
 {
 	return parent_list_[index];
+}
+
+int ThetaStar4Grid::getRealParent(int index)
+{
+	return real_parent_list_[index];
 }

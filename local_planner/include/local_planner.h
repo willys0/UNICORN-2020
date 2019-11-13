@@ -51,7 +51,7 @@
 
 #define DT 0.10000 //It defines the granularity to create a trajectory. A higher value will create a few points on a trajectory.
 
-#define DIPOLE_FIELD_THRESHOLD 1.0
+#define DIPOLE_FIELD_THRESHOLD 0.5
 #define REPULSIVE_FIELD_THRESHOLD 0.5
 
 
@@ -90,7 +90,7 @@ static const float DELTA_T = 1.0;
 int test_variable;
 int generate_new_path;
 float last_linear_velocity_;
-static const float max_linear_vel = 0.4; // default 0.4
+static const float max_linear_vel = 0.6; // default 0.4
 static const float max_angular_vel = 0.4;
 static const float max_linear_acc_ = 0.01;
 vector_creation::vector obstacle_vector_;
