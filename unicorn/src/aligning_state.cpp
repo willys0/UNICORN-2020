@@ -22,6 +22,7 @@ void ALIGNINGState::cancelGoal()
 
 int ALIGNINGState::sendGoal(Goal new_goal)
 {    
+    int attempts = 0;
     try
     {
         float check_input = boost::lexical_cast<float>(new_goal.x);
@@ -50,9 +51,15 @@ int ALIGNINGState::sendGoal(Goal new_goal)
         ROS_ERROR("[UNICORN State Machine] yaw is undefined");
         return -1;
     }
-    while (!move_base_clt_.waitForServer(ros::Duration(5.0)))
+    while (!move_base_clt_.waitForServer(ros::Duration(5.0)) || (attempts < 4))
     {
-        ROS_INFO("[UNICORN State Machine] Waiting for the move_base action server to come up");
+        ROS_INFO("Waiting for the move_base action server to come up");
+        attempts++;
+    }
+    if(attempts == 3)
+    {
+        ROS_WARN("Failed to contact move base server after four attempts, goal not published!");
+        return -1;
     }
 
     move_base_msgs::MoveBaseGoal goal;
@@ -77,7 +84,11 @@ Command ALIGNINGState::run()
     new_goal.x = bin_location_.x + 1.5 * cos(bin_location_.yaw);
     new_goal.y = bin_location_.y + 1.5 * sin(bin_location_.yaw);
     new_goal.yaw = bin_location_.yaw;
-    sendGoal(new_goal);
+    int goal_status = sendGoal(new_goal);
+    if(goal_status == -1)
+    {
+        return new_cmd;
+    }
     while (true)
     {
         ros::spinOnce();

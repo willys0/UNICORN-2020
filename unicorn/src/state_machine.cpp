@@ -71,7 +71,7 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
 
     /*Set the current state to be IDLE*/
     Command initial_cmd;
-    initial_cmd.state = STATE_ALIGNING;
+    initial_cmd.state = STATE_IDLE;
     current_state_ = StateFactory::CreateStateInstance(initial_cmd, n_, refuse_bin_pose_);
 }
 
@@ -110,7 +110,8 @@ void StateMachine::cmdCallback(const unicorn::command &msg)
 {
     ROS_INFO("[Unicorn State Machine]: New command has been received.");
     Command new_cmd;
-    new_cmd.state = std::stoi(msg.command);
+
+    new_cmd.state = msg.state;
     new_cmd.param1 = msg.param1;
     new_cmd.param2 = msg.param2;
     new_cmd.param3 = msg.param3;
@@ -138,6 +139,7 @@ void StateMachine::updateAndPublishState(int new_state)
 
 int StateMachine::sendGoal(const float x, const float y, const float yaw)
 {
+    int attempts = 0;
     try
     {
         float check_input = boost::lexical_cast<float>(x);
@@ -170,9 +172,15 @@ int StateMachine::sendGoal(const float x, const float y, const float yaw)
 
         return -1;
     }
-    while (!move_base_clt_.waitForServer(ros::Duration(5.0)))
+    while (!move_base_clt_.waitForServer(ros::Duration(5.0)) && (attempts < 4))
     {
         ROS_INFO("Waiting for the move_base action server to come up");
+        attempts++;
+    }
+    if(attempts == 3)
+    {
+        ROS_WARN("Failed to contact move base server after four attempts, goal not published!");
+        return -1;
     }
 
     move_base_msgs::MoveBaseGoal goal;

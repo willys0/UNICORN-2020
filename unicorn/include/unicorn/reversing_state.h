@@ -11,8 +11,19 @@ class REVERSINGState : public State
 {
 public:
     /*Methods*/
+    /**
+     * @brief Class constructor
+     * 
+     * @param node ros node handle to the state machine node
+    */
     REVERSINGState(ros::NodeHandle node);
+    /**
+     * @brief Class deconstructor
+    */
     ~REVERSINGState();
+    /**
+     * @brief Main logic for the reversing state, returns either a new command or a default IDLE command if an abort message has been issued. 
+    */
     Command run();
 
 private:
@@ -26,9 +37,22 @@ private:
     double current_yaw_;
 	double current_vel_;
     MoveBaseClient move_base_clt_;
-    /*Methods*/
+    /*Methods*/ 
+    /**
+     * @brief Callback method used to capture and process messages issued by the roboRIO to rear lidar topic. 
+     * 
+     * @param msg message containing the current averaged distance measured by the rear lidar
+    */
     void rearLidarCallback(const std_msgs::Float32 &msg);
+    /**
+     * @brief Callback method used to capture and process odometry messages
+     * 
+     * @param msg message containing odometry data
+    */
     void odomCallback(const nav_msgs::Odometry &msg);
+    /**
+     * @brief method which publishes to the cancel goal topic subscribed to by move base. 
+    */
     void cancelGoal();
 
 };

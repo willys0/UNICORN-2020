@@ -18,6 +18,7 @@ NAVIGATINGState::~NAVIGATINGState()
 
 int NAVIGATINGState::sendGoal(Goal new_goal)
 {    
+    int attempts = 0;
     try
     {
         float check_input = boost::lexical_cast<float>(new_goal.x);
@@ -46,9 +47,15 @@ int NAVIGATINGState::sendGoal(Goal new_goal)
         ROS_ERROR("[Unicorn State Machine] yaw is undefined");
         return -1;
     }
-    while (!move_base_clt_.waitForServer(ros::Duration(5.0)))
+    while (!move_base_clt_.waitForServer(ros::Duration(5.0)) && (attempts < 4))
     {
-        ROS_INFO("[Unicorn State Machine] Waiting for the move_base action server to come up");
+        ROS_INFO("Waiting for the move_base action server to come up");
+        attempts++;
+    }
+    if(attempts == 3)
+    {
+        ROS_WARN("Failed to contact move base server after four attempts, goal not published!");
+        return -1;
     }
 
     move_base_msgs::MoveBaseGoal goal;
@@ -75,7 +82,7 @@ Command NAVIGATINGState::run()
     Command new_cmd;
     new_cmd.state = STATE_IDLE;
     int err = sendGoal(current_goal_);
-    if(err == 1)
+    if(err == -1)
     {
         ROS_ERROR("[Unicorn State Machine] Could not send goal. Entering IDLE state.");
         return new_cmd;

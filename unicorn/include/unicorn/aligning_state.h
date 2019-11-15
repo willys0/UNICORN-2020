@@ -15,7 +15,15 @@ public:
     Command run();
 protected:
 private:
+    /**
+     * @brief method which publishes a new goal to the ROS move base
+     * 
+     * @param new_goal instance containing the goal information in the form of x, y and yaw coordinates.
+    */
     int sendGoal(Goal new_goal);
+    /**
+     * @brief method which publishes to the cancel goal topic subscribed to by move base. 
+    */
     void cancelGoal();
     MoveBaseClient move_base_clt_;
     ros::Publisher move_base_cancel_pub_;

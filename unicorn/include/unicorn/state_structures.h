@@ -7,18 +7,6 @@
 #define STATE_ALIGNING 3
 #define STATE_REVERSING 4
 
-// namespace state_enum
-// {
-// enum
-// {
-//     IDLE,
-//     NAVIGATING,
-//     LIFT,
-//     ALIGNING,
-//     REVERSING
-// };
-// }
-
 typedef struct command
 {
     command() : state(-1), param1(-1.0), param2(-1.0), param3(-1.0) {}

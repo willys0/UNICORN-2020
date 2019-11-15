@@ -58,13 +58,19 @@ public:
     /*Members*/
 
     /*Methods*/
+    /**
+     * @brief Default constructor
+    */
     StateMachine();
+    /**
+     * @brief Default de-constructor
+    */
     ~StateMachine();
+    /**
+     * @brief State machine main loop 
+    */
     int start();
-    /*
-     * takes the next state and searches the constructor array for the
-     * relevant state constructor. Also sends potential move_base
-     */
+    
 protected:
 private:
     /*Members*/
@@ -88,13 +94,43 @@ private:
     MoveBaseClient move_base_clt_;
 
     /*Methods*/
+    /**
+     * @brief Initialises the global localisation element of the robot with provided parameters specified in the main.launch file.
+    */
     void initGlobalLocalisation();
+    /**
+     * @brief Callback method which captures command messages issued by the command node, or other command interfaces. 
+     * 
+     * @param msg new command which has been issued.
+    */
     void cmdCallback(const unicorn::command &msg);
+    /**
+     * @brief Callback method which captures and processes messages related to the robot's odometry.
+     * 
+     * @param msg message containing odometry data.
+    */
     void odomCallback(const nav_msgs::Odometry &msg);
+    /**
+     * @brief Method which publishes a state change to the /TX2_unicorn_state topic. 
+     * 
+     * @param new_state new state of UNICORN
+    */
     void updateAndPublishState(const int new_state);
+    /**
+     * @brief method which publishes a new goal to the ROS move base
+     * 
+     * @param x x-coordinate of new goal
+     * @param y y-coordinate of new goal
+     * @param yaw yaw-coordinate of new goal
+    */
     int sendGoal(const float x, const float y, const float yaw);
+    /**
+     * @brief "fill in brief description"
+    */
     bool accGoalServer(unicorn::CharlieCmd::Request &req, unicorn::CharlieCmd::Response &res);
-    Command parseCmdMsg(std::string cmd_msg);
+    /**
+     * @brief returns the string representation of the current state. 
+    */
     std::string getStateString();
 };
 #endif // !ST

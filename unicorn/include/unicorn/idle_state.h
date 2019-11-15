@@ -9,9 +9,23 @@
 class IDLEState : public State
 {
 public:
+    /**
+     * @brief Default constructor 
+    */
     IDLEState();
+    /**
+     * @brief Default de-constructor
+    */
     ~IDLEState();
+     /**
+     * @brief Main logic for the IDLE state. Waits for a new command to be issued when transitions to the relevant state. 
+     */
     Command run();
+    /**
+     * @brief Setter-method to set a new command for a state. Is used to signal the currently executing state that a new command has been issued. 
+     * 
+     * @param new_cmd New command which has been published by the command node.
+    */
     Command setNewCmd(Command new_cmd);
 protected:
 private:
