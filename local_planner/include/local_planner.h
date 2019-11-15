@@ -27,6 +27,7 @@
 #include <geometry_msgs/Point.h>
 #include <vector_creation/vectors.h>
 #include <vector_creation/vector.h>
+#include <std_msgs/Int32.h>
 //#include "vectors.h"
 //#include "vector.h"
 //#include "../../../../devel/include/vector_creation/vectors.h"
@@ -114,7 +115,7 @@ float shortest_distance_to_obstacle_;
 	// flags
 	bool initialized_; //!< Keeps track about the correct initialization of this class
 	
-	ros::Publisher l_plan_pub_,marker_pub,new_map_pub;
+	ros::Publisher l_plan_pub_,marker_pub,new_map_pub,intention_pub;
 	ros::Subscriber odom_sub_,moving_obstacle_subscriber_;
 
 	uint32_t shape; //Marker to represent local goal

@@ -298,7 +298,6 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	}
 	else
 	{
-		std::cout << "Dipole field activated" << endl;
 		if(repulsive_field_gradient>0)
 			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*0.5));//tanh(1/(repulsive_field_gradient*200+1e-12)); // Speed is affected by: a constant, distance to goal and the repulsive field 
 		else 
@@ -331,6 +330,14 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	}
 	std::cout << "Linear velocity: " << u << " Angular velocity: " << omega << endl;
 	last_repulsive_field_magnitude_ = repulsive_field_magnitude;
+	int intention_angle = -round((theta_d-theta)*180/PI);
+	if (intention_angle > 180)
+		intention_angle = intention_angle - 360;
+	else if (intention_angle < -180)
+		intention_angle = intention_angle + 360;
+
+	std::cout << "Theta: " << theta << " Theta_d: " << theta_d << " Intention: " << intention_angle << endl; 
+	intention_pub.publish(intention_angle);
 }
 
 void LocalPlanner::dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *dipole_force) 
@@ -383,8 +390,8 @@ void LocalPlanner::dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> r
 
 	// Equation 7 - Dynamic Dipole Field
 	// d^ = d / |d|
-	std::cout << "Robot pos: " << robot_pose.getOrigin().getX() << " " << robot_pose.getOrigin().getY();
-	std::cout << " Obst pos: " << obstacle_vector_.xposition << " " << obstacle_vector_.yposition << endl;
+	//std::cout << "Robot pos: " << robot_pose.getOrigin().getX() << " " << robot_pose.getOrigin().getY();
+	//std::cout << " Obst pos: " << obstacle_vector_.xposition << " " << obstacle_vector_.yposition << endl;
 	//std::cout << "Robot vel: " << mx << " " << my;
 	//std::cout << " Obst vel:" << obstacle_vector_.xvelocity << " " << obstacle_vector_.yvelocity << endl;
 
@@ -419,7 +426,7 @@ void LocalPlanner::dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> r
 	//if (sign > 0)
 	//	dipole_force->setValue(-fx,-fy,0);
 	dipole_force->setValue(fx,fy,0);
-	std::cout << "Original dipole force: " << dipole_force->m_floats[0] << " " << dipole_force->m_floats[1] << " " << dipole_force->m_floats[2] << endl;
+	//std::cout << "Original dipole force: " << dipole_force->m_floats[0] << " " << dipole_force->m_floats[1] << " " << dipole_force->m_floats[2] << endl;
 	if (sign < 0)
 	{
 		dipole_force->setValue(fx,fy,0);
@@ -427,12 +434,12 @@ void LocalPlanner::dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> r
 		if (fx*rx > 0)
 		{
 			dipole_force->setValue(fx,fy,0); //-fx,fy
-			ROS_INFO("Changed nothing");
+			//ROS_INFO("Changed nothing");
 		}
 		else if (fy*ry > 0)
 		{
 			dipole_force->setValue(fx,fy,0);
-			ROS_INFO("Changed fy");
+			//ROS_INFO("Changed fy");
 		}
 		/*if (fx*rx < 0)
 		{
@@ -454,12 +461,12 @@ void LocalPlanner::dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> r
 		if (fx*rx < 0)
 		{
 			dipole_force->setValue(-fx,-fy,0);
-			ROS_INFO("Changed fx");
+			//ROS_INFO("Changed fx");
 		}
 		else if (fy*ry < 0)
 		{
 			dipole_force->setValue(-fx,-fy,0);
-			ROS_INFO("Changed fy");
+			//ROS_INFO("Changed fy");
 		}
 		//std::cout << "Alternative dipole force: " << fx*cos(reversed_angles)-fx*sin(reversed_angles) << " " << fy*sin(reversed_angles)+fy*cos(reversed_angles) << endl;
 		//dipole_force->setValue(fx*cos(reversed_angles)-fx*sin(reversed_angles),fx*sin(reversed_angles)+fx*cos(reversed_angles),0);
@@ -561,6 +568,7 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 		updateVelocity(final_vector, robot_pose, &linear_velocity, &angular_velocity, f_repulsive_vector.length(), dipole_force.length(), distance_to_path);
 		cmd_vel.angular.z = angular_velocity;
 		cmd_vel.linear.x = linear_velocity;
+		//intention_pub.publish();
 		
 		minCost = 255;//std::numeric_limits<double>::max();
 		global_plan_temp.clear();
@@ -595,9 +603,9 @@ bool LocalPlanner::isGoalReached(){
 
 		costmap_->worldToMap(global_goal_odom.getOrigin().getX(),global_goal_odom.getOrigin().getY(),coordx,coordy);
 
-		std::cout << "Goal coordinate costmap: " << coordx << " " << coordy << endl;
-		std::cout << "Final orientation: " << tf::getYaw(global_goal_odom.getRotation()) << endl;
-		std::cout << "Cost: " << ((int)costmap_->getCost(coordx,coordy)) << " At position: " << coordx << " " << coordy << endl;
+		//std::cout << "Goal coordinate costmap: " << coordx << " " << coordy << endl;
+		//std::cout << "Final orientation: " << tf::getYaw(global_goal_odom.getRotation()) << endl;
+		//std::cout << "Cost: " << ((int)costmap_->getCost(coordx,coordy)) << " At position: " << coordx << " " << coordy << endl;
 
 		if (fabs(std::sqrt(dx*dx+dy*dy)) < 1.0)
 		{
@@ -683,7 +691,7 @@ bool LocalPlanner::setPlan(const std::vector<geometry_msgs::PoseStamped>& plan){
 				ROS_ERROR("IsGoalReached %s",ex.what());
 				return false;
 			}
-
+			close_to_goal = false;
 			goal_reached_ = false;
 			generate_new_path = 0;
 		}
@@ -713,12 +721,15 @@ Initialize Local planner
         // create Node Handle with name of plugin (as used in move_base for loading)
         ros::NodeHandle pn("~/" + name);
 		ros::NodeHandle path_handle;
+		ros::NodeHandle intention_node;
 
         // advertise topics (adapted global plan and predicted local trajectory)
         l_plan_pub_ = pn.advertise<nav_msgs::Path>("local_plan", 1);
 	marker_pub = pn.advertise<visualization_msgs::Marker>("visualization_marker", 1);
 	shape = visualization_msgs::Marker::CUBE;
 	new_map_pub	= path_handle.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal",1);
+	intention_pub = intention_node.advertise<std_msgs::Int32>("TX2_localplanner_intention",1);
+
 
 
 	// Added by Peter

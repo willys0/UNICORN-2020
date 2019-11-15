@@ -3,7 +3,7 @@ ukf_node_odom:
     frequency: 30
     sensor_timeout: 1
     two_d_mode: true
-    publish_tf: true
+#    publish_tf: true
     transform_time_offset: 0.0
     transform_timeout: 0.0
     print_diagnostics: true
@@ -11,17 +11,17 @@ ukf_node_odom:
     debug_out_file: /path/to/debug/file.txt
 
     map_frame: map              # Defaults to "map" if unspecified
-    odom_frame: odom            # Defaults to "odom" if unspecified
-    base_link_frame: base_link  # Defaults to "base_link" if unspecified
-    world_frame: odom           # Defaults to the value of odom_frame if unspecified
+    odom_frame: odom_gazebo            # Defaults to "odom" if unspecified
+    base_link_frame: chassis_link  # Defaults to "base_link" if unspecified
+    world_frame: odom_gazebo           # Defaults to the value of odom_frame if unspecified
 
     #odometry/wheel
     odom0: odom
-    odom0_config: [true, true,  false, 	#x,y,z
-               false, false, true,	# roll,pitch,yaw
-               false, false, false,	# x_vel,y_vel,z_vel
-               false, false, false,	# roll_vel, etc
-               false, false, false]	# x_acc, etc
+    odom0_config: [true, true,  false,
+               false, false, true,
+               false, false, false,
+               false, false, false,
+               false, false, false]
     odom0_queue_size: 5
     odom0_nodelay: true
     odom0_differential: false
@@ -90,7 +90,119 @@ ukf_node_odom:
 
 #Added by Marielle
 #Second UKF node
+ukf_node_map:
+    frequency: 30
+    sensor_timeout: 1
+    two_d_mode: true
+#    publish_tf: true
+    transform_time_offset: 0.0
+    transform_timeout: 0.0
+    print_diagnostics: true
+    debug: false
+    debug_out_file: /path/to/debug/file.txt
 
+    map_frame: map
+    odom_frame: odom_gazebo
+    base_link_frame: chassis_link
+    world_frame: map
+
+    #odometry/wheel
+#    odom0: odom
+#    odom0_config: [true, true,  false,
+#               false, false, true,
+#               false, false, false,
+#               false, false, false,
+#               false, false, false]
+#    odom0_queue_size: 5
+#    odom0_nodelay: true
+#    odom0_differential: false
+#    odom0_relative: false
+#    odom0_pose_rejection_threshold: 5
+#    odom0_twist_rejection_threshold: 1
+
+    #odometry/zed
+#    odom1: zed/odom
+#    odom1_config: [true, true, false,
+#                   false, false, false,
+#                   false, false, false,
+#                   false, false, false,
+#                   false, false, false]
+#    odom1_differential: true
+#    odom1_relative: false
+#    odom1_queue_size: 5
+#    odom1_pose_rejection_threshold: 2
+#    odom1_twist_rejection_threshold: 0.2
+#    odom1_nodelay: true
+
+    pose0: amcl_pose
+    pose0_config: [true,  true,  false,
+               false, false, false,
+               false, false, false,
+               false, false, false,
+               false, false, false]
+    pose0_differential: true
+    pose0_relative: false
+    pose0_queue_size: 5
+    pose0_rejection_threshold: 2  # Note the difference in parameter name
+    pose0_nodelay: false
+
+    #UWB
+    pose1: uwbpos
+    pose1_config: [true,  true,  false,
+                   false, false, false,
+                   false, false, false,
+                   false, false, false,
+                   false, false, false]
+    pose1_differential: true
+    pose1_relative: false
+    pose1_queue_size: 5
+    pose1_rejection_threshold: 2  # Note the difference in parameter name
+    pose1_nodelay: true
+
+    use_control: false
+#    stamped_control: false
+#    control_timeout: 0.2
+#    control_config: [true, false, false, false, false, true]
+#    acceleration_limits: [1.3, 0.0, 0.0, 0.0, 0.0, 3.4]
+#    deceleration_limits: [1.3, 0.0, 0.0, 0.0, 0.0, 4.5]
+#    acceleration_gains: [0.8, 0.0, 0.0, 0.0, 0.0, 0.9]
+#    deceleration_gains: [1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+
+    process_noise_covariance: [0.08, 0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0.08, 0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0.06, 0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0.08, 0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0.08, 0,    0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0.08, 0,     0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0.05, 0,     0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0.025, 0,    0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0.04, 0,    0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0.01, 0,    0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0.01, 0,    0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0.02, 0,    0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0.01, 0,    0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0.01, 0,
+                           0,    0,    0,    0,    0,    0,    0,     0,     0,    0,    0,    0,    0,    0,    0.015]
+
+    initial_estimate_covariance: [1e-3, 0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    1e-3, 0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    0,    1e-9, 0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    0,    0,    1e-9, 0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    0,    0,    0,    1e-9, 0,    0,    0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    0,    0,    0,    0,    1e-9, 0,    0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    1e-9, 0,    0,    0,     0,     0,     0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,    1e-9, 0,    0,     0,     0,     0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,    0,    1e-9, 0,     0,     0,     0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,    0,    0,    1e-9,  0,     0,     0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     1e-9,  0,     0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     1e-9,  0,    0,    0,
+                              0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     1e-9, 0,    0,
+                              0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    1e-9, 0,
+                              0,    0,    0,    0,    0,    0,    0,    0,    0,    0,     0,     0,     0,    0,    1e-9]
+
+    alpha: 0.001
+    kappa: 0
+    beta: 2
 
 # ------------------------------------------------------------------------------------
 # PARAMETER DESCRIPTION
