@@ -728,7 +728,7 @@ Initialize Local planner
 	marker_pub = pn.advertise<visualization_msgs::Marker>("visualization_marker", 1);
 	shape = visualization_msgs::Marker::CUBE;
 	new_map_pub	= path_handle.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal",1);
-	intention_pub = intention_node.advertise<std_msgs::Int32>("TX2_localplanner_intention",1);
+	intention_pub = intention_node.advertise<std_msgs::Int32>("/TX2_localplanner_intention",1);
 
 
 
