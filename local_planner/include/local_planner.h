@@ -1,5 +1,9 @@
-/** include the libraries you need in your planner here */
- /** for global path planner interface */
+/**
+ * 		@file local_planner.h
+ */
+
+#ifndef LOCAL_PLANNER_CPP
+#define LOCAL_PLANNER_CPP
 #include <ros/ros.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
@@ -18,9 +22,7 @@
 #include <tf/transform_datatypes.h>
 #include <nav_msgs/Path.h>
 #include <nav_msgs/Odometry.h>
- #include <visualization_msgs/Marker.h>
-
-//Added by Peter
+#include <visualization_msgs/Marker.h>
 #include <costmap_2d/layered_costmap.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <std_msgs/String.h>
@@ -28,36 +30,32 @@
 #include <vector_creation/vectors.h>
 #include <vector_creation/vector.h>
 #include <std_msgs/Int32.h>
-//#include "vectors.h"
-//#include "vector.h"
-//#include "../../../../devel/include/vector_creation/vectors.h"
-//#include "vector_creation/vector.h"
-//#include <costmap_2d>
-// -- Peter
 
  using std::string;
 
- #ifndef LOCAL_PLANNER_CPP
- #define LOCAL_PLANNER_CPP
 
-#define MAX_LINEAR_VEL 0.5
+
+#define MAX_LINEAR_VEL 0.4
 #define MIN_LINEAR_VEL 0.0
-#define MAX_ANGULAR_VEL 0.5
+#define MAX_ANGULAR_VEL 0.4
 #define MIN_ANGULAR_VEL -0.5
 #define GAMA 1.0
 #define PI 3.14159265358979323846264338327950288
 
-#define MAX_ACC_LINEAR 1.0
+#define MAX_ACC_LINEAR 0.01
 #define MAX_ACC_ANGULAR 2.0
 
 #define DT 0.10000 //It defines the granularity to create a trajectory. A higher value will create a few points on a trajectory.
+#define DELTA_T 1.0
 
 #define DIPOLE_FIELD_THRESHOLD 0.5
 #define REPULSIVE_FIELD_THRESHOLD 0.5
 
 
  namespace local_planner {
-
+/**
+ *  @brief Local planner class 
+ */
  class LocalPlanner : public nav_core::BaseLocalPlanner {
  public:
 
@@ -87,13 +85,9 @@ void dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> robot_pose, tf:
 //static const float k2 = 1;
 float k1;
 float k2;
-static const float DELTA_T = 1.0;
 int test_variable;
 int generate_new_path;
 float last_linear_velocity_;
-static const float max_linear_vel = 0.6; // default 0.4
-static const float max_angular_vel = 0.4;
-static const float max_linear_acc_ = 0.01;
 vector_creation::vector obstacle_vector_;
 bool close_to_goal;
 std::vector<tf::Vector3> final_vectors_vector;

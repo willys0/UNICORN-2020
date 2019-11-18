@@ -284,10 +284,10 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	//u = k_u*tanh(0.1*d)*tanh(1/repulsive_field_magnitude)*tanh(1/dipole_field_magnitude)*tanh(1/(distance_to_path*4));
 	//u = k_u*tanh(0.1*d)*tanh(1/(distance_to_path*2))*tanh(1/(repulsive_field_magnitude*0.5))*tanh(1/(fabs(omega*2)+1));//*tanh(1/(repulsive_field_magnitude*2)); // Speed is affected by: a constant, distance to goal and the repulsive field 
 
-	if (omega > max_angular_vel)
-		omega = max_angular_vel;
-	else if (omega < -max_angular_vel)
-		omega = -max_angular_vel;
+	if (omega > MAX_ANGULAR_VEL)
+		omega = MAX_ANGULAR_VEL;
+	else if (omega < -MAX_ANGULAR_VEL)
+		omega = -MAX_ANGULAR_VEL;
 
 	if(dipole_field_magnitude < DIPOLE_FIELD_THRESHOLD) // If we do not care about the dipole field
 	{
@@ -306,10 +306,10 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	
 
 
-	if ((last_linear_velocity_ + max_linear_acc_) < u)
-		u = max_linear_acc_ + last_linear_velocity_;
-	if (u > max_linear_vel)
-		u = max_linear_vel;
+	if ((last_linear_velocity_ + MAX_ACC_LINEAR) < u)
+		u = MAX_ACC_LINEAR + last_linear_velocity_;
+	if (u > MAX_LINEAR_VEL)
+		u = MAX_LINEAR_VEL;
 
 	last_linear_velocity_ = u;
 
@@ -337,7 +337,7 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 		intention_angle = intention_angle + 360;
 
 	std::cout << "Theta: " << theta << " Theta_d: " << theta_d << " Intention: " << intention_angle << endl; 
-	intention_pub.publish(intention_angle);
+	//intention_pub.publish(intention_angle);
 }
 
 void LocalPlanner::dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *dipole_force) 
