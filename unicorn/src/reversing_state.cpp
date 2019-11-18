@@ -4,6 +4,7 @@ REVERSINGState::REVERSINGState(ros::NodeHandle node) : move_base_clt_("move_base
 {
     cmd_vel_pub_ = node.advertise<geometry_msgs::Twist>("/unicorn/cmd_vel", 0);
     move_base_cancel_pub_ = node.advertise<actionlib_msgs::GoalID>("/move_base/cancel", 0);
+    rear_lidar_sub_ = node.subscribe("/RIO_lidarBackPublisher_avgDist", 0, &REVERSINGState::rearLidarCallback, this);
     state_identifier_ = STATE_REVERSING;
     at_desired_distance_ = false;
     man_cmd_vel_.angular.z = 0;
@@ -32,8 +33,8 @@ Command REVERSINGState::run()
     while (ros::ok())
     {
         ros::spinOnce();
-        ROS_INFO("[UNICORN State Machine] Current velocity: %f", current_vel_);
-        ROS_INFO("[UNICORN State Machine] Current yaw: %f", current_yaw_);
+//        ROS_INFO("[UNICORN State Machine] Current velocity: %f", current_vel_);
+//        ROS_INFO("[UNICORN State Machine] Current yaw: %f", current_yaw_);
         if(command.state != -1)
         {
             cancelGoal();
@@ -56,6 +57,7 @@ Command REVERSINGState::run()
 
 void REVERSINGState::rearLidarCallback(const std_msgs::Float32 &msg)
 {
+	ROS_INFO("Current Distance: %f", msg.data);
     if(msg.data <= desired_distance_)
     {
         at_desired_distance_ = true;

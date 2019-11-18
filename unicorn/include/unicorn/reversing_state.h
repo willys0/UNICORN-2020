@@ -32,7 +32,7 @@ private:
     ros::Publisher cmd_vel_pub_;
     ros::Publisher move_base_cancel_pub_;
     ros::Subscriber rear_lidar_sub_;
-    float desired_distance_ = 10; //expressed in cm
+    float desired_distance_ = 100; //expressed in mm
     bool at_desired_distance_ = false;
     double current_yaw_;
 	double current_vel_;
