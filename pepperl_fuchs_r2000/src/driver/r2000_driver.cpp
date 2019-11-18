@@ -82,9 +82,11 @@ bool R2000Driver::startCapturingTCP(int start_angle, unsigned int samples_per_sc
     
     //Added by Niklas Fasth
     //unsigned int max_num_points_scan = (samples_per_scan_ / 3600000) * 3600000-(3600000+(start_angle*2));
-    //std::cout << "\nMAXNUMPOINTSCAN: " << max_num_points_scan << std::endl;
+    unsigned int max_num_points_scan = 2400;
+    std::cout << "\nMAXNUMPOINTSCAN: " << max_num_points_scan << std::endl;
+    std::cout << "StartAngle" << start_angle << std::endl;
 
-    handle_info_ = command_interface_->requestHandleTCP(start_angle);
+    handle_info_ = command_interface_->requestHandleTCP(start_angle, max_num_points_scan);
     //End add
 
     if( !handle_info_ )

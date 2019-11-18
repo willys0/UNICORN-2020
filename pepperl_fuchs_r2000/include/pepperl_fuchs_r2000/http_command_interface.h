@@ -57,7 +57,7 @@ public:
     //! Request TCP handle
     //! @param start_angle Set start angle for scans in the range [0,3600000] (1/10000°)
     //! @returns A valid HandleInfo on success, an empty boost::optional<HandleInfo> container otherwise
-    boost::optional<HandleInfo> requestHandleTCP(int start_angle=-1800000);
+    boost::optional<HandleInfo> requestHandleTCP(int start_angle=-1800000, int max_num_points_scan=3600);
 
     //! Request UDP handle
     //! @param port Set UDP port where scanner data should be sent to

@@ -35,7 +35,7 @@
 </group>
 
 <!-- Run zed camera -->
-<group ns="zed">
+<!--<group ns="zed">
     <include file="$(find zed_wrapper)/launch/zed_camera.launch">
         <arg name="publish_tf" value="false"/>
         <arg name="publish_urdf" value="false"/>
@@ -45,7 +45,7 @@
         <arg name="depth_frame" value="zed_depth_camera"/>
         <arg name="confidence_val" value="80"/>
     </include>
-</group>
+</group> -->
 
 
 <!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->

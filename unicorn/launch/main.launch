@@ -9,7 +9,7 @@
 
 <arg name="map_file" value="$(find unicorn_slam)/maps/canteen.yaml"/>
 
-<arg name="lidar_ip" default="192.168.0.100" />
+<arg name="lidar_ip" default="192.168.1.58"/>
 
 <rosparam param="frame_id">base_link</rosparam>
 
