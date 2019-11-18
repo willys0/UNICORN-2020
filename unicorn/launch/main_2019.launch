@@ -61,7 +61,6 @@
  leaf_size: 0.02
 </rosparam>
 </node>
-</group>
 
 <!-- load joint controller configurations from YAML file to parameter server -->
 <rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
@@ -76,14 +75,14 @@
 </node>
 
 <!-- Starts interface between automower and unicorn to enable backward driving -->
-<node name="range_sensor_driver" 
+<!-- <node name="range_sensor_driver" 
 	pkg="unicorn" 
 	type="range_sensor_driver" 
 	output="screen">
 <rosparam>
  serial_port: "/dev/ttyACM0"
 </rosparam>
-</node>
+</node> -->
 
 
 <!-- Start the am_driver -->
@@ -98,11 +97,20 @@
 	<param name="jsonFile" value="$(find am_driver_safe)/config/automower_hrp.json" type="string" />
 </node> 
 
+<!-- Start R2000 Lidar node -->
+<node pkg="pepperl_fuchs_r2000" type="r2000_node" name="TX2_r2000Lidar" output="screen">
+    <param name="scanner_ip" value="192.168.1.58"/>
+    <param name="frame_id" value="$(arg scan_topic)"/>
+    <param name="scan_frequency" value="10"/>
+    <param name="samples_per_scan" value="3600"/>
+    <param name="start_angle" value="-1800000"/>
+</node>
+
 <!-- Start the Sick LMS111 driver -->
-<node pkg="lms1xx" name="lms1xx" type="LMS1xx_node">
+<!-- <node pkg="lms1xx" name="lms1xx" type="LMS1xx_node">
 	<param name="host" value="$(arg lidar_ip)" />
 	<param name="frame_id" value="base_laser"/>
-</node>
+</node> -->
 
 <!-- Launch Move Base -->
 <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
@@ -127,12 +135,12 @@
 <!-- <node name="initialpose_publisher" pkg="unicorn" type="pub_initialpose"/> -->
 
 <!-- Starts laser filter to enable limitation of laserscan angle -->
-<node name="laser_filter" pkg="unicorn" type="laser_scan_filter" output="screen">
+<!-- <node name="laser_filter" pkg="unicorn" type="laser_scan_filter" output="screen">
 <rosparam>
  upper_angle: 1.57
  lower_angle: -1.57
 </rosparam>
-</node>
+</node> -->
 
 
 <node pkg="robot_localization" type="ukf_localization_node" name="ukf_localization_node" clear_params="true">

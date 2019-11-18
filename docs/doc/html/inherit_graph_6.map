@@ -1,3 +1,6 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classRangeSensor.html" title="Class for one ultrasonic range sensor. " alt="" coords="5,5,107,32"/>
+<area shape="rect" id="node1" href="$classbenchmark_1_1BenchmarkReporter.html" title="benchmark::BenchmarkReporter" alt="" coords="5,56,216,83"/>
+<area shape="rect" id="node2" href="$classbenchmark_1_1ConsoleReporter.html" title="benchmark::ConsoleReporter" alt="" coords="264,5,456,32"/>
+<area shape="rect" id="node3" href="$classbenchmark_1_1CSVReporter.html" title="benchmark::CSVReporter" alt="" coords="274,56,446,83"/>
+<area shape="rect" id="node4" href="$classbenchmark_1_1JSONReporter.html" title="benchmark::JSONReporter" alt="" coords="270,107,450,133"/>
 </map>
