@@ -2,6 +2,14 @@
 #for more details on the parameters in this file, and a full list of the parameters used by the costmaps, 
 #please see http://www.ros.org/wiki/costmap_2d.
 
+plugins:
+  #- {name: static_layer,      type: "costmap_2d::StaticLayer"}
+  #- {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
+  #- {name: sonar_layer,       type: "range_sensor_layer::RangeSensorLayer"}
+  #- {name: voxel_layer,       type: "costmap_2d::VoxelLayer"}
+  #- {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
+
+
 #The footprint of the robot and associated padding
 footprint: [[-0.5, -0.25], [-0.5, 0.25], [0.2, 0.25], [0.2, -0.25]]
 footprint_padding: 0.0
@@ -25,11 +33,11 @@ obstacle_layer:
   raytrace_range: 1.9
 
   #Cost function parameters
-  inflation_radius: 0.55
-  cost_scaling_factor: 10.0
+  inflation_radius: 0.7
+  cost_scaling_factor: 8.0
 
   #The cost at which a cell is considered an obstacle when a map is read from the map_server
-  lethal_cost_threshold: 254
+  lethal_cost_threshold: 250
 
   #Configuration for the sensors that the costmap will use to update a map
   observation_sources: laser_scan_sensor point_cloud_sensor
