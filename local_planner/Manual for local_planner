@@ -1,0 +1,3 @@
+
+At the function repulsiveForceMatrix the value of dmax needs to be adjusted.
+dmax ~= 1 + robot_radius / 2 ---- in meters

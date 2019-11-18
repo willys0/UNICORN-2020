@@ -43,3 +43,4 @@ odom_alpha5:      0.1    # 0.2,0.1
 odom_frame_id:    odom_gazebo
 base_frame_id:    chassis_link
 global_frame_id: map 
+#tf_broadcast: true #Added by peter

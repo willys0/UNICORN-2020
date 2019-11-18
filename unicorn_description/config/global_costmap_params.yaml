@@ -13,7 +13,8 @@ global_costmap:
   update_frequency: 1.0
   use_first_map_only: True
   static_map: True
+  publish_frequency: 0.5
 
   inflation_layer:
-     inflation_radius: 4
-     cost_scaling_factor: 3
+     inflation_radius: 0.60 # 4
+     cost_scaling_factor: 1 # 3

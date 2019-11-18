@@ -17,11 +17,11 @@ ukf_node_odom:
 
     #odometry/wheel
     odom0: odom
-    odom0_config: [true, true,  false,
-               false, false, true,
-               false, false, false,
-               false, false, false,
-               false, false, false]
+    odom0_config: [true, true,  false, 	#x,y,z
+               false, false, true,	# roll,pitch,yaw
+               false, false, false,	# x_vel,y_vel,z_vel
+               false, false, false,	# roll_vel, etc
+               false, false, false]	# x_acc, etc
     odom0_queue_size: 5
     odom0_nodelay: true
     odom0_differential: false
