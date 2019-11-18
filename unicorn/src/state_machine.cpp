@@ -116,6 +116,7 @@ void StateMachine::cmdCallback(const unicorn::command &msg)
     new_cmd.param2 = msg.param2;
     new_cmd.param3 = msg.param3;
     current_state_->setNewCmd(new_cmd);
+    return;
 }
 
 void StateMachine::odomCallback(const nav_msgs::Odometry &msg)
@@ -129,8 +130,7 @@ void StateMachine::odomCallback(const nav_msgs::Odometry &msg)
 
 void StateMachine::updateAndPublishState(int new_state)
 {
-    std::string state_str = getStateString();
-    ROS_INFO("[UNICORN State Machine] Setting new state to: %s", state_str.c_str());
+    ROS_INFO("[UNICORN State Machine] Setting new state to: %s", getStateString().c_str());
     std_msgs::Int32 new_state_msg;
     new_state_msg.data = new_state;
     state_pub_.publish(new_state_msg);
