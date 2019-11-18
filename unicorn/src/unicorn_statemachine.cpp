@@ -120,11 +120,15 @@ UnicornState::UnicornState()
 	amcl_global_clt_ = n_.serviceClient<std_srvs::Empty>("/global_localization");
 	cmd_vel_pub_ = n_.advertise<geometry_msgs::Twist>("/unicorn/cmd_vel", 0);
 
+
+
 	lift_pub_ = n_.advertise<std_msgs::Int8>("/lift", 0);
 	lift_publisher = n_.advertise<std_msgs::Int8>("/Lifting", 0); //ADDED BY MUJI
 	lift_subscriber = n_.subscribe("Lifting", 0, &UnicornState::LiftCallback, this);
 	odom_sub_ = n_.subscribe(odom_topic.c_str(), 0, &UnicornState::odomCallback, this);
+
 	
+
 	rear_lidar_sub_ = n_.subscribe("/RIO_lidarBack_state", 0, &UnicornState::lidarBackCallback, this);
 	acc_cmd_srv_ = n_.advertiseService("cmd_charlie", &UnicornState::accGoalServer, this);
 	//Change topic to /bumper_state from rearBumper
@@ -546,6 +550,7 @@ void UnicornState::active()
 		printUsage();
 		break;
 
+
 	case current_state::ALIGNING:
 
 		if (!move_base_active_)
@@ -584,6 +589,45 @@ void UnicornState::active()
 		cmd_vel_pub_.publish(man_cmd_vel_);
 		break;
 
+=======
+
+	case current_state::ALIGNING:
+
+		if (!move_base_active_)
+		{
+			ROS_INFO("[unicorn_statemachine] Aligning with garbage disposal...");
+
+			sendGoal(refuse_bin_pose_.x + 1.5 * cos(refuse_bin_pose_.yaw), refuse_bin_pose_.y + 1.5 * sin(refuse_bin_pose_.yaw), refuse_bin_pose_.yaw);
+			move_base_active_ = 1;
+
+			return;
+		}
+		if (move_base_clt_.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+		{
+			move_base_active_ = 0;
+			// reversing_ = 1;
+			updateAndPublishState(current_state::ENTERING);
+
+			//loading_state_ = current_state::ENTERING;
+			ROS_INFO("[unicorn_statemachine] Entering garbage disposal");
+		}
+		break;
+
+	case current_state::ENTERING:
+		man_cmd_vel_.angular.z = 0;
+		man_cmd_vel_.linear.x = -0.1;
+		reversing_ = true;
+		ROS_INFO("[unicorn_statemachine] Current vel: %f", current_vel_);
+		ROS_INFO("[unicorn_statemachine] atDesiredDistance_  %d", atDesiredDistance_);
+		if (atDesiredDistance_)
+		{
+			man_cmd_vel_.linear.x = 0.0;
+			cancelGoal();
+			updateAndPublishState(current_state::LIFT);
+			ROS_INFO("[unicorn_statemachine] Entered lifting mode. Waiting for lift completion message.");
+		}
+		cmd_vel_pub_.publish(man_cmd_vel_);
+		break;
 		/** Moves the machine close to a wall.
 			* Slows down the machine when range to wall is below 30cm.
 	// 		*/

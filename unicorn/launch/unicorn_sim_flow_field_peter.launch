@@ -56,7 +56,6 @@
 		<rosparam file="$(find unicorn_description)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
 		<rosparam file="$(find unicorn_description)/config/local_costmap_params_peter.yaml" command="load" />
 		<rosparam file="$(find unicorn_description)/config/global_costmap_params.yaml" command="load" />
-<!--<rosparam file="$(find unicorn)/launch/move_base_params_peter.yaml" command="load" />-->
 		<remap from="cmd_vel" to="/unicorn/cmd_vel"/> 
 	</node>
 	

@@ -40,18 +40,18 @@ int sgn(T val)
 /** Current state of the robot. */
 namespace current_state
 {
-	enum
-	{
-		AUTONOMOUS,
-		MANUAL,
-		LOADING,
-		IDLE,
-		ALIGNING,
-		EXITING,
-		ENTERING,
-		LIFT,
-		REVERSING
-	};
+enum
+{
+	AUTONOMOUS,
+	MANUAL,
+	LOADING,
+	IDLE,
+	ALIGNING,
+	EXITING,
+	ENTERING,
+	LIFT,
+	REVERSING
+};
 }
 
 /** @brief Storage class for refuse bin position*/
