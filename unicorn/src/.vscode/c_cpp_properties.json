@@ -1,0 +1,35 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/devel/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_prod_ws/devel/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_catkin_ws/devel/include/**",
+                "/opt/ros/kinetic/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/hrp/am_driver_legacy/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/UNICORN-2019/am_driver_safe/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/hrp/am_gazebo_controller_2wd/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/hrp/am_gazebo_sensors/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/hrp/am_gazebo_wheelencoder/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/hrp/am_gazebo_wire/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/hrp/am_vive_pos/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/hrp/hq_decision_making/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/hrp/hq_robot_task/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/UNICORN-2019/thetastar_planner/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/UNICORN-2019/unicorn/include/**",
+                "/home/goldeorange/catkin_workspaces/unicorn_refactor_state_machine/src/unicorn_cmd_interface/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

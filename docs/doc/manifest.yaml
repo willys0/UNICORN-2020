@@ -17,7 +17,8 @@ depends:
 description: The unicorn package
 license: TODO
 maintainers: ventov <ventov@todo.todo>
-msgs: []
+msgs:
+- command
 package_type: package
 repo_url: ''
 srvs:

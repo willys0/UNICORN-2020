@@ -1,0 +1,15 @@
+<map id="iter_impl.hpp" name="iter_impl.hpp">
+<area shape="rect" id="node5" href="$exceptions_8hpp.html" title="nlohmann/detail/exceptions.hpp" alt="" coords="1061,87,1267,114"/>
+<area shape="rect" id="node11" href="$macro__scope_8hpp.html" title="nlohmann/detail/macro\l_scope.hpp" alt="" coords="1253,169,1406,211"/>
+<area shape="rect" id="node15" href="$internal__iterator_8hpp.html" title="nlohmann/detail/iterators\l/internal_iterator.hpp" alt="" coords="1466,80,1630,121"/>
+<area shape="rect" id="node16" href="$primitive__iterator_8hpp.html" title="nlohmann/detail/iterators\l/primitive_iterator.hpp" alt="" coords="1687,169,1851,211"/>
+<area shape="rect" id="node18" href="$cpp__future_8hpp.html" title="nlohmann/detail/meta\l/cpp_future.hpp" alt="" coords="43,259,189,300"/>
+<area shape="rect" id="node19" href="$type__traits_8hpp.html" title="nlohmann/detail/meta\l/type_traits.hpp" alt="" coords="400,80,547,121"/>
+<area shape="rect" id="node28" href="$value__t_8hpp.html" title="nlohmann/detail/value\l_t.hpp" alt="" coords="626,169,774,211"/>
+<area shape="rect" id="node9" href="$position__t_8hpp.html" title="nlohmann/detail/input\l/position_t.hpp" alt="" coords="1083,169,1229,211"/>
+<area shape="rect" id="node13" href="$hedley_8hpp.html" title="nlohmann/thirdparty\l/hedley/hedley.hpp" alt="" coords="1289,259,1425,300"/>
+<area shape="rect" id="node20" href="$iterator__traits_8hpp.html" title="nlohmann/detail/iterators\l/iterator_traits.hpp" alt="" coords="386,169,550,211"/>
+<area shape="rect" id="node22" href="$detected_8hpp.html" title="nlohmann/detail/meta\l/detected.hpp" alt="" coords="215,169,361,211"/>
+<area shape="rect" id="node23" href="$json__fwd_8hpp.html" title="nlohmann/json_fwd.hpp" alt="" coords="798,177,957,203"/>
+<area shape="rect" id="node21" href="$void__t_8hpp.html" title="nlohmann/detail/meta\l/void_t.hpp" alt="" coords="315,259,461,300"/>
+</map>
