@@ -1,0 +1,23 @@
+<package format="2">
+  <name>vector_creation</name>
+  <version>2.7.0</version>
+  <description>
+    This package will create a vector from 2 locations.
+  </description>
+
+  <maintainer email="support@stereolabs.com">STEREOLABS</maintainer>
+  <license>MIT</license>
+
+  <url type="website">http://stereolabs.com/</url>
+  <url type="repository">https://github.com/stereolabs/zed-ros-wrapper</url>
+  <url type="bugtracker">https://github.com/stereolabs/zed-ros-wrapper/issues</url>
+
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>roscpp</depend>
+  <depend>geometry_msgs</depend>
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
+
+</package>

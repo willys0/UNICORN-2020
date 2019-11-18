@@ -25,9 +25,9 @@ local_costmap:
   rolling_window: true
   width: 4.0
   height: 6.0
-  resolution: 0.15
-  origin_x: 0.25
-  origin_y: 0.0
+  resolution: 0.1
+  #origin_x: 0.25
+  #origin_y: 0.0
   
   
   inflation_layer:

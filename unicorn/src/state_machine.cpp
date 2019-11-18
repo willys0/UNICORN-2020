@@ -108,7 +108,7 @@ void StateMachine::initGlobalLocalisation()
 
 void StateMachine::cmdCallback(const unicorn::command &msg)
 {
-    ROS_INFO("[Unicorn State Machine]: New command has been received.");
+    ROS_INFO("[Unicorn State Machine]: New command has been received");
     Command new_cmd;
 
     new_cmd.state = msg.state;
@@ -130,7 +130,7 @@ void StateMachine::odomCallback(const nav_msgs::Odometry &msg)
 
 void StateMachine::updateAndPublishState(int new_state)
 {
-    ROS_INFO("[UNICORN State Machine] Setting new state to: %s", getStateString().c_str());
+    ROS_INFO("[UNICORN State Machine] Updating state to: %s", getStateString().c_str());
     std_msgs::Int32 new_state_msg;
     new_state_msg.data = new_state;
     state_pub_.publish(new_state_msg);

@@ -9,6 +9,7 @@
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
+      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="namespaces.html"><span>Namespaces</span></a></li>
       <li class="current"><a href="annotated.html"><span>Classes</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
@@ -17,6 +18,7 @@
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="annotated.html"><span>Class&#160;List</span></a></li>
+      <li><a href="inherits.html"><span>Class&#160;Hierarchy</span></a></li>
       <li><a href="functions.html"><span>Class&#160;Members</span></a></li>
     </ul>
   </div>
@@ -34,18 +36,28 @@
 <p>Class to define a PID controller.  
  <a href="classPidController.html#details">More...</a></p>
 
-<p><code>#include &lt;<a class="el" href="unicorn__statemachine_8h_source.html">unicorn_statemachine.h</a>&gt;</code></p>
+<p><code>#include &lt;<a class="el" href="pid__controller_8h_source.html">pid_controller.h</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a552221766731078fadc55bcc8e5c823c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPidController.html#a552221766731078fadc55bcc8e5c823c">control</a> (float &amp;var, float error)</td></tr>
 <tr class="memdesc:a552221766731078fadc55bcc8e5c823c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate pidterm and control variable.  <a href="#a552221766731078fadc55bcc8e5c823c">More...</a><br /></td></tr>
 <tr class="separator:a552221766731078fadc55bcc8e5c823c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a552221766731078fadc55bcc8e5c823c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPidController.html#a552221766731078fadc55bcc8e5c823c">control</a> (float &amp;var, float error)</td></tr>
+<tr class="memdesc:a552221766731078fadc55bcc8e5c823c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate pidterm and control variable.  <a href="#a552221766731078fadc55bcc8e5c823c">More...</a><br /></td></tr>
+<tr class="separator:a552221766731078fadc55bcc8e5c823c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5c5cd6a232489de2d8221225e1195cdd"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPidController.html#a5c5cd6a232489de2d8221225e1195cdd">limit</a> (float term)</td></tr>
+<tr class="separator:a5c5cd6a232489de2d8221225e1195cdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5c5cd6a232489de2d8221225e1195cdd"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPidController.html#a5c5cd6a232489de2d8221225e1195cdd">limit</a> (float term)</td></tr>
 <tr class="separator:a5c5cd6a232489de2d8221225e1195cdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a467063e725dc2da210971d6511bebf91"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPidController.html#a467063e725dc2da210971d6511bebf91">PidController</a> (float Kp, float Ki, float Kd, float tolerance)</td></tr>
 <tr class="memdesc:a467063e725dc2da210971d6511bebf91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor to initialize PID gains and error tolerance.  <a href="#a467063e725dc2da210971d6511bebf91">More...</a><br /></td></tr>
 <tr class="separator:a467063e725dc2da210971d6511bebf91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a467063e725dc2da210971d6511bebf91"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPidController.html#a467063e725dc2da210971d6511bebf91">PidController</a> (float Kp, float Ki, float Kd, float tolerance)</td></tr>
+<tr class="memdesc:a467063e725dc2da210971d6511bebf91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor to initialize PID gains and error tolerance.  <a href="#a467063e725dc2da210971d6511bebf91">More...</a><br /></td></tr>
+<tr class="separator:a467063e725dc2da210971d6511bebf91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb3107cc37e35cf3f2302c0eff9df4cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPidController.html#afb3107cc37e35cf3f2302c0eff9df4cb">setLimit</a> (double lower, double upper)</td></tr>
+<tr class="separator:afb3107cc37e35cf3f2302c0eff9df4cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb3107cc37e35cf3f2302c0eff9df4cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classPidController.html#afb3107cc37e35cf3f2302c0eff9df4cb">setLimit</a> (double lower, double upper)</td></tr>
 <tr class="separator:afb3107cc37e35cf3f2302c0eff9df4cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -72,7 +84,7 @@ Private Attributes</h2></td></tr>
 <div class="textblock"><p>Class to define a PID controller. </p>
 <p>Controls a float variable based on input error. </p>
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8h_source.html#l00069">69</a> of file <a class="el" href="unicorn__statemachine_8h_source.html">unicorn_statemachine.h</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8h_source.html#l00001">1</a> of file <a class="el" href="pid__controller_8h_source.html">pid_controller.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a class="anchor" id="a467063e725dc2da210971d6511bebf91"></a>
 <div class="memitem">
@@ -121,7 +133,56 @@ Private Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8cpp_source.html#l00020">20</a> of file <a class="el" href="unicorn__statemachine_8cpp_source.html">unicorn_statemachine.cpp</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8cpp_source.html#l00003">3</a> of file <a class="el" href="pid__controller_8cpp_source.html">pid_controller.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a467063e725dc2da210971d6511bebf91"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">PidController::PidController </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>Kp</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>Ki</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>Kd</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>tolerance</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Constructor to initialize PID gains and error tolerance. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">Kp</td><td>Proportional gain. </td></tr>
+    <tr><td class="paramname">Ki</td><td>Integral gain. </td></tr>
+    <tr><td class="paramname">Kd</td><td>Derivative gain. </td></tr>
+    <tr><td class="paramname">tolerance</td><td>error tolerance. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -159,7 +220,42 @@ Private Attributes</h2></td></tr>
   </dd>
 </dl>
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8cpp_source.html#l00046">46</a> of file <a class="el" href="unicorn__statemachine_8cpp_source.html">unicorn_statemachine.cpp</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8cpp_source.html#l00029">29</a> of file <a class="el" href="pid__controller_8cpp_source.html">pid_controller.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a552221766731078fadc55bcc8e5c823c"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PidController::control </td>
+          <td>(</td>
+          <td class="paramtype">float &amp;&#160;</td>
+          <td class="paramname"><em>var</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>error</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate pidterm and control variable. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">error</td><td>error of output response </td></tr>
+    <tr><td class="paramname">var</td><td>new input into pid loop </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
@@ -177,7 +273,23 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8cpp_source.html#l00033">33</a> of file <a class="el" href="unicorn__statemachine_8cpp_source.html">unicorn_statemachine.cpp</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8cpp_source.html#l00016">16</a> of file <a class="el" href="pid__controller_8cpp_source.html">pid_controller.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="a5c5cd6a232489de2d8221225e1195cdd"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float PidController::limit </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>term</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -205,7 +317,33 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8cpp_source.html#l00027">27</a> of file <a class="el" href="unicorn__statemachine_8cpp_source.html">unicorn_statemachine.cpp</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8cpp_source.html#l00010">10</a> of file <a class="el" href="pid__controller_8cpp_source.html">pid_controller.cpp</a>.</p>
+
+</div>
+</div>
+<a class="anchor" id="afb3107cc37e35cf3f2302c0eff9df4cb"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PidController::setLimit </td>
+          <td>(</td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>lower</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>upper</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -228,7 +366,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8h_source.html#l00089">89</a> of file <a class="el" href="unicorn__statemachine_8h_source.html">unicorn_statemachine.h</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8h_source.html#l00022">22</a> of file <a class="el" href="pid__controller_8h_source.html">pid_controller.h</a>.</p>
 
 </div>
 </div>
@@ -250,7 +388,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8h_source.html#l00089">89</a> of file <a class="el" href="unicorn__statemachine_8h_source.html">unicorn_statemachine.h</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8h_source.html#l00022">22</a> of file <a class="el" href="pid__controller_8h_source.html">pid_controller.h</a>.</p>
 
 </div>
 </div>
@@ -272,7 +410,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8h_source.html#l00089">89</a> of file <a class="el" href="unicorn__statemachine_8h_source.html">unicorn_statemachine.h</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8h_source.html#l00022">22</a> of file <a class="el" href="pid__controller_8h_source.html">pid_controller.h</a>.</p>
 
 </div>
 </div>
@@ -294,7 +432,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8h_source.html#l00092">92</a> of file <a class="el" href="unicorn__statemachine_8h_source.html">unicorn_statemachine.h</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8h_source.html#l00025">25</a> of file <a class="el" href="pid__controller_8h_source.html">pid_controller.h</a>.</p>
 
 </div>
 </div>
@@ -316,7 +454,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8h_source.html#l00090">90</a> of file <a class="el" href="unicorn__statemachine_8h_source.html">unicorn_statemachine.h</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8h_source.html#l00023">23</a> of file <a class="el" href="pid__controller_8h_source.html">pid_controller.h</a>.</p>
 
 </div>
 </div>
@@ -338,7 +476,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8h_source.html#l00089">89</a> of file <a class="el" href="unicorn__statemachine_8h_source.html">unicorn_statemachine.h</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8h_source.html#l00022">22</a> of file <a class="el" href="pid__controller_8h_source.html">pid_controller.h</a>.</p>
 
 </div>
 </div>
@@ -360,7 +498,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8h_source.html#l00091">91</a> of file <a class="el" href="unicorn__statemachine_8h_source.html">unicorn_statemachine.h</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8h_source.html#l00024">24</a> of file <a class="el" href="pid__controller_8h_source.html">pid_controller.h</a>.</p>
 
 </div>
 </div>
@@ -382,12 +520,14 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Definition at line <a class="el" href="unicorn__statemachine_8h_source.html#l00092">92</a> of file <a class="el" href="unicorn__statemachine_8h_source.html">unicorn_statemachine.h</a>.</p>
+<p>Definition at line <a class="el" href="pid__controller_8h_source.html#l00025">25</a> of file <a class="el" href="pid__controller_8h_source.html">pid_controller.h</a>.</p>
 
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following files:<ul>
+<li><a class="el" href="pid__controller_8h_source.html">pid_controller.h</a></li>
 <li><a class="el" href="unicorn__statemachine_8h_source.html">unicorn_statemachine.h</a></li>
+<li><a class="el" href="pid__controller_8cpp_source.html">pid_controller.cpp</a></li>
 <li><a class="el" href="unicorn__statemachine_8cpp_source.html">unicorn_statemachine.cpp</a></li>
 </ul>
 </div><!-- contents -->
@@ -396,7 +536,7 @@ Private Attributes</h2></td></tr>
 <hr size="1"><div style="align: right;">
 <a href="http://wiki.ros.org/unicorn">unicorn</a><br />
 Author(s): </br />
-<small>autogenerated on Wed Sep 25 2019 09:34:04</small>
+<small>autogenerated on Mon Nov 18 2019 08:50:47</small>
 </div>
 </body>
 </html>
