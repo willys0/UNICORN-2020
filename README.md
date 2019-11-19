@@ -27,6 +27,7 @@ sudo apt-get install ros-kinetic-navigation
 sudo apt-get install ros-kinetic-range-sensor-layer
 sudo apt-get install ros-kinetic-global-planner
 sudo apt-get install ros-kinetic-teb-local-planner
+sudo apt-get install ros-kinetic-robot-localization
 cd ~/catkin_ws/src
 git clone https://github.com/HusqvarnaResearch/hrp.git
 git clone https://github.com/nlohmann/json.git
