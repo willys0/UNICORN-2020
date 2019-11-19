@@ -235,7 +235,7 @@ void LocalPlanner::findClosestObjectEuclidean(int *deg, float *distance_to_obsta
 		}
 	}
 
-	std::cout << "Added obstacle at position: " << min_x << " " << min_y << endl;
+	//std::cout << "Added obstacle at position: " << min_x << " " << min_y << endl;
 	min_dist = fabs(min_dist - 1); // Makes the grid next to an obstacle to have a distance of 0 to an obstacle
 	dist_x = round(pos_x - min_x);
     dist_y = round(pos_y - min_y);
@@ -628,7 +628,7 @@ bool LocalPlanner::isGoalReached(){
 				generate_new_path = 1;
 				return true;
 			}		
-			else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.2 && fabs(delta_orient) < (30 * PI / 180))
+			else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.4 && fabs(delta_orient) < (30 * PI / 180))
 			{
 				goal_reached_ = true;
 				ROS_INFO("Goal reached close to %f %f", global_goal_odom.getOrigin().getX(), global_goal_odom.getOrigin().getY());
