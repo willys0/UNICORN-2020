@@ -4,35 +4,23 @@
 	
 <!-- roslaunch arguments -->
 <arg name="debug" default="false"/>
-<arg name="use_gmapping" default="true"/>
 <arg name="scan_topic" value="/TX2_r2000Lidar/laserScan"/>
 <arg name="map_file" value="$(find unicorn_slam)/maps/work_room.yaml"/>
-<arg name="lidar_ip" default="192.168.0.100" />
+<arg name="lidar_ip" default="192.168.1.58" />
 
 <!-- Joint pos gui -->
 <param name="use_gui" value="false"/>
 
-<group if="$(arg use_gmapping)">
+<rosparam param="odom">odom_gazebo</rosparam>
+<rosparam param="global_local">false</rosparam>
+<rosparam param="frame_id">chassis_link</rosparam>
 
-	<!-- Launch grid-mapping -->
-	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
-		<rosparam file="$(find unicorn_slam)/config/gmapping_default.yaml"/>
-		<remap from="scan" to="$(arg scan_topic)"/>
-	</node>
-	
-</group>
+<!-- Launch grid-mapping -->
+<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
+	<rosparam file="$(find unicorn_slam)/config/gmapping_default.yaml"/>
+	<remap from="scan" to="$(arg scan_topic)"/>
+</node>
 
-<group unless="$(arg use_gmapping)">
-	<rosparam param="global_local">false</rosparam>
-	<!-- Run the map server -->
-	<node pkg="map_server" type="map_server" args="$(arg map_file)" respawn="true" name="map" />
-
-	<!--- Run AMCL -->
-	<node pkg="amcl" type="amcl" name="amcl" output="screen">
-		<rosparam command="load" file="$(find unicorn_slam)/config/amcl.yaml"/>
-		<remap from="scan" to="$(arg scan_topic)"/>
-	</node>	
-</group>
 
 <!-- Run zed camera -->
 <!--<group ns="zed">
@@ -49,7 +37,7 @@
 
 
 <!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->
-<node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
+<!--node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
 <node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid pcl_manager" output="screen">
 <remap from="~input" to="/zed/point_cloud/cloud_registered" />
 <remap from="~output" to="cloud_filtered" />
@@ -60,7 +48,7 @@
  filter_limit_negative: False
  leaf_size: 0.02
 </rosparam>
-</node>
+</node-->
 
 <!-- load joint controller configurations from YAML file to parameter server -->
 <rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
@@ -68,11 +56,11 @@
 <!-- Urdf xml robot description loaded on the Parameter Server-->
 <param name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target.urdf.xacro'" />
 <!-- Starts interface between automower and unicorn to enable backward driving -->
-<node name="am_unicorn_interface" 
+<!--node name="am_unicorn_interface" 
 	pkg="unicorn" 
 	type="am_unicorn_interface" 
 	output="screen">
-</node>
+</node-->
 
 <!-- Starts interface between automower and unicorn to enable backward driving -->
 <!-- <node name="range_sensor_driver" 
@@ -99,7 +87,7 @@
 
 <!-- Start R2000 Lidar node -->
 <node pkg="pepperl_fuchs_r2000" type="r2000_node" name="TX2_r2000Lidar" output="screen">
-    <param name="scanner_ip" value="192.168.1.58"/>
+    <param name="scanner_ip" value="$(arg lidar_ip)"/>
     <param name="frame_id" value="base_laser"/>
     <param name="scan_frequency" value="10"/>
     <param name="samples_per_scan" value="3600"/>
@@ -119,8 +107,8 @@
 	<param name="base_local_planner" value="local_planner/LocalPlanner" />
 	<rosparam file="$(find unicorn)/config/costmap_common_params_zed.yaml" command="load" ns="global_costmap" />
 	<rosparam file="$(find unicorn)/config/costmap_common_params_zed.yaml" command="load" ns="local_costmap" />
-	<rosparam file="$(find unicorn)/config/local_costmap_params.yaml" command="load" />
-	<rosparam file="$(find unicorn)/config/global_costmap_params.yaml" command="load" />
+	<rosparam file="$(find unicorn)/config/local_costmap_params_peter.yaml" command="load" />
+	<rosparam file="$(find unicorn)/config/global_costmap_params_peter.yaml" command="load" />
 	<remap from="cmd_vel" to="/unicorn/cmd_vel"/>
 </node>
 <!-- source that publishes the joint positions as a sensor_msgs/JointState -->
