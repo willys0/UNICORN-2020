@@ -3,7 +3,7 @@
 
 	
 <!-- roslaunch arguments -->
-<arg name="debug" default="false"/>
+<arg name="debug" default="true"/>
 <arg name="use_gmapping" default="true"/>
 <arg name="scan_topic" value="/TX2_r2000Lidar/laserScan"/>
 <arg name="map_file" value="$(find unicorn_slam)/maps/work_room.yaml"/>
@@ -13,7 +13,7 @@
 <param name="use_gui" value="false"/>
 
 <group if="$(arg use_gmapping)">
-
+	
 	<!-- Launch grid-mapping -->
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
 		<rosparam file="$(find unicorn_slam)/config/gmapping_default.yaml"/>
@@ -35,19 +35,17 @@
 </group>
 
 <!-- Run zed camera -->
-<!--<group ns="zed">
-    <include file="$(find zed_wrapper)/launch/zed_camera.launch">
-        <arg name="publish_tf" value="false"/>
-        <arg name="publish_urdf" value="false"/>
-        <arg name="odometry_frame" value="odom"/>
-        <arg name="base_frame" value="zed_center"/>
-        <arg name="camera_frame" value="zed_left_camera"/>
-        <arg name="depth_frame" value="zed_depth_camera"/>
-        <arg name="confidence_val" value="80"/>
-    </include>
-</group> -->
-
-
+<group ns="zed">
+<include file="$(find zed_wrapper)/launch/zed_camera.launch">
+	<arg name="gpu_id" value="-1"/>
+	<arg name="publish_tf" value="false"/>
+	<arg name="publish_urdf" value="false"/>
+	<arg name="odometry_frame" value="odom"/>
+	<arg name="base_frame" value="zed_center"/>
+	<arg name="camera_frame" value="zed_left_camera"/>
+	<arg name="depth_frame" value="zed_depth_camera"/> 
+</include>
+</group>  
 <!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->
 <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
 <node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid pcl_manager" output="screen">
@@ -86,8 +84,8 @@
 
 
 <!-- Start the am_driver -->
-<!--node name="am_driver_safe" pkg="am_driver_safe" type="am_driver_safe_node" output="screen">
-	<param name="serialPort" value="/dev/ttyACM1" type="str" />
+<node name="am_driver_safe" pkg="am_driver_safe" type="am_driver_safe_node" output="screen">
+	<param name="serialPort" value="/dev/ttyACM0" type="str" />
 	<param name="printCharge" value="false"/>
 	<param name="publishTf" value="1"/>
 	<param name="pitchAndRoll" value="false"/>
@@ -95,7 +93,7 @@
 	<param name="serialLog" value="false"/>
 	<param name="hil" value="0"/>
 	<param name="jsonFile" value="$(find am_driver_safe)/config/automower_hrp.json" type="string" />
-</node--> 
+</node> 
 
 <!-- Start R2000 Lidar node -->
 <node pkg="pepperl_fuchs_r2000" type="r2000_node" name="TX2_r2000Lidar" output="screen">

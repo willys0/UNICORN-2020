@@ -46,8 +46,8 @@
   <xacro:include filename="$(find am_description)/urdf/materials.urdf.xacro" />
 
 <!-- UWB Tag -->
-  <xacro:arg name="uwb_xyz" default="0.23437 0.0 0.70758" />
-  <xacro:include filename="$(find unicorn_description)/urdf/uwb_tag.urdf.xacro" />
+<!--  <xacro:arg name="uwb_xyz" default="0.23437 0.0 0.70758" />
+  <xacro:include filename="$(find unicorn_description)/urdf/uwb_tag.urdf.xacro" /> -->
 
   <link
     name="base_link">
@@ -141,13 +141,13 @@
 
 <!-- UWB Joint Marielle -->
 
-   <uwbtag frame="uwb_t" robot_namespace="$(arg robot_namespace)"/>
+   <!--<uwbtag frame="uwb_t" robot_namespace="$(arg robot_namespace)"/>
    
    <joint name="uwb_chassis_joint" type="fixed">
       <origin xyz="$(arg uwb_xyz)" rpy= "0.0 0.0 0.0"/>
       <parent link="chassis_link" />
       <child link="uwb_t" />
-   </joint>
+   </joint>-->
 
   <link name="zed_left_camera">
         <visual>

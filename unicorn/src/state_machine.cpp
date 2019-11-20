@@ -71,7 +71,7 @@ StateMachine::StateMachine() : move_base_clt_("move_base", true)
 
     /*Set the current state to be IDLE*/
     Command initial_cmd;
-    initial_cmd.state = STATE_REVERSING;
+    initial_cmd.state = STATE_IDLE;
     current_state_ = StateFactory::CreateStateInstance(initial_cmd, n_, refuse_bin_pose_);
 }
 
