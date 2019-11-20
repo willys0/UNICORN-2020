@@ -45,7 +45,7 @@
 	<arg name="camera_frame" value="zed_left_camera"/>
 	<arg name="depth_frame" value="zed_depth_camera"/> 
 </include>
-</group>  
+</group> 
 
 <!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->
 <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
