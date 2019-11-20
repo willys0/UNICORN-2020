@@ -35,7 +35,6 @@
 </group>
 
 <!-- Run zed camera -->
-<<<<<<< Updated upstream
 <group ns="zed">
 <include file="$(find zed_wrapper)/launch/zed_camera.launch">
 	<arg name="gpu_id" value="-1"/>
@@ -47,21 +46,7 @@
 	<arg name="depth_frame" value="zed_depth_camera"/> 
 </include>
 </group>  
-=======
-<!-- <group ns="zed">
-    <include file="$(find zed_wrapper)/launch/zed_camera.launch">
-        <arg name="publish_tf" value="false"/>
-        <arg name="publish_urdf" value="false"/>
-        <arg name="odometry_frame" value="odom"/>
-        <arg name="base_frame" value="zed_center"/>
-        <arg name="camera_frame" value="zed_left_camera"/>
-        <arg name="depth_frame" value="zed_depth_camera"/>
-        <arg name="confidence_val" value="80"/>
-    </include>
-</group> -->
 
-
->>>>>>> Stashed changes
 <!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->
 <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
 <node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid pcl_manager" output="screen">
