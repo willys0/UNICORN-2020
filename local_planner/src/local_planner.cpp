@@ -1,9 +1,6 @@
 #include <pluginlib/class_list_macros.h>
 #include "local_planner.h"
 
-//#define INT_MAX 2000
-
-
  //register this planner as a BaseLocalPlanner plugin
  PLUGINLIB_EXPORT_CLASS(local_planner::LocalPlanner, nav_core::BaseLocalPlanner)
 
