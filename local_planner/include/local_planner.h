@@ -34,7 +34,7 @@
 
 
 #define MAX_LINEAR_VEL 0.4
-#define MIN_LINEAR_VEL 0.0
+#define MIN_LINEAR_VEL 0.05
 #define MAX_ANGULAR_VEL 0.4
 #define MIN_ANGULAR_VEL -0.4
 #define GAMA 1.0

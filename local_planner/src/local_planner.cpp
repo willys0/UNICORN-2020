@@ -308,24 +308,49 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	if (u > MAX_LINEAR_VEL)
 		u = MAX_LINEAR_VEL;
 
-	last_linear_velocity_ = u;
-
 	if(!close_to_goal) 
 	{
-		*linear_velocity = u;
+		if ((u < MIN_LINEAR_VEL) && u > (MIN_LINEAR_VEL/2))
+			*linear_velocity = MIN_LINEAR_VEL;
+		else if (u < MIN_LINEAR_VEL)
+			*linear_velocity = 0;
+		else		
+			*linear_velocity = u;
 		*angular_velocity = omega;
+		last_linear_velocity_ = u;
 	}
-	else // If only the orientation is not good
+	else // If only the orientation is not good enough
 	{
 		float angular_vel_orientation = MAX_ANGULAR_VEL/2;
-		if (delta_orient >= 0)
-			*angular_velocity = angular_vel_orientation;
+		if (last_linear_velocity_ >= 0)
+		{
+			if (delta_orient >= 0)
+			{
+				*angular_velocity = angular_vel_orientation;
+			}
+			else
+			{
+				*angular_velocity = -angular_vel_orientation;
+			}
+			*linear_velocity = -MIN_LINEAR_VEL;
+		}
 		else
-			*angular_velocity = -angular_vel_orientation;
-
-		*linear_velocity = 0;
+		{
+			if (delta_orient >= 0)
+			{
+				*angular_velocity = angular_vel_orientation;
+			}
+			else
+			{
+				*angular_velocity = -angular_vel_orientation;
+			}
+			*linear_velocity = MIN_LINEAR_VEL;
+		}
+		last_linear_velocity_ = *linear_velocity;		
+		//*linear_velocity = 0;
+		theta_d = tf::getYaw(global_goal_odom.getRotation()); //delta_orient;// * 180 / PI;
 	}
-	std::cout << "Linear velocity: " << u << " Angular velocity: " << omega << endl;
+	std::cout << "Linear velocity: " << *linear_velocity << " Angular velocity: " << *angular_velocity << endl;
 	last_repulsive_field_magnitude_ = repulsive_field_magnitude;
 	int intention_angle = -round((theta_d-theta)*180/PI);
 	if (intention_angle > 180)
@@ -333,8 +358,10 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	else if (intention_angle < -180)
 		intention_angle = intention_angle + 360;
 
-	std::cout << "Theta: " << theta << " Theta_d: " << theta_d << " Intention: " << intention_angle << endl; 
-	//intention_pub.publish(intention_angle);
+	std_msgs::Int32 intention_to_send;
+	intention_to_send.data = intention_angle;
+	std::cout << "Theta: " << theta << " Theta_d: " << theta_d << " Intention: " << intention_to_send.data << endl; 
+	intention_pub.publish(intention_to_send);
 }
 
 void LocalPlanner::dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *dipole_force) 
@@ -645,7 +672,7 @@ bool LocalPlanner::isGoalReached(){
 				return true;
 
 			}
-			else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.1) // If we only need to adjust the orientation
+			else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.2) // If we only need to adjust the orientation
 			{
 				close_to_goal = true;
 			}
