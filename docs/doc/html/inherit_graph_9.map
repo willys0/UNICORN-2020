@@ -1,3 +1,8 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$structbenchmark_1_1ChooseClockType.html" title="benchmark::ChooseClockType" alt="" coords="5,5,208,32"/>
+<area shape="rect" id="node1" href="$classState.html" title="State" alt="" coords="5,107,59,133"/>
+<area shape="rect" id="node2" href="$classALIGNINGState.html" title="ALIGNINGState" alt="" coords="116,5,233,32"/>
+<area shape="rect" id="node3" href="$classIDLEState.html" title="IDLEState" alt="" coords="133,56,216,83"/>
+<area shape="rect" id="node4" href="$classLIFTState.html" title="LIFTState" alt="" coords="135,107,215,133"/>
+<area shape="rect" id="node5" href="$classNAVIGATINGState.html" title="NAVIGATINGState" alt="" coords="107,157,243,184"/>
+<area shape="rect" id="node6" href="$classREVERSINGState.html" title="REVERSINGState" alt="" coords="108,208,241,235"/>
 </map>
