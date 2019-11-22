@@ -336,7 +336,7 @@
 -->
 
 
-   <rplidar_a2 frame="base_laser" topic="scan" robot_namespace="$(arg robot_namespace)"/>
+   <rplidar_a2 frame="base_laser" topic="/TX2_r2000Lidar/laserScan" robot_namespace="$(arg robot_namespace)"/>
    
    <joint name="laser_mount_joint" type="fixed">
       <origin xyz="$(arg laser_xyz)" rpy="$(arg laser_rpy)" />

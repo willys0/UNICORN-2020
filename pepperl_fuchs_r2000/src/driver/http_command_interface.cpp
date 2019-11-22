@@ -282,7 +282,7 @@ boost::optional<HandleInfo> HttpCommandInterface::requestHandleTCP(int start_ang
     params["packet_type"] = "C";
     params["start_angle"] = std::to_string(start_angle);
     //Added by Niklas Fasth
-    params["watchdog"] = "off";
+    //params["watchdog"] = "off";
     params["max_num_points_scan"] = std::to_string(max_num_points_scan); //max_num_points_scan
     //End add
 

@@ -58,7 +58,7 @@ R2000Node::R2000Node():nh_("~")
 
     // Declare publisher and create timer
     //-------------------------------------------------------------------------
-    scan_publisher_ = nh_.advertise<sensor_msgs::LaserScan>("laserScan",100);
+    scan_publisher_ = nh_.advertise<sensor_msgs::LaserScan>("laserScan",1);
     cmd_subscriber_ = nh_.subscribe("controlCommand",100,&R2000Node::cmdMsgCallback,this);
     get_scan_data_timer_ = nh_.createTimer(ros::Duration(1/(2*std::atof(driver_->getParametersCached().at("scan_frequency").c_str()))), &R2000Node::getScanData, this);
 }
@@ -145,6 +145,12 @@ void R2000Node::getScanData(const ros::TimerEvent &e)
         scanmsg.intensities[i] = scandata.amplitude_data[i];
     }
     scan_publisher_.publish(scanmsg);
+
+    //Added by Niklas Fasth
+    // Feed the watchdog when getting data from the lidar 
+    // so old unactive connections gets removed
+    driver_->feedWatchdog(true);
+    //End add
 }
 
 //-----------------------------------------------------------------------------

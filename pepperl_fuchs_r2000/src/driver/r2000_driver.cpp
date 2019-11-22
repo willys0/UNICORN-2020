@@ -71,6 +71,7 @@ bool R2000Driver::connect(const std::string hostname, int port)
 //-----------------------------------------------------------------------------
 R2000Driver::~R2000Driver()
 {
+    std::cout << "disconnecting R2100" << std::endl;
     disconnect();
 }
 
