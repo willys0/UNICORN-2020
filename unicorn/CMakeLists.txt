@@ -144,8 +144,8 @@ include_directories(
 #add_executable(laser_scan_filter src/laser_scan_filter.cpp)
 #target_link_libraries(laser_scan_filter ${catkin_LIBRARIES})
 
-#add_executable(am_unicorn_interface src/am_unicorn_interface.cpp)
-#target_link_libraries(am_unicorn_interface ${catkin_LIBRARIES})
+add_executable(am_unicorn_interface src/am_unicorn_interface.cpp)
+target_link_libraries(am_unicorn_interface ${catkin_LIBRARIES})
 
 #add_executable(unicorn_statemachine src/unicorn_statemachine.cpp)
 #add_dependencies(unicorn_statemachine ${catkin_EXPORTED_TARGETS})

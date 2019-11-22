@@ -70,11 +70,6 @@ private:
     //! frame_id of sensor_msgs/Laserscan messages
     std::string frame_id_;
 
-    //Added by Niklas Fasth
-    //! start_angle of the lidar scan
-    int start_angle;
-    //End add
-
     //! IP or hostname of laser range finder
     std::string scanner_ip_;
 
@@ -83,6 +78,11 @@ private:
 
     //! samples_per_scan parameter
     int samples_per_scan_;
+
+    //Added by Niklas Fasth
+    //! start_angle of the lidar scan
+    int start_angle;
+    //End add
 
     //! Pointer to driver
     R2000Driver* driver_;

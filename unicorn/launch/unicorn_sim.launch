@@ -2,20 +2,19 @@
 <!-- Launches Gazebo with predefined settings with the Unicorn platform -->
 <launch>
 	<!-- roslaunch arguments -->
-	<arg name="use_teb_planner" default="true"/>
+	<arg name="use_teb_planner" default="false"/>
 	<arg name="show_rviz" default="true"/>
 	<arg name="paused" default="false"/>
 	<arg name="debug" default="false"/>  	
 	<arg name="gazebo_gui" default="true"/>
 	<arg name="use_gmapping" default="true"/>
-	<arg name="use_hector" default="true"/>   <!-- Meant to be used if Hector slam is desired -->
+	<arg name="use_hector" default="false"/>   <!-- Meant to be used if Hector slam is desired -->
 	<arg name="scan_topic" value="scan"/> <!-- from scan_filtered to scan, nothing found in scan_filtered-->
 	<arg name="map_file" value="$(find unicorn_slam)/maps/gmap_map.yaml"/>
 	<rosparam param="odom_frame">odom_gazebo</rosparam>
 	<rosparam param="global_local">false</rosparam>
 	<rosparam param="frame_id">chassis_link</rosparam>
 
-	<!-- Lidar angle limitations (rad) -->
 	<rosparam param="use_sim_time">true</rosparam>
 
 	<group if="$(arg use_gmapping)">
@@ -38,21 +37,28 @@
 	</group>
 
 
-	<!-- start ukf node -->
-	<node pkg="robot_localization" type="ukf_localization_node" name="ukf_node_odom" clear_params="true"><rosparam command="load" file="$(find unicorn)/config/ukf_template_sim.yaml"/>
-	</node>
-	
+	<!-- start ekf node -->
+<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
+   <rosparam command="load" file="$(find unicorn)/config/sim/ekf_odom_bob.yaml" />
+</node>
+
+<!-- Peter Launch move base-->
+<!--include file="$(find unicorn)/launch/move_base_peter.xml"/>-->
 	<!-- Launch move_base -->
+
 	<node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
-		<rosparam file="$(find unicorn_description)/config/base_local_planner_teb.yaml" command="load" />
-		<param name="base_local_planner" value="teb_local_planner/TebLocalPlannerROS" />
-		<param name="base_global_planner" value="global_planner/GlobalPlanner"/>
+		<!--<rosparam file="$(find unicorn_description)/config/base_local_planner_teb.yaml" command="load" />--> <!-- OLD PLANER -->
+		<rosparam file="$(find unicorn_description)/config/sim/base_local_LocalPlanner.yaml" command="load" />
+		<param name="base_local_planner" value="local_planner/LocalPlanner" />    <!-- NEW PLANER -->
+		<!--param name="base_global_planner" value="global_planner/GlobalPlanner"/>--> <!-- OLD PLANNER -->
+		<param name="base_global_planner" value="thetastar_planner/ThetaStarPlanner"/>
 		<rosparam file="$(find unicorn_description)/config/costmap_common_params.yaml" command="load" ns="global_costmap" />
 		<rosparam file="$(find unicorn_description)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
-		<rosparam file="$(find unicorn_description)/config/local_costmap_params.yaml" command="load" />
+		<rosparam file="$(find unicorn_description)/config/local_costmap_params_peter.yaml" command="load" />
 		<rosparam file="$(find unicorn_description)/config/global_costmap_params.yaml" command="load" />
 		<remap from="cmd_vel" to="/unicorn/cmd_vel"/> 
 	</node>
+	
 
 	<node name="voxel_grid_2_point_cloud" pkg="costmap_2d" type="costmap_2d_cloud">
 		<remap from="voxel_grid" to="/move_base/local_costmap/obstacle_layer/voxel_grid"/>
@@ -62,8 +68,10 @@
 
 	<!-- Launch gazebo world -->
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-		<arg name="world_name" value="$(find husky_gazebo)/worlds/clearpath_playpen.world"/>
-		<arg name="paused" value="false"/>
+	<arg name="world_name" value="$(find husky_gazebo)/worlds/clearpath_playpen.world"/>
+<!--arg name="world_name" value="$(find unicorn_slam)/worlds/clearpath_playpen_moving_obstacle.world"/-->
+				<!--arg name="world_name" value="$(find unicorn_slam)/worlds/testworld_moving_obstacle.world"/-->
+<arg name="paused" value="false"/>
 		<arg name="use_sim_time" value="true"/>
 		<arg name="gui" value="$(arg gazebo_gui)"/>
 		<arg name="headless" value="false"/>

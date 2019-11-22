@@ -1,9 +1,7 @@
-/**
- * 		@file local_planner.h
- */
-
 #ifndef LOCAL_PLANNER_CPP
 #define LOCAL_PLANNER_CPP
+
+/*ROS*/
 #include <ros/ros.h>
 #include <costmap_2d/costmap_2d_ros.h>
 #include <costmap_2d/costmap_2d.h>
@@ -36,9 +34,9 @@
 
 
 #define MAX_LINEAR_VEL 0.4
-#define MIN_LINEAR_VEL 0.0
+#define MIN_LINEAR_VEL 0.05
 #define MAX_ANGULAR_VEL 0.4
-#define MIN_ANGULAR_VEL -0.5
+#define MIN_ANGULAR_VEL -0.4
 #define GAMA 1.0
 #define PI 3.14159265358979323846264338327950288
 
@@ -53,17 +51,40 @@
 
 
  namespace local_planner {
-/**
- *  @brief Local planner class 
- */
+/*
+Description:
+The state machine class will handle the overgrasping logic required by the states so they can
+transition and responding to events. Furthermore, it also is responsible for keeping the UNICORNs 
+*/
  class LocalPlanner : public nav_core::BaseLocalPlanner {
  public:
+	/*Members*/
 
+	/*Methods*/
+	/**
+	* @brief Default constructor
+	*/
 	LocalPlanner();
+	/**
+	* @brief Default de-constructor
+	*/
+	//~LocalPlanner();
+	/**
+	* @brief Constructor
+	*/
 	LocalPlanner(std::string name,  tf::TransformListener* tf, costmap_2d::Costmap2DROS* costmap_ros);
 
-	/** overridden classes from interface nav_core::BaseLocalPlanner **/
+	/**
+	* @brief Overridden classes from interface nav_core::BaseLocalPlanner 
+	*/
 	bool computeVelocityCommands(geometry_msgs::Twist& cmd_vel);
+	/**
+	* @brief method which publishes a new goal to the ROS move base
+	* 
+	* @param x x-coordinate of new goal
+	* @param y y-coordinate of new goal
+	* @param yaw yaw-coordinate of new goal
+	*/
 	bool isGoalReached();
 	bool setPlan(const std::vector<geometry_msgs::PoseStamped>& plan);
 	void initialize (std::string name, tf::TransformListener *tf, costmap_2d::Costmap2DROS *costmap_ros) ;
@@ -71,29 +92,27 @@ void dynamicObstacleCallback(const vector_creation::vector msg);
 //static void chatterCallback(const std_msgs::String::ConstPtr& msg);
 
   private:
-
-	// Made by Peter
-geometry_msgs::Point closestPointOnPath(tf::Stamped<tf::Pose> robot_pose, int *plan_index, float *distance_to_path);
-tf::Vector3 unitVectorOfPath(int plan_index);
-void fAttractiveVector(geometry_msgs::Point fa_point_path, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 unit_vector_ni, tf::Vector3 *attractive_vector);
-void makeRepulsiveField(int scale, int gain, float dmax, float pos_x, float pos_y, float *repulsive_force, int *deg);
-void repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *repulsive_vector);
-void updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot_pose, float *linear_velocity, float *angular_velocity, double repulsive_field_magnitude, double dipole_field_magnitude, float distance_to_path);
-void findClosestObjectEuclidean(int *deg, float *distance_to_obstacle);
-void dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *dipole_force);
-//static const float k1 = 0.01;
-//static const float k2 = 1;
-float k1;
-float k2;
-int test_variable;
-int generate_new_path;
-float last_linear_velocity_;
-vector_creation::vector obstacle_vector_;
-bool close_to_goal;
-std::vector<tf::Vector3> final_vectors_vector;
-double last_repulsive_field_magnitude_;
-float shortest_distance_to_obstacle_;
-	// -- Peter
+	/*Members*/
+	geometry_msgs::Point closestPointOnPath(tf::Stamped<tf::Pose> robot_pose, int *plan_index, float *distance_to_path);
+	tf::Vector3 unitVectorOfPath(int plan_index);
+	void fAttractiveVector(geometry_msgs::Point fa_point_path, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 unit_vector_ni, tf::Vector3 *attractive_vector);
+	void makeRepulsiveField(int scale, int gain, float dmax, float pos_x, float pos_y, float *repulsive_force, int *deg);
+	void repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *repulsive_vector);
+	void updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot_pose, float *linear_velocity, float *angular_velocity, double repulsive_field_magnitude, double dipole_field_magnitude, float distance_to_path);
+	void findClosestObjectEuclidean(int *deg, float *distance_to_obstacle);
+	void dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> robot_pose, tf::Vector3 *dipole_force);
+	//static const float k1 = 0.01;
+	//static const float k2 = 1;
+	float k1;
+	float k2;
+	int test_variable;
+	int generate_new_path;
+	float last_linear_velocity_;
+	vector_creation::vector obstacle_vector_;
+	bool close_to_goal;
+	std::vector<tf::Vector3> final_vectors_vector;
+	double last_repulsive_field_magnitude_;
+	float shortest_distance_to_obstacle_;
 
   	costmap_2d::Costmap2DROS* costmap_ros_; //!< Pointer to the costmap ros wrapper, received from the navigation stack
   	costmap_2d::Costmap2D* costmap_; //!< Pointer to the 2d costmap (obtained from the costmap ros wrapper)
@@ -122,6 +141,6 @@ float shortest_distance_to_obstacle_;
 
   };
  };
- #endif
+ #endif // !ST
 
 
