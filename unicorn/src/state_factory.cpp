@@ -5,7 +5,7 @@
 #include "unicorn/navigating_state.h"
 #include "unicorn/reversing_state.h"
 
-std::shared_ptr<State> StateFactory::CreateStateInstance(Command cmd, ros::NodeHandle node, RefuseBin bin)
+std::unique_ptr<State> StateFactory::CreateStateInstance(Command cmd, ros::NodeHandle node, RefuseBin bin)
 {
     State *instance = nullptr;
 
@@ -36,7 +36,7 @@ std::shared_ptr<State> StateFactory::CreateStateInstance(Command cmd, ros::NodeH
     }
     if (instance != nullptr)
     {
-        return std::shared_ptr<State>(instance);
+        return std::unique_ptr<State>(instance);
     }
     return nullptr;
 }

@@ -56,7 +56,7 @@ int ALIGNINGState::sendGoal(Goal new_goal)
         ROS_INFO("Waiting for the move_base action server to come up");
         attempts++;
     }
-    if(attempts == 3)
+    if(attempts >= 3)
     {
         ROS_WARN("Failed to contact move base server after four attempts, goal not published!");
         return -1;
@@ -81,6 +81,7 @@ Command ALIGNINGState::run()
     Command new_cmd;
     new_cmd.state = STATE_IDLE;
     Goal new_goal;
+    //set bin goal coordinatess
     new_goal.x = bin_location_.x + 1.5 * cos(bin_location_.yaw);
     new_goal.y = bin_location_.y + 1.5 * sin(bin_location_.yaw);
     new_goal.yaw = bin_location_.yaw;
