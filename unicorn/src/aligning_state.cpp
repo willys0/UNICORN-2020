@@ -51,7 +51,7 @@ int ALIGNINGState::sendGoal(Goal new_goal)
         ROS_ERROR("[UNICORN State Machine] yaw is undefined");
         return -1;
     }
-    while (!move_base_clt_.waitForServer(ros::Duration(5.0)) || (attempts < 4))
+    while (!move_base_clt_.waitForServer(ros::Duration(5.0)) && (attempts < 4))
     {
         ROS_INFO("Waiting for the move_base action server to come up");
         attempts++;
