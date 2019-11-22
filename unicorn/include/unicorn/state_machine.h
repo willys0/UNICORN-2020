@@ -88,7 +88,7 @@ private:
     tf::TransformListener tf_listener_;
 	PidController *velocity_pid_; /**< PID to control position in x*/
 	RefuseBin refuse_bin_pose_;
-    std::unique_ptr<State> current_state_;
+    std::shared_ptr<State> current_state_;
     float current_yaw_;
     float current_vel_;
     MoveBaseClient move_base_clt_;
