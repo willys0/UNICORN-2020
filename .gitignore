@@ -33,3 +33,6 @@
 
 # Generated document files
 /docs/doc/
+
+# VSCode workspace files
+.vscode/
