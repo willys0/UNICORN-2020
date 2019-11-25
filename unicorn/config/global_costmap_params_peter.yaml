@@ -11,7 +11,7 @@ global_costmap:
   global_frame: /map
   robot_base_frame: chassis_link
   update_frequency: 1.0
-  use_first_map_only: True
+  #use_first_map_only: True
   static_map: True
   publish_frequency: 0.5
 

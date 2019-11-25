@@ -4,7 +4,7 @@ footprint_padding: 0.0
 plugins:
   - {name: static_layer,     type: "costmap_2d::StaticLayer"}
   - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
-  - {name: sonar_layer,       type: "range_sensor_layer::RangeSensorLayer"}
+  #- {name: sonar_layer,       type: "range_sensor_layer::RangeSensorLayer"}
   #- {name: voxel_layer,       type: "costmap_2d::VoxelLayer"}
   - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
 
@@ -38,7 +38,7 @@ obstacle_layer:
   observation_sources: laser_scan_sensor point_cloud_sensor
 
     #testing with 360 degrees of view from LIDAR
-  laser_scan_sensor: {sensor_frame: base_laser, data_type: LaserScan, topic: /scan, expected_update_rate: 0.5,
+  laser_scan_sensor: {sensor_frame: base_laser, data_type: LaserScan, topic: /TX2_r2000Lidar/laserScan, expected_update_rate: 0.5,
     marking: true, clearing: true, max_obstacle_height: 1, min_obstacle_height: 0.08}
 
   point_cloud_sensor: {sensor_frame: camera_left_depth_link, data_type: PointCloud2, topic: /camera/depth/points,
