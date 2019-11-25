@@ -321,7 +321,7 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	}
 	else // If only the orientation is not good enough
 	{
-		float angular_vel_orientation = MAX_ANGULAR_VEL/2;
+		float angular_vel_orientation = MAX_ANGULAR_VEL;//2;
 		if (last_linear_velocity_ >= 0)
 		{
 			if (delta_orient >= 0)
@@ -332,7 +332,7 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 			{
 				*angular_velocity = -angular_vel_orientation;
 			}
-			*linear_velocity = -MIN_LINEAR_VEL;
+			*linear_velocity = -0.01;
 		}
 		else
 		{
@@ -344,7 +344,7 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 			{
 				*angular_velocity = -angular_vel_orientation;
 			}
-			*linear_velocity = MIN_LINEAR_VEL;
+			*linear_velocity = -0.01;
 		}
 		last_linear_velocity_ = *linear_velocity;		
 		//*linear_velocity = 0;
