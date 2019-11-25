@@ -286,36 +286,42 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	else if (omega < -MAX_ANGULAR_VEL)
 		omega = -MAX_ANGULAR_VEL;
 
-	if(dipole_field_magnitude < DIPOLE_FIELD_THRESHOLD) // If we do not care about the dipole field
-	{
-		if(repulsive_field_gradient>0) // If we're reaching towards an obstacle
-			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1))*tanh(1/(repulsive_field_gradient*200+1e-12)); // Speed is affected by: a constant, distance to goal, the repulsive field, the angular velocity and the change of repulsive field 
-		else 
-			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1)); // Speed is affected by: a constant, distance to goal, the repulsive field and the angular velocity 
-	}
-	else
-	{
-		if(repulsive_field_gradient>0)
-			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*0.5));//tanh(1/(repulsive_field_gradient*200+1e-12)); // Speed is affected by: a constant, distance to goal and the repulsive field 
-		else 
-			u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1)); // Speed is affected by: a constant, distance to goal, the repulsive field and the angular velocity
-	}
-	
 
-
-	if ((last_linear_velocity_ + MAX_ACC_LINEAR) < u)
-		u = MAX_ACC_LINEAR + last_linear_velocity_;
-	if (u > MAX_LINEAR_VEL)
-		u = MAX_LINEAR_VEL;
 
 	if(!close_to_goal) 
 	{
-		if ((u < MIN_LINEAR_VEL) && u > (MIN_LINEAR_VEL/2))
-			*linear_velocity = MIN_LINEAR_VEL;
-		else if (u < MIN_LINEAR_VEL)
-			*linear_velocity = 0;
-		else		
+		if(dipole_field_magnitude < DIPOLE_FIELD_THRESHOLD) // If we do not care about the dipole field
+		{
+			if(repulsive_field_gradient>0) // If we're reaching towards an obstacle
+				u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1))*tanh(1/(repulsive_field_gradient*200+1e-12)); // Speed is affected by: a constant, distance to goal, the repulsive field, the angular velocity and the change of repulsive field 
+			else 
+				u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1))*tanh(1/(fabs(omega*15)+1)); // Speed is affected by: a constant, distance to goal, the repulsive field and the angular velocity 
+		}
+		else
+		{
+			if(repulsive_field_gradient>0)
+				u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*0.5));//tanh(1/(repulsive_field_gradient*200+1e-12)); // Speed is affected by: a constant, distance to goal and the repulsive field 
+			else 
+				u = 1*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1));//*tanh(1/(fabs(omega*15)+1)); // Speed is affected by: a constant, distance to goal, the repulsive field and the angular velocity
+		}
+		if ((last_linear_velocity_ + MAX_ACC_LINEAR) < u)
+			u = MAX_ACC_LINEAR + last_linear_velocity_;
+		if (u > MAX_LINEAR_VEL)
+			u = MAX_LINEAR_VEL;
+		if (fabs(theta-theta_d)*180/PI >= 90)
+		{
+			u = -0.01;
 			*linear_velocity = u;
+		}
+		else
+		{
+			if ((u < MIN_LINEAR_VEL) && u > (MIN_LINEAR_VEL/2))
+				*linear_velocity = MIN_LINEAR_VEL;
+			else if (u < MIN_LINEAR_VEL)
+				*linear_velocity = 0;
+			else		
+				*linear_velocity = u;
+		}
 		*angular_velocity = omega;
 		last_linear_velocity_ = u;
 	}

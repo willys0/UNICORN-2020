@@ -6,7 +6,7 @@
 	<arg name="show_rviz" default="true"/>
 	<arg name="paused" default="false"/>
 	<arg name="debug" default="false"/>  	
-	<arg name="gazebo_gui" default="true"/>
+	<arg name="gazebo_gui" default="false"/>
 	<arg name="use_gmapping" default="true"/>
 	<arg name="use_hector" default="false"/>   <!-- Meant to be used if Hector slam is desired -->
 	<arg name="scan_topic" value="scan"/> <!-- from scan_filtered to scan, nothing found in scan_filtered-->
