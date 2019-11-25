@@ -118,8 +118,8 @@
 	<param name="base_local_planner" value="local_planner/LocalPlanner" />
 	<rosparam file="$(find unicorn)/config/costmap_common_params_zed.yaml" command="load" ns="global_costmap" />
 	<rosparam file="$(find unicorn)/config/costmap_common_params_zed.yaml" command="load" ns="local_costmap" />
-	<rosparam file="$(find unicorn)/config/local_costmap_params.yaml" command="load" />
-	<rosparam file="$(find unicorn)/config/global_costmap_params.yaml" command="load" />
+	<rosparam file="$(find unicorn)/config/local_costmap_params_peter.yaml" command="load" />
+	<rosparam file="$(find unicorn)/config/global_costmap_params_peter.yaml" command="load" />
 	<remap from="cmd_vel" to="/unicorn/cmd_vel"/>
 </node>
 
