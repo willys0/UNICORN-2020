@@ -85,7 +85,6 @@ int StateMachine::start()
     {
         updateAndPublishState(current_state_->state_identifier_);
         new_cmd = current_state_->run();
-        current_state_.reset();
         current_state_ = StateFactory::CreateStateInstance(new_cmd, n_, refuse_bin_pose_);
     }
     return 1;   

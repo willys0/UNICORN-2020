@@ -57,11 +57,15 @@ Command REVERSINGState::run()
 
 void REVERSINGState::rearLidarCallback(const std_msgs::Float32 &msg)
 {
-	ROS_INFO("Current Distance: %f", msg.data);
     if(msg.data <= desired_distance_)
     {
         at_desired_distance_ = true;
     }
+    else
+    {
+	    ROS_INFO("Current Distance: %f", msg.data);
+    }
+    
 }
 
 void REVERSINGState::odomCallback(const nav_msgs::Odometry &msg)

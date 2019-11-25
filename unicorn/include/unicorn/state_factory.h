@@ -16,6 +16,6 @@ public:
 	* @param node ros node handle to the state machine node
     * @param bin location information about the refuse bin, expressed in x,y and yaw coordinates.
 	*/
-    static std::shared_ptr<State> CreateStateInstance(Command cmd, ros::NodeHandle node, RefuseBin bin);
+    static std::unique_ptr<State> CreateStateInstance(Command cmd, ros::NodeHandle node, RefuseBin bin);
 };
 #endif // !STATE_FAC

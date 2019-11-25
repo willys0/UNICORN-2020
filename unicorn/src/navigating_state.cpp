@@ -53,7 +53,7 @@ int NAVIGATINGState::sendGoal(Goal new_goal)
         ROS_INFO("Waiting for the move_base action server to come up");
         attempts++;
     }
-    if(attempts == 3)
+    if(attempts >= 3)
     {
         ROS_WARN("Failed to contact move base server after four attempts, goal not published!");
         return -1;
