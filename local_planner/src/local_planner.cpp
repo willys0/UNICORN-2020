@@ -310,7 +310,7 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 			u = MAX_LINEAR_VEL;
 		if (fabs(theta-theta_d)*180/PI >= 90)
 		{
-			u = -0.01;
+			u = 0.01;
 			*linear_velocity = u;
 		}
 		else
@@ -338,7 +338,7 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 			{
 				*angular_velocity = -angular_vel_orientation;
 			}
-			*linear_velocity = -0.01;
+			*linear_velocity = 0.01;
 		}
 		else
 		{
@@ -350,7 +350,7 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 			{
 				*angular_velocity = -angular_vel_orientation;
 			}
-			*linear_velocity = -0.01;
+			*linear_velocity = 0.01;
 		}
 		last_linear_velocity_ = *linear_velocity;		
 		//*linear_velocity = 0;
@@ -658,7 +658,7 @@ bool LocalPlanner::isGoalReached(){
 				generate_new_path = 1;
 				return true;
 			}		
-			else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.4 && fabs(delta_orient) < (30 * PI / 180))
+			else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.5 && fabs(delta_orient) < (30 * PI / 180))
 			{
 				goal_reached_ = true;
 				ROS_INFO("Goal reached close to %f %f", global_goal_odom.getOrigin().getX(), global_goal_odom.getOrigin().getY());
@@ -682,8 +682,12 @@ bool LocalPlanner::isGoalReached(){
 			{
 				close_to_goal = true;
 			}
-			else
+			else if (fabs(std::sqrt(dx*dx+dy*dy)) > 0.5)
 				close_to_goal = false;
+		}
+		else
+		{
+			close_to_goal = false;
 		}
 	}
    	return goal_reached_;
