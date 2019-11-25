@@ -1,5 +1,5 @@
 odom_frame: odom
-base_frame: base_link
+base_frame: chassis_link
 map_frame: map
 map_update_interval: 3.0 # Publish new map
 maxUrange: 19.0 # Should be just less than sensor range
