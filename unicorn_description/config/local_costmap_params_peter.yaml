@@ -12,7 +12,7 @@ local_costmap:
   publish_voxel_map: false
 
   #Set the global and robot frames for the costmap
-  global_frame: odom_gazebo
+  global_frame: map
   robot_base_frame: chassis_link
 
   #Set the update and publish frequency of the costmap

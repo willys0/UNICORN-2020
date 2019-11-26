@@ -255,9 +255,9 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	//float k_u = k1;
 	float k_u;
 	double repulsive_field_gradient = repulsive_field_magnitude - last_repulsive_field_magnitude_; // Does the magnitude increase or decrease
-	std::cout << "Repulsive field gradient: " << repulsive_field_gradient << endl;
-	if (fabs(repulsive_field_gradient) < 0.01)
-		repulsive_field_gradient = 0.0;
+	//std::cout << "Repulsive field gradient: " << repulsive_field_gradient << endl;
+	//if (fabs(repulsive_field_gradient) < 0.01)
+	//	repulsive_field_gradient = 0.0;
 	float pos_x = robot_pose.getOrigin().getX();
 	float pos_y = robot_pose.getOrigin().getY();
 
@@ -312,10 +312,24 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 				u = MAX_LINEAR_VEL*tanh(0.5*d)*tanh(1/(repulsive_field_magnitude*1));//*tanh(1/(fabs(omega*15)+1)); // Speed is affected by: a constant, distance to goal, the repulsive field and the angular velocity
 		}
 		if ((last_linear_velocity_ + MAX_ACC_LINEAR) < u)
+		{
 			u = MAX_ACC_LINEAR + last_linear_velocity_;
+		}
 		if (u > MAX_LINEAR_VEL)
+		{
 			u = MAX_LINEAR_VEL;
-		if (fabs(theta-theta_d)*180/PI >= 90)
+		}
+
+		int intention_angle = -round((theta_d-theta)*180/PI);
+		if (intention_angle > 180)
+		{
+			intention_angle = intention_angle - 360;
+		}
+		else if (intention_angle < -180)
+		{
+			intention_angle = intention_angle + 360;	
+		}
+		if (fabs(intention_angle) >= 90)
 		{
 			u = 0.01;
 			*linear_velocity = u;
