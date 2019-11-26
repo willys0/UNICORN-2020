@@ -151,5 +151,6 @@
    <rosparam command="load" file="$(find unicorn)/config/ekf_odom_simple.yaml" />
 </node>
 
+<!--<node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find am_description)/rviz/pf.rviz"/> -->
 
 </launch>
