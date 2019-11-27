@@ -377,7 +377,7 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 		//*linear_velocity = 0;
 		theta_d = tf::getYaw(global_goal_odom.getRotation()); //delta_orient;// * 180 / PI;
 	}
-	std::cout << "Linear velocity: " << *linear_velocity << " Angular velocity: " << *angular_velocity << endl;
+	//std::cout << "Linear velocity: " << *linear_velocity << " Angular velocity: " << *angular_velocity << endl;
 	last_repulsive_field_magnitude_ = repulsive_field_magnitude;
 	int intention_angle = -round((theta_d-theta)*180/PI);
 	if (intention_angle > 180)
@@ -387,7 +387,7 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 
 	std_msgs::Int32 intention_to_send;
 	intention_to_send.data = intention_angle;
-	std::cout << "Theta: " << theta << " Theta_d: " << theta_d << " Intention: " << intention_to_send.data << endl; 
+	//std::cout << "Theta: " << theta << " Theta_d: " << theta_d << " Intention: " << intention_to_send.data << endl; 
 	intention_pub.publish(intention_to_send);
 }
 
@@ -604,9 +604,9 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 		final_vector.operator+=(dipole_force);
 		final_vector.operator+=(f_attractive_vector);
 
-		std::cout << "Dipole force: " << dipole_force.m_floats[0] << " " << dipole_force.m_floats[1] << " " << dipole_force.m_floats[2] << endl;
-		std::cout << "Repulsive force: " << f_repulsive_vector.m_floats[0] << " " << f_repulsive_vector.m_floats[1] << " " << f_repulsive_vector.m_floats[2] << endl;
-		std::cout << "Final vector: " << final_vector.m_floats[0] << " " << final_vector.m_floats[1] << " " << final_vector.m_floats[2] << endl;
+		//std::cout << "Dipole force: " << dipole_force.m_floats[0] << " " << dipole_force.m_floats[1] << " " << dipole_force.m_floats[2] << endl;
+		//std::cout << "Repulsive force: " << f_repulsive_vector.m_floats[0] << " " << f_repulsive_vector.m_floats[1] << " " << f_repulsive_vector.m_floats[2] << endl;
+		//std::cout << "Final vector: " << final_vector.m_floats[0] << " " << final_vector.m_floats[1] << " " << final_vector.m_floats[2] << endl;
 
 		/*double mapx, mapy;
 		costmap_->mapToWorld(costmap_->getSizeInCellsX()/2,costmap_->getSizeInCellsY()/2,mapx,mapy);
@@ -615,6 +615,7 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 		unsigned int coordx,coordy;
 		costmap_->worldToMap(global_goal_odom.getOrigin().getX(),global_goal_odom.getOrigin().getY(),coordx,coordy);
 		std::cout << "Cost of goal: " << (int)costmap_->getCost(coordx,coordy) << endl;*/
+		std::cout << "Robot pos: " << robot_pose.getOrigin().getX() << " " << robot_pose.getOrigin().getY() << endl;
 
 		updateVelocity(final_vector, robot_pose, &linear_velocity, &angular_velocity, f_repulsive_vector.length(), dipole_force.length(), distance_to_path);
 		cmd_vel.angular.z = angular_velocity;
