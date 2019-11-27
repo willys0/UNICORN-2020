@@ -39,7 +39,11 @@ Command REVERSINGState::run()
         {
             cancelGoal();
             ROS_INFO("[UNICORN State Machine] New command was issued, halting navigation.");
-            return command;
+            new_cmd.state = command.state;
+            new_cmd.param1 = command.param1;
+            new_cmd.param2 = command.param2;
+            new_cmd.param3 = command.param3;
+            break;
         }
         if(at_desired_distance_)
         {
@@ -48,11 +52,12 @@ Command REVERSINGState::run()
             cmd_vel_pub_.publish(man_cmd_vel_);
             ROS_INFO("[UNICORN State Machine] Robot reached desired distance exiting with new state set to LIFT");
             new_cmd.state = STATE_LIFT;
-            return new_cmd;
+            break;
         }
         cmd_vel_pub_.publish(man_cmd_vel_);
         rate.sleep();
     }
+    return new_cmd;
 }
 
 void REVERSINGState::rearLidarCallback(const std_msgs::Float32 &msg)

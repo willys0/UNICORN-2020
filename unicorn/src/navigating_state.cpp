@@ -75,19 +75,20 @@ void NAVIGATINGState::cancelGoal()
 {
     actionlib_msgs::GoalID cancel_all;
     move_base_cancel_pub_.publish(cancel_all);
-    ROS_INFO("[Unicorn State Machine] Canceling move_base goal");
+    ROS_INFO("[UNICORN State Machine] Canceling move_base goal");
 }
 
 Command NAVIGATINGState::run()
 {
     Command new_cmd;
     new_cmd.state = STATE_IDLE;
-    int err = sendGoal(current_goal_);
-    if(err == -1)
+    int ret = sendGoal(current_goal_);
+    if(ret == -1)
     {
-        ROS_ERROR("[Unicorn State Machine] Could not send goal. Entering IDLE state.");
+        ROS_ERROR("[UNICORN State Machine] Could not send goal. Entering IDLE state.");
         return new_cmd;
     }
+    actionlib::SimpleClientGoalState goalState = move_base_clt_.getState();
     ros::Rate rate(50);
 
     while (true)
@@ -99,7 +100,8 @@ Command NAVIGATINGState::run()
             ROS_INFO("[Unicorn State Machine] New command was issued, halting navigation.");
             return command;
         }
-        if(move_base_clt_.getState() == actionlib::SimpleClientGoalState::SUCCEEDED)
+        goalState = move_base_clt_.getState();
+        if(goalState == actionlib::SimpleClientGoalState::SUCCEEDED)
         {
             ROS_INFO("[Unicorn State Machine] Robot reached designated goal!");
             break;
