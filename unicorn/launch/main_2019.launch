@@ -5,7 +5,7 @@
 <!-- roslaunch arguments -->
 <arg name="debug" default="true"/>
 <arg name="use_gmapping" default="true"/>
-<arg name="scan_topic" value="/TX2_r2000Lidar/laserScan"/>
+<arg name="scan_topic" value="scan"/>
 <arg name="map_file" value="$(find unicorn_slam)/maps/work_room.yaml"/>
 <arg name="lidar_ip" default="192.168.0.100" />
 
@@ -17,7 +17,7 @@
 	<!-- Launch grid-mapping -->
 	<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
 		<rosparam file="$(find unicorn_slam)/config/gmapping_default.yaml"/>
-		<remap from="scan" to="$(arg scan_topic)"/>
+		<remap from="scan" to="TX2_r2000Lidar/laserScan"/>
 	</node>
 	
 </group>
@@ -45,7 +45,7 @@
 	<arg name="camera_frame" value="zed_left_camera"/>
 	<arg name="depth_frame" value="zed_depth_camera"/> 
 </include>
-</group> 
+</group>
 
 <!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->
 <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
@@ -98,11 +98,11 @@
 
 <!-- Start R2000 Lidar node -->
 <node pkg="pepperl_fuchs_r2000" type="r2000_node" name="TX2_r2000Lidar" output="screen">
-    <param name="scanner_ip" value="192.168.1.58"/>
+    <param name="scanner_ip" value="10.0.0.3"/>
     <param name="frame_id" value="base_laser"/>
-    <param name="scan_frequency" value="10"/>
-    <param name="samples_per_scan" value="3600"/>
-    <param name="start_angle" value="-1800000"/>
+    <param name="scan_frequency" value="30"/>
+    <param name="samples_per_scan" value="1200"/>
+    <param name="start_angle" value="-1200000"/>
 </node>
 
 <!-- Start the Sick LMS111 driver -->
@@ -151,5 +151,6 @@
    <rosparam command="load" file="$(find unicorn)/config/ekf_odom.yaml" />
 </node>
 
+<!--<node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find am_description)/rviz/pf.rviz"/> -->
 
 </launch>

@@ -1,7 +1,8 @@
 #include "unicorn/navigating_state.h"
 
-NAVIGATINGState::NAVIGATINGState(float x, float y, float yaw, ros::NodeHandle node) : move_base_clt_("move_base", false)
+NAVIGATINGState::NAVIGATINGState(float x, float y, float yaw, ros::NodeHandle node) : move_base_clt_("move_base", true)
 {
+
     current_goal_.x = x;
     current_goal_.y = y;
     current_goal_.yaw = yaw;
