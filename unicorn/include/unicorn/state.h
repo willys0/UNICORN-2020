@@ -26,7 +26,6 @@
 #include <iostream>
 #include <termios.h>
 #include <cmath>
-#include <boost/lexical_cast.hpp>
 #include <cstdlib>
 
 /* User-defined message */

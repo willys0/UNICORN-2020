@@ -23,34 +23,6 @@ void ALIGNINGState::cancelGoal()
 int ALIGNINGState::sendGoal(Goal new_goal)
 {    
     int attempts = 0;
-    try
-    {
-        float check_input = boost::lexical_cast<float>(new_goal.x);
-    }
-    catch (boost::bad_lexical_cast &e)
-    {
-        ROS_INFO("%s", e.what());
-        ROS_ERROR("[UNICORN State Machine] x is undefined");
-        return -1;
-    }
-    try
-    {
-        float check_input = boost::lexical_cast<float>(new_goal.y);
-    }
-    catch (boost::bad_lexical_cast &)
-    {
-        ROS_ERROR("[UNICORN State Machine] y is undefined");
-        return -1;
-    }
-    try
-    {
-        float check_input = boost::lexical_cast<float>(new_goal.yaw);
-    }
-    catch (boost::bad_lexical_cast &)
-    {
-        ROS_ERROR("[UNICORN State Machine] yaw is undefined");
-        return -1;
-    }
     while (!move_base_clt_.waitForServer(ros::Duration(5.0)) && (attempts < 4))
     {
         ROS_INFO("Waiting for the move_base action server to come up");
