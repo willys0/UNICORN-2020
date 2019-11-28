@@ -9,7 +9,7 @@ int main(int argc, char** argv)
     return 0;
 }
 
-StateMachine::StateMachine() : move_base_clt_("move_base", true)
+StateMachine::StateMachine()
 {
     bool run_global_loc, sim_time;
     std::string odom_topic;

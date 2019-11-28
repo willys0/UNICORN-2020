@@ -91,7 +91,7 @@ private:
     std::shared_ptr<State> current_state_;
     float current_yaw_;
     float current_vel_;
-    MoveBaseClient move_base_clt_;
+    // MoveBaseClient move_base_clt_;
 
     /*Methods*/
     /**
