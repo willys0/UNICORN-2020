@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(unicorn)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -16,12 +16,11 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
   tf
   geometry_msgs
-  message_generation
-  
+  message_generation 
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED)
+#find_package(Boost REQUIRED)
 #find_package(rostest REQUIRED)
 #find_package(GTest REQUIRED)
 
@@ -63,6 +62,7 @@ find_package(Boost REQUIRED)
 
 add_message_files(
   FILES
+  masterMessage.msg
   command.msg
 )
 

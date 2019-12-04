@@ -71,6 +71,9 @@ namespace thetastar_planner {
         double next_world_x = 0, next_world_y = 0, world_x = 0, world_y = 0;
         
         for(int i = 0; i < theta_path_.getNumOfSegment(); i++){
+
+	    std::cout << (int)costmap_->getCost((unsigned int)theta_path_.getX(i), (unsigned int)theta_path_.getY(i)) << std::endl;
+
             // Get the current point in the path
             mapToWorld(theta_path_.getX(i), theta_path_.getY(i), world_x, world_y);
 
@@ -184,6 +187,13 @@ namespace thetastar_planner {
                 return true;
             }        
         }
+        grid_graph_.IntializeMap(costmap_->getCharMap(), costmap_->getSizeInCellsY(), costmap_->getSizeInCellsX());
+
+	// Update the grid since the cost map might have been updated
+        if(!grid_graph_.MakeGrid()) {
+            std::cout << "Failed to make grid (grid_graph_)" << std::endl;
+        }
+
 
         // Convert postions
         worldToMap(start.pose.position.x, start.pose.position.y, start_x, start_y);
@@ -211,11 +221,7 @@ namespace thetastar_planner {
             worldToMap(rec_x,rec_y, start_x, start_y);
         }
 
-        // Update the grid since the cost map might have been updated
-        if(!grid_graph_.MakeGrid()) {
-            std::cout << "Failed to make grid (grid_graph_)" << std::endl;
-        }
-
+        
         // If the current goal is inside an obstacle, calculate the closes legal goal position
         // in the direction of the start point
         goal_cost = (int)costmap_->getCost((unsigned int)goal_x, (unsigned int)goal_y);

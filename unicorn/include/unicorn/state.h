@@ -30,6 +30,7 @@
 
 /* User-defined message */
 #include "unicorn/command.h"
+#include "unicorn/masterMessage.h"
 
 /* UNICORN */
 #include "unicorn/state_structures.h"
