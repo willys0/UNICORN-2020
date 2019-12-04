@@ -3,10 +3,35 @@
 int main(int argc, char** argv) 
 {
 	ros::init(argc, argv, "TX2_unicornStatemachine");    
-    StateMachine state_machine;
-    int exit_code = state_machine.start();
+    StateMachine * state_machine = new StateMachine();
+    int exit_code = state_machine->start();
     ROS_INFO("[UNICORN] State machine exited with: %d", exit_code);
     return 0;
+}
+
+bool StateMachine::areRIONodesRunning(ros::V_string nodes)
+{
+    std::vector<std::string> RIO_node_names = {"/RIO_publisher", "/RIO_unicornStateSubscriber", "/RIO_ledSubscriber"};   
+    return std::includes(nodes.begin(), nodes.end(), RIO_node_names.begin(), RIO_node_names.end());
+}
+
+bool StateMachine::checkROSNodeStatus()
+{
+    ros::V_string nodes;
+    ros::master::getNodes(nodes);
+    ros::Rate rate(0.5);
+    while(!areRIONodesRunning(nodes))
+    {
+        if(!ros::master::getNodes(nodes) || !ros::master::check())
+        {
+            ROS_ERROR("[UNICORN State Machine] ROS status check: Could not fetch nodes from master");
+            return false;
+        } 
+        ros::spinOnce();
+        rate.sleep();
+    }
+    ROS_INFO("[UNICORN State Machine] ROS status check: OK");
+    return true;
 }
 
 StateMachine::StateMachine()
@@ -74,7 +99,9 @@ StateMachine::StateMachine()
     current_state_ = StateFactory::CreateStateInstance(initial_cmd, n_, refuse_bin_pose_);
 }
 
-StateMachine::~StateMachine() {}
+StateMachine::~StateMachine() {
+    delete velocity_pid;
+}
 
 int StateMachine::start() 
 {

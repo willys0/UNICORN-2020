@@ -3,6 +3,8 @@
 
 /*ROS*/
 #include <ros/ros.h>
+#include <ros/master.h>
+#include <ros/common.h>
 #include <tf/transform_listener.h>
 #include <std_srvs/Empty.h>
 #include <actionlib_msgs/GoalID.h>
@@ -88,7 +90,7 @@ private:
     tf::TransformListener tf_listener_;
 	PidController *velocity_pid_; /**< PID to control position in x*/
 	RefuseBin refuse_bin_pose_;
-    std::shared_ptr<State> current_state_;
+    std::unique_ptr<State> current_state_;
     float current_yaw_;
     float current_vel_;
     // MoveBaseClient move_base_clt_;
@@ -132,5 +134,9 @@ private:
      * @brief returns the string representation of the current state. 
     */
     std::string getStateString();
+
+    bool checkROSNodeStatus();
+
+    bool areRIONodesRunning(ros::V_string nodes);
 };
 #endif // !ST

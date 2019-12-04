@@ -53,7 +53,7 @@ public:
     /**
         @brief Default de-constructor
     */
-    ~State(){};
+    virtual ~State(){};
     /**
      * @brief Sets the states command to the provided command.
      * 
