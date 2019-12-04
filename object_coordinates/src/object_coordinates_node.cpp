@@ -41,7 +41,7 @@ void callback(const sensor_msgs::Image::ConstPtr& im_msg, const darknet_ros_msgs
 							0,					0,					1.0;
 			
 			//save the closest human
-			if(coordinates(2) > depths[x+y*im_msg->width){
+			if(coordinates(2) > depths[x+y*im_msg->width]){
 				coordinates(0) = x;
 				coordinates(1) = y;
 				coordinates(2) = depths[x+y*im_msg->width];

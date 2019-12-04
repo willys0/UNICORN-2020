@@ -100,7 +100,7 @@ StateMachine::StateMachine()
 }
 
 StateMachine::~StateMachine() {
-    delete velocity_pid;
+    delete velocity_pid_;
 }
 
 int StateMachine::start() 

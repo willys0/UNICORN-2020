@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   geometry_msgs
   message_generation 
+  genmsg
 )
 
 ## System dependencies are found with CMake's conventions
@@ -62,8 +63,8 @@ find_package(catkin REQUIRED COMPONENTS
 
 add_message_files(
   FILES
-  masterMessage.msg
   command.msg
+  masterMessage.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -146,6 +147,8 @@ include_directories(
 
 add_executable(am_unicorn_interface src/am_unicorn_interface.cpp)
 target_link_libraries(am_unicorn_interface ${catkin_LIBRARIES})
+add_dependencies(am_unicorn_interface unicorn_generate_messages_cpp)
+
 
 #add_executable(unicorn_statemachine src/unicorn_statemachine.cpp)
 #add_dependencies(unicorn_statemachine ${catkin_EXPORTED_TARGETS})
@@ -169,6 +172,7 @@ add_library(state_lib
 add_library(pid_controller_lib src/pid_controller.cpp)
 
 add_executable(unicorn_statemachine src/state_machine.cpp)
+add_dependencies(unicorn_statemachine unicorn_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES} pid_controller_lib state_lib)
 
 ## Add cmake target dependencies of the library

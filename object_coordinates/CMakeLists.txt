@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(tf_filter)
+project(object_coordinates)
 
 # if CMAKE_BUILD_TYPE is not specified, take 'Release' as default
 IF(NOT CMAKE_BUILD_TYPE)
@@ -31,8 +31,7 @@ catkin_package(
 )
 
 include_directories(
-  ${tf_filter}/src
-  ${tf_filter}/include
+  ${object_coordinates}/src
   include
   ${Boost_INCLUDE_DIRS}
   ${catkin_INCLUDE_DIRS}
@@ -40,6 +39,8 @@ include_directories(
 )
 
 ## Build 
-add_executable(tf_filter src/tf_filter_node.cpp)
-target_link_libraries(tf_filter ${catkin_LIBRARIES})
+add_executable(object_coordinates src/object_coordinates_node.cpp)
+target_link_libraries(object_coordinates ${catkin_LIBRARIES})
+add_dependencies(object_coordinates object_coordinates_generate_messages_cpp)
+
 
