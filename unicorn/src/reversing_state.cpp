@@ -37,6 +37,8 @@ Command REVERSINGState::run()
 //        ROS_INFO("[UNICORN State Machine] Current yaw: %f", current_yaw_);
         if(command.state != -1)
         {
+            man_cmd_vel_.linear.x = 0.0;
+            cmd_vel_pub_.publish(man_cmd_vel_);
             cancelGoal();
             ROS_INFO("[UNICORN State Machine] New command was issued, halting navigation.");
             new_cmd.state = command.state;

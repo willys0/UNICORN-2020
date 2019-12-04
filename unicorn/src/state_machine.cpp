@@ -159,7 +159,7 @@ void StateMachine::odomCallback(const nav_msgs::Odometry &msg)
 void StateMachine::updateAndPublishState(int new_state)
 {
     ROS_INFO("[UNICORN State Machine]: Updating state to: %d", new_state);
-    std_msgs::Int32 new_state_msg;
+    std_msgs::Int32 new_state_msg; 
     new_state_msg.data = new_state;
     state_pub_.publish(new_state_msg);
     return;
