@@ -34,7 +34,7 @@ private:
      * 
      * @param recieveMsg message containing the current state of the lift state machine.
      */
-    void liftCallback(const std_msgs::Int32 &recieveMsg);
+    void liftCallback(const unicorn::masterMessage &recieveMsg);
     /**
      * @brief reverses from the bin for a small moment 
      */

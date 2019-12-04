@@ -30,6 +30,7 @@
 
 /* User-defined message */
 #include "unicorn/command.h"
+#include "unicorn/masterMessage.h"
 
 /* UNICORN */
 #include "unicorn/state_structures.h"
@@ -59,7 +60,7 @@ public:
      * 
      * @param new_cmd Command
     */
-    Command setNewCmd(Command new_cmd) { ROS_INFO("New command has been set"); command = new_cmd; };
+    void setNewCmd(Command new_cmd) { ROS_INFO("New command has been set"); command = new_cmd; };
     /**
      * @brief Pure Virtual function which is called to by the state machine. Intended purpose is to run the state logic and exit upon finished. 
     */

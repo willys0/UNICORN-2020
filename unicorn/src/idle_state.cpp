@@ -13,11 +13,9 @@ IDLEState::~IDLEState()
 Command IDLEState::run()
 {
     ROS_INFO("Waiting for new command...");
-    ros::Rate rate(0.3);
+    ros::Rate rate(1);
     while(command.state == -1)
-    {
-        rate.sleep();
-        ROS_INFO("No new command yet.");
+    {   
         ros::spinOnce();
     }
     ROS_INFO("New command has been recieved: %d", command.state);

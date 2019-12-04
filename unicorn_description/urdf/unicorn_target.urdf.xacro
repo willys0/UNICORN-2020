@@ -133,7 +133,7 @@
     <turnGravityOff>false</turnGravityOff>
   </gazebo>
   <joint name="base_chassis_joint" type="fixed">
-    <parent link="base_link"/>
+    <parent link="base_link"/> <!-- Switched -->
     <child link="chassis_link" />
   <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
   </joint>
@@ -202,7 +202,8 @@
     </joint> -->
 
     <joint name="chassis_zed_joint" type="fixed">
-      <parent link="chassis_link"/>
+      <!--parent link="chassis_link"/-->
+      <parent link="base_link"/>
       <child link="zed_center"/>
      <origin xyz="-0.14 0.0 0.11" rpy="0 0 ${-M_PI}"/>
     </joint>
@@ -237,7 +238,8 @@
   <link name="camera_rgb_optical_frame" />
 
   <joint name="chassis_orbbec_joint" type="fixed">
-    <parent link="chassis_link"/>
+    <!--parent link="chassis_link"/-->
+    <parent link="base_link"/>
     <child link="camera_link"/>
     <origin xyz="0.2 0 0.3" rpy="0 0 ${M_PI}"/>
   </joint>
@@ -268,11 +270,15 @@
 
 
 
-  <wheel fb="back" lr="left" parent="chassis_link" translateY="-0.24" translateX="0.0" translateZ="-0.006" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
-  <wheel fb="back" lr="right" parent="chassis_link" translateY="0.24" translateX="0.0" translateZ="-0.006" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <!--wheel fb="back" lr="left" parent="chassis_link" translateY="-0.24" translateX="0.0" translateZ="-0.006" wheel_radius="0.1225" wheel_height="0.032" flip="1"/-->
+  <wheel fb="back" lr="left" parent="base_link" translateY="-0.24" translateX="0.0" translateZ="-0.006" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <!--wheel fb="back" lr="right" parent="chassis_link" translateY="0.24" translateX="0.0" translateZ="-0.006" wheel_radius="0.1225" wheel_height="0.032" flip="1"/-->
+  <wheel fb="back" lr="right" parent="base_link" translateY="0.24" translateX="0.0" translateZ="-0.006" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
 
-  <swivel_wheel fb="front" lr="left" parent="chassis_link" translateY="-0.16" translateX="0.355" translateZ="0.03" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
-  <swivel_wheel fb="front" lr="right" parent="chassis_link" translateY="0.16" translateX="0.355" translateZ="0.03" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
+  <!--swivel_wheel fb="front" lr="left" parent="chassis_link" translateY="-0.16" translateX="0.355" translateZ="0.03" wheel_radius="0.05" wheel_height="0.05" flip="0"/-->
+  <swivel_wheel fb="front" lr="left" parent="base_link" translateY="-0.16" translateX="0.355" translateZ="0.03" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
+  <!--swivel_wheel fb="front" lr="right" parent="chassis_link" translateY="0.16" translateX="0.355" translateZ="0.03" wheel_radius="0.05" wheel_height="0.05" flip="0"/-->
+  <swivel_wheel fb="front" lr="right" parent="base_link" translateY="0.16" translateX="0.355" translateZ="0.03" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
 
   
   <!--ultrasonic_sensor frame="base_ultrasonic_br" topic="br" robot_namespace="$(arg robot_namespace)"/>
@@ -340,7 +346,8 @@
    
    <joint name="laser_mount_joint" type="fixed">
       <origin xyz="$(arg laser_xyz)" rpy="$(arg laser_rpy)" />
-      <parent link="chassis_link" />
+      <!--parent link="chassis_link" /-->
+      <parent link="base_link" />
       <child link="base_laser" />
    </joint>
    

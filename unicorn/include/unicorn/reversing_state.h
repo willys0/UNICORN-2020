@@ -43,7 +43,7 @@ private:
      * 
      * @param msg message containing the current averaged distance measured by the rear lidar
     */
-    void rearLidarCallback(const std_msgs::Float32 &msg);
+    void rearLidarCallback(const unicorn::masterMessage &msg);
     /**
      * @brief Callback method used to capture and process odometry messages
      * 

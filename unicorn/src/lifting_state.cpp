@@ -3,7 +3,7 @@
 LIFTState::LIFTState(ros::NodeHandle node) : move_base_clt_("move_base", false)
 {
     lift_init_pub_ = node.advertise<std_msgs::Bool>("TX2_liftSubscriber_state", 1);
-    lift_complete_sub_ = node.subscribe("RIO_liftPublisher_state", 0, &LIFTState::liftCallback, this);
+    lift_complete_sub_ = node.subscribe("RIO_publisher_masterMessage", 0, &LIFTState::liftCallback, this);
     cmd_vel_pub_ = node.advertise<geometry_msgs::Twist>("/unicorn/cmd_vel", 0);
     move_base_cancel_pub_ = node.advertise<actionlib_msgs::GoalID>("/move_base/cancel", 0);
     state_identifier_ = STATE_LIFT;
@@ -42,11 +42,11 @@ Command LIFTState::run()
     return new_cmd;
 }
 
-void LIFTState::liftCallback(const std_msgs::Int32 &recieveMsg)
-{
-    ROS_INFO("[UNICORN State Machine] Lift completion signal recieved.");
-    if (recieveMsg.data == 5)
+void LIFTState::liftCallback(const unicorn::masterMessage &recieveMsg)
+{ 
+    if (recieveMsg.liftState == 5)
     {
+	ROS_INFO("[UNICORN State Machine] Lift completion signal recieved.");
         lift_complete_ = true;
     }
 }
