@@ -806,7 +806,7 @@ Initialize Local planner
 	k1 = 0.01;
 	k2 = 1;
 	ros::NodeHandle moving_obstacle_node;
-	moving_obstacle_subscriber_ = moving_obstacle_node.subscribe<vector_creation::vector>("/vector_generation/vector", 1, &LocalPlanner::dynamicObstacleCallback, this);
+	moving_obstacle_subscriber_ = moving_obstacle_node.subscribe<vector_creation::vector>("/TX2/vector_creation/vector", 1, &LocalPlanner::dynamicObstacleCallback, this);
 	close_to_goal = false;
 	final_vectors_vector.clear();
 	last_repulsive_field_magnitude_ = 0.0;
