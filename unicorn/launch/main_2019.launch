@@ -47,6 +47,10 @@
 </include>
 </group>
 
+<group ns="tf_filter">
+<node pkg="tf_filter" type="tf_filter" name="tf_filter"/>
+</group>
+
 <!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->
 <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
 <node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid pcl_manager" output="screen">

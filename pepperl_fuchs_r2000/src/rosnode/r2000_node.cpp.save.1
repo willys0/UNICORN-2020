@@ -61,6 +61,10 @@ R2000Node::R2000Node():nh_("~")
     scan_publisher_ = nh_.advertise<sensor_msgs::LaserScan>("laserScan",1);
     cmd_subscriber_ = nh_.subscribe("controlCommand",100,&R2000Node::cmdMsgCallback,this);
 
+    // Added by Niklas Fasth
+    intention_subscriber_ = nh_.subscribe("rosout", 100, &R2000Node::intentionMsgCallback, this);
+    // End add
+
     get_scan_data_timer_ = nh_.createTimer(ros::Duration(1/(2*std::atof(driver_->getParametersCached().at("scan_frequency").c_str()))), &R2000Node::getScanData, this);
 }
 
@@ -92,6 +96,14 @@ bool R2000Node::connect()
     for( const auto& p : params )
         std::cout << p.first << " : " << p.second << std::endl;
     std::cout << "============================================================" << std::endl;
+
+    // Set static text message
+    //-------------------------------------------------------------------------
+    //const std::string hej = "Hej_Rasmus";
+    driver_->setParameter("hmi_static_text_1", "Starting...");
+    driver_->setParameter("hmi_static_text_2", "I_am_Unicorn");
+    driver_->setParameter("hmi_display_mode", "static_text");
+    
 
     // Start capturing scanner data
     //-------------------------------------------------------------------------
@@ -188,12 +200,20 @@ void R2000Node::cmdMsgCallback(const std_msgs::StringConstPtr &msg)
     }
 }
 
+// Added by Niklas Fasth
+void R2000Node::intentionMsgCallback(const std_msgs::Int32::ConstPtr& msg)
+{
+
+
+}
+// End add
+
 //-----------------------------------------------------------------------------
 } // NS
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "r2000_node", ros::init_options::AnonymousName);
+    ros::init(argc, argv, "r2000_node");//, ros::init_options::AnonymousName);
     new pepperl_fuchs::R2000Node();
     ros::spin();
     return 0;
