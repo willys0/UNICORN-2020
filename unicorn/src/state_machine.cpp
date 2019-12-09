@@ -107,7 +107,9 @@ int StateMachine::start()
 {
     ROS_INFO("[UNICORN State Machine] Check ROS Status...");
     if(!checkROSNodeStatus())
+    {
         return -1;
+    }
     Command new_cmd;
     ROS_INFO("[UNICORN State Machine] Starting state machine...");
     while (ros::ok())
