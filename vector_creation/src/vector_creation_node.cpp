@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
 	VectorCreation vc;
 	vector_creation::vector msg;
 
-	ros::Subscriber subPosition    	= n.subscribe("tx2/tf_filter/point", 1, &VectorCreation::positionCallback, &vc);
+	ros::Subscriber subPosition    	= n.subscribe("TX2/tf_filter/point", 1, &VectorCreation::positionCallback, &vc);
 	ros::Publisher pubVector	= n.advertise<vector_creation::vector>("/TX2/vector_creation/vector",1);
 
 	ros::Rate loop_rate(20);

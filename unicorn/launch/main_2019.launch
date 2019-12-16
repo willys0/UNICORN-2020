@@ -34,6 +34,23 @@
 	</node>	
 </group>
 
+<group ns="darknet_ros">
+	<include file="/home/nvidia/catkin_ws/src/darknet_ros/darknet_ros/launch/darknet_ros.launch"/>
+</group>
+
+<!--<group ns="object_coordinates">-->
+	<node pkg="object_coordinates" type="object_coordinates" name="tx2_object_coordinates" output="screen"></node>
+<!--</group> -->
+
+<!--<group ns="vector_creation">-->
+	<node pkg="vector_creation" type="vector_creation" name="vector_creation" output="screen">	
+</node>
+
+<!--</group>-->
+<!--<group ns="tf_filter"> -->
+	<node pkg="tf_filter" type="tf_filter" name="tx2_tf_filter"></node>
+<!--</group> -->
+
 <!-- Run zed camera -->
 <group ns="zed">
 <include file="$(find zed_wrapper)/launch/zed_camera.launch">
@@ -45,10 +62,6 @@
 	<arg name="camera_frame" value="zed_left_camera"/>
 	<arg name="depth_frame" value="zed_depth_camera"/> 
 </include>
-</group>
-
-<group ns="tf_filter">
-<node pkg="tf_filter" type="tf_filter" name="tf_filter"/>
 </group>
 
 <!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->
