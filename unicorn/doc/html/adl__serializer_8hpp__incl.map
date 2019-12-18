@@ -1,0 +1,16 @@
+<map id="adl_serializer.hpp" name="adl_serializer.hpp">
+<area shape="rect" id="node3" href="$from__json_8hpp.html" title="nlohmann/detail/conversions\l/from_json.hpp" alt="" coords="817,169,1004,211"/>
+<area shape="rect" id="node34" href="$to__json_8hpp.html" title="nlohmann/detail/conversions\l/to_json.hpp" alt="" coords="1097,80,1284,121"/>
+<area shape="rect" id="node15" href="$exceptions_8hpp.html" title="nlohmann/detail/exceptions.hpp" alt="" coords="449,266,655,293"/>
+<area shape="rect" id="node20" href="$macro__scope_8hpp.html" title="nlohmann/detail/macro\l_scope.hpp" alt="" coords="355,348,509,389"/>
+<area shape="rect" id="node23" href="$cpp__future_8hpp.html" title="nlohmann/detail/meta\l/cpp_future.hpp" alt="" coords="676,437,823,479"/>
+<area shape="rect" id="node24" href="$type__traits_8hpp.html" title="nlohmann/detail/meta\l/type_traits.hpp" alt="" coords="1140,259,1287,300"/>
+<area shape="rect" id="node33" href="$value__t_8hpp.html" title="nlohmann/detail/value\l_t.hpp" alt="" coords="1897,259,2045,300"/>
+<area shape="rect" id="node18" href="$position__t_8hpp.html" title="nlohmann/detail/input\l/position_t.hpp" alt="" coords="1147,348,1293,389"/>
+<area shape="rect" id="node21" href="$hedley_8hpp.html" title="nlohmann/thirdparty\l/hedley/hedley.hpp" alt="" coords="285,437,421,479"/>
+<area shape="rect" id="node26" href="$iterator__traits_8hpp.html" title="nlohmann/detail/iterators\l/iterator_traits.hpp" alt="" coords="787,348,951,389"/>
+<area shape="rect" id="node28" href="$detected_8hpp.html" title="nlohmann/detail/meta\l/detected.hpp" alt="" coords="976,348,1123,389"/>
+<area shape="rect" id="node29" href="$json__fwd_8hpp.html" title="nlohmann/json_fwd.hpp" alt="" coords="1699,355,1858,382"/>
+<area shape="rect" id="node27" href="$void__t_8hpp.html" title="nlohmann/detail/meta\l/void_t.hpp" alt="" coords="852,437,999,479"/>
+<area shape="rect" id="node35" href="$iteration__proxy_8hpp.html" title="nlohmann/detail/iterators\l/iteration_proxy.hpp" alt="" coords="1654,169,1818,211"/>
+</map>

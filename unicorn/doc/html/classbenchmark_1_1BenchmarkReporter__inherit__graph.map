@@ -1,0 +1,5 @@
+<map id="benchmark::BenchmarkReporter" name="benchmark::BenchmarkReporter">
+<area shape="rect" id="node2" href="$classbenchmark_1_1ConsoleReporter.html" title="benchmark::ConsoleReporter" alt="" coords="5,80,197,107"/>
+<area shape="rect" id="node3" href="$classbenchmark_1_1CSVReporter.html" title="benchmark::CSVReporter" alt="" coords="222,80,394,107"/>
+<area shape="rect" id="node4" href="$classbenchmark_1_1JSONReporter.html" title="benchmark::JSONReporter" alt="" coords="418,80,598,107"/>
+</map>

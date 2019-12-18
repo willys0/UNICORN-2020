@@ -11,6 +11,14 @@
 #include <string>
 using namespace Eigen;
 geometry_msgs::PointStamped msg;
+
+/**
+ * @brief Callback method which processes an image from the stereo camera and extracts the nearest human obstacle detected in the image. 
+ * 
+ * @param im_msg Sensor message containing an image
+ * @param bb_msg DARKNET ROS message containing bounding boxes calculated around objects detected in the an image
+ */
+
 void callback(const sensor_msgs::Image::ConstPtr& im_msg, const darknet_ros_msgs::BoundingBoxes::ConstPtr& bb_msg)
 {
 	int xmin, xmax, ymin, ymax, width;
