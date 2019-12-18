@@ -25,7 +25,7 @@ odom0_differential: false
 #odometry/zed
 odom1: zed/odom
 odom1_config: [true, true, false,
-           false, false, false,
+           false, false, true,
            false, false, false,
            false, false, false,
            false, false, false]

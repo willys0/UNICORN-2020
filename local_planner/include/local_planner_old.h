@@ -7,7 +7,6 @@
 #include <costmap_2d/costmap_2d.h>
 #include <nav_core/base_local_planner.h>
 #include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/Twist.h>
 #include <angles/angles.h>
 #include <base_local_planner/world_model.h>
@@ -114,8 +113,6 @@ void dynamicObstacleCallback(const vector_creation::vector msg);
 	std::vector<tf::Vector3> final_vectors_vector;
 	double last_repulsive_field_magnitude_;
 	float shortest_distance_to_obstacle_;
-	int deg_to_obstacle_;
-	float last_k2_;
 
   	costmap_2d::Costmap2DROS* costmap_ros_; //!< Pointer to the costmap ros wrapper, received from the navigation stack
   	costmap_2d::Costmap2D* costmap_; //!< Pointer to the 2d costmap (obtained from the costmap ros wrapper)
@@ -131,7 +128,7 @@ void dynamicObstacleCallback(const vector_creation::vector msg);
 	// flags
 	bool initialized_; //!< Keeps track about the correct initialization of this class
 	
-	ros::Publisher l_plan_pub_,marker_pub,new_map_pub,intention_pub,position_pub;
+	ros::Publisher l_plan_pub_,marker_pub,new_map_pub,intention_pub;
 	ros::Subscriber odom_sub_,moving_obstacle_subscriber_;
 
 	uint32_t shape; //Marker to represent local goal

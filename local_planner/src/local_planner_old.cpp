@@ -142,7 +142,7 @@ void LocalPlanner::repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 
 	// Every 
     int xt, yt, cost, force_x, force_y, deg;
     int scale = 1; // default 100
-    int gain = 71; // 71 = 1meter // 2000 // Default 10000
+    int gain = 106; // 71 = 1meter // 2000 // Default 10000
     float dmax = 21; // default 1.25 // 1.1
 	float repulsive_force, x_force, y_force, z_force;
 
@@ -239,7 +239,6 @@ void LocalPlanner::findClosestObjectEuclidean(int *deg, float *distance_to_obsta
 
     // Calculate angle
     *deg = int(round(atan2(dist_y, dist_x) * 180 / PI));
-	deg_to_obstacle_ = *deg;
 
 	*distance_to_obstacle = min_dist;
 	shortest_distance_to_obstacle_ = min_dist;
@@ -270,73 +269,14 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 
 	double delta_orient = base_local_planner::getGoalOrientationAngleDifference (robot_pose, tf::getYaw(global_goal_odom.getRotation())); // Difference in rotation between robot and goal
 
-	theta_d = atan2(force.m_floats[1], force.m_floats[0]); // Desired heading
-
 	// Parameters that affects the attractive field
 	k1 = 0.01+tanh(1/d); // The higher k1 value, the more the robot wants to stay on the path
-	//k2 = tanh(d)+tanh(repulsive_field_magnitude*1); // The higher k2 values, the more the robot wants to advance towards goal
-
-	int theta_degree = round((theta_d)*180/PI);
-	if (theta_degree > 0)
-	{
-		theta_degree -= 180;
-	}
-	else
-	{
-		theta_degree += 180;
-	}
-	
-	int diff_heading_obst = 0;
-	diff_heading_obst = fabs(theta_degree - deg_to_obstacle_);
-
-	/*if (theta_degree > 0)
-	{
-		diff_heading_obst = fabs(theta_degree - deg_to_obstacle_);
-	}
-	else if (deg_to_obstacle_ > 0)
-	{
-		diff_heading_obst = fabs(deg_to_obstacle_ - theta_degree);
-	}
-	else
-	{
-		diff_heading_obst = fabs(theta_degree - deg_to_obstacle_);
-	}*/
-	if (diff_heading_obst > 180)
-	{
-		diff_heading_obst = 360 - diff_heading_obst;
-	}
-	
-	/*if (diff_heading_obst > 360)
-	{
-		ROS_INFO("DIFF_HEADING_OBST WRONG VALUE");
-	}*/
-	if (!close_to_goal)
-	{
-		if (diff_heading_obst > 60)
-		{
-			k2 = tanh(d)+2*tanh(repulsive_field_magnitude*1); // The higher k2 values, the more the robot wants to advance towards goal
-		}
-		else
-		{
-			k2 = tanh(d)+1*tanh(repulsive_field_magnitude*1); // The higher k2 values, the more the robot wants to advance towards goal
-		}
-	}
-	else
-	{
-		k2 = tanh(d)+1*tanh(repulsive_field_magnitude*1);
-	}
-	
-	if (k2 > (last_k2_ + 0.01))
-	{
-		k2 = last_k2_ + 0.01;
-	}
-
-
-	std::cout << "Robot heading: " << theta_degree << " Deg to obst: " << deg_to_obstacle_ << endl;
-	std::cout << "Difference: " << diff_heading_obst << endl;
+	k2 = tanh(d)+1*tanh(repulsive_field_magnitude*1); // The higher k2 values, the more the robot wants to advance towards goal
 
 	k_u = k1;
 	k_omega = k2;
+	
+	theta_d = atan2(force.m_floats[1], force.m_floats[0]); // Desired heading
 
 	omega = k_omega*atan2(sin(theta_d-theta),cos(theta_d-theta)); // Angular velocity to get on path
 
@@ -445,7 +385,6 @@ void LocalPlanner::updateVelocity(tf::Vector3 force, tf::Stamped<tf::Pose> robot
 	else if (intention_angle < -180)
 		intention_angle = intention_angle + 360;
 
-	last_k2_ = k2;
 	std_msgs::Int32 intention_to_send;
 	intention_to_send.data = intention_angle;
 	//std::cout << "Theta: " << theta << " Theta_d: " << theta_d << " Intention: " << intention_to_send.data << endl; 
@@ -502,10 +441,10 @@ void LocalPlanner::dipoleForce(tf::Vector3 robot_moment, tf::Stamped<tf::Pose> r
 
 	// Equation 7 - Dynamic Dipole Field
 	// d^ = d / |d|
-	//std::cout << "Robot pos: " << robot_pose.getOrigin().getX() << " " << robot_pose.getOrigin().getY();
-	//std::cout << " Obst pos: " << obstacle_vector_.xposition << " " << obstacle_vector_.yposition << endl;
-	//std::cout << "Robot vel: " << mx << " " << my;
-	//std::cout << " Obst vel:" << obstacle_vector_.xvelocity << " " << obstacle_vector_.yvelocity << endl;
+//	std::cout << "Robot pos: " << robot_pose.getOrigin().getX() << " " << robot_pose.getOrigin().getY();
+//	std::cout << " Obst pos: " << obstacle_vector_.xposition << " " << obstacle_vector_.yposition << endl;
+//	std::cout << "Robot vel: " << mx << " " << my;
+//	std::cout << " Obst vel:" << obstacle_vector_.xvelocity << " " << obstacle_vector_.yvelocity << endl;
 
 	rx = obstacle_vector_.xposition - robot_pose.getOrigin().getX();
 	ry = obstacle_vector_.yposition - robot_pose.getOrigin().getY();
@@ -630,7 +569,7 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
     tf::Vector3 f_attractive_vector, f_repulsive_vector, final_vector, dipole_force, vector_to_compute, obstacle_velocity_vector;
 	global_plan_temp = global_plan_;
 	generate_new_path = 1;
-    geometry_msgs::Point fa_point_path = closestPointOnPath(robot_pose, &plan_index, &distance_to_path); // Which point on path that is closest to the robot
+    geometry_msgs::Point fa_point_path = closestPointOnPath(robot_pose, &plan_index, &distance_to_path); // Where are we
 
 	//ros::spinOnce(); // Receive information from callback
 
@@ -665,7 +604,7 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 		final_vector.operator+=(dipole_force);
 		final_vector.operator+=(f_attractive_vector);
 
-		//std::cout << "Dipole force: " << dipole_force.m_floats[0] << " " << dipole_force.m_floats[1] << " " << dipole_force.m_floats[2] << endl;
+		std::cout << "Dipole force: " << dipole_force.m_floats[0] << " " << dipole_force.m_floats[1] << " " << dipole_force.m_floats[2] << endl;
 		//std::cout << "Repulsive force: " << f_repulsive_vector.m_floats[0] << " " << f_repulsive_vector.m_floats[1] << " " << f_repulsive_vector.m_floats[2] << endl;
 		//std::cout << "Final vector: " << final_vector.m_floats[0] << " " << final_vector.m_floats[1] << " " << final_vector.m_floats[2] << endl;
 
@@ -676,7 +615,7 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 		unsigned int coordx,coordy;
 		costmap_->worldToMap(global_goal_odom.getOrigin().getX(),global_goal_odom.getOrigin().getY(),coordx,coordy);
 		std::cout << "Cost of goal: " << (int)costmap_->getCost(coordx,coordy) << endl;*/
-		//std::cout << "Robot pos: " << robot_pose.getOrigin().getX() << " " << robot_pose.getOrigin().getY() << endl;
+//		std::cout << "Robot pos: " << robot_pose.getOrigin().getX() << " " << robot_pose.getOrigin().getY() << endl;
 
 		updateVelocity(final_vector, robot_pose, &linear_velocity, &angular_velocity, f_repulsive_vector.length(), dipole_force.length(), distance_to_path);
 		cmd_vel.angular.z = angular_velocity;
@@ -692,23 +631,7 @@ bool LocalPlanner::computeVelocityCommands(geometry_msgs::Twist& cmd_vel){
 		new_map_pub.publish(check_if_done_);
 		generate_new_path = 1; // Re-calculate global plan. Out of bounds
 	}
-
-	geometry_msgs::PoseWithCovarianceStamped position_to_send;
-	position_to_send.header.frame_id = global_frame_;
-	position_to_send.header.stamp = ros::Time::now();
-	float random_number = rand() % 11;
-	if (random_number > 5)
-		random_number = 5 - random_number;
-	random_number = random_number / 100;
-	position_to_send.pose.pose.position.x = 0;//robot_pose.getOrigin().getX();// + random_number;
-	position_to_send.pose.pose.position.y = 0;//robot_pose.getOrigin().getY();// + random_number;// + (rand() % 20 - 20) / 100;
-	position_to_send.pose.pose.position.z = 0.0;
-	position_to_send.pose.pose.orientation.x = 0.0;
-	position_to_send.pose.pose.orientation.y = 0.0;
-	position_to_send.pose.pose.orientation.z = 0.0;
-	position_to_send.pose.pose.orientation.w = 1.0;
-	position_pub.publish(position_to_send);
-
+	
 	return true;
 }
 
@@ -736,8 +659,7 @@ bool LocalPlanner::isGoalReached(){
 		//std::cout << "Final orientation: " << tf::getYaw(global_goal_odom.getRotation()) << endl;
 		//std::cout << "Cost: " << ((int)costmap_->getCost(coordx,coordy)) << " At position: " << coordx << " " << coordy << endl;
 
-		float dist = fabs(std::sqrt(dx*dx+dy*dy));
-		if (dist < 1.0)
+		if (fabs(std::sqrt(dx*dx+dy*dy)) < 1.0)
 		{
 			if (((int)costmap_->getCost(coordx,coordy)) > 0)
 			{
@@ -757,13 +679,8 @@ bool LocalPlanner::isGoalReached(){
 				new_map_pub.publish(check_if_done_);
 				generate_new_path = 1;
 				return true;
-			}	
-			else if (dist > 0.5)
-			{
-				close_to_goal = false;
-			}
-
-			else if (dist < 0.5 && fabs(delta_orient) < (30 * PI / 180))
+			}		
+			else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.5 && fabs(delta_orient) < (30 * PI / 180))
 			{
 				goal_reached_ = true;
 				ROS_INFO("Goal reached close to %f %f", global_goal_odom.getOrigin().getX(), global_goal_odom.getOrigin().getY());
@@ -783,11 +700,12 @@ bool LocalPlanner::isGoalReached(){
 				return true;
 
 			}
-			else if (dist < 0.2) // If we only need to adjust the orientation
+			else if (fabs(std::sqrt(dx*dx+dy*dy)) < 0.2) // If we only need to adjust the orientation
 			{
 				close_to_goal = true;
 			}
-
+			else if (fabs(std::sqrt(dx*dx+dy*dy)) > 0.5)
+				close_to_goal = false;
 		}
 		else
 		{
@@ -860,7 +778,6 @@ Initialize Local planner
         ros::NodeHandle pn("~/" + name);
 		ros::NodeHandle path_handle;
 		ros::NodeHandle intention_node;
-		ros::NodeHandle position_node;
 
         // advertise topics (adapted global plan and predicted local trajectory)
         l_plan_pub_ = pn.advertise<nav_msgs::Path>("local_plan", 1);
@@ -868,7 +785,6 @@ Initialize Local planner
 	shape = visualization_msgs::Marker::CUBE;
 	new_map_pub	= path_handle.advertise<geometry_msgs::PoseStamped>("/move_base_simple/goal",1);
 	intention_pub = intention_node.advertise<std_msgs::Int32>("/TX2_localplanner_intention",1);
-	position_pub = position_node.advertise<geometry_msgs::PoseWithCovarianceStamped>("/TX2_localplanner_position",1);
 
 
 
@@ -895,7 +811,6 @@ Initialize Local planner
 	final_vectors_vector.clear();
 	last_repulsive_field_magnitude_ = 0.0;
 	shortest_distance_to_obstacle_ = 100.0;
-	last_k2_ = 0;
 	// -- Peter
 
 

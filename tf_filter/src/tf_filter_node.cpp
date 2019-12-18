@@ -1,4 +1,5 @@
 #include "ros/ros.h"
+#include <time.h>
 #include "tf/transform_listener.h"
 #include "tf/message_filter.h"
 #include "message_filters/subscriber.h"
@@ -8,7 +9,7 @@ class PoseDrawer
 public:
   PoseDrawer() : tf_(),  target_frame_("map")
   {
-    point_sub_.subscribe(n_, "tx2/object_coordinates/point", 10);
+    point_sub_.subscribe(n_, "TX2/object_coordinates/point", 10);
 	
 	
     tf_filter_ = new tf::MessageFilter<geometry_msgs::PointStamped>(point_sub_, tf_, target_frame_, 10);
@@ -40,7 +41,7 @@ int main(int argc, char ** argv)
 {
   ros::init(argc, argv, "tx2_tf_filter"); //Init ROS
   PoseDrawer pd; //Construct class
-  ros::Publisher pubVector= pd.n_.advertise<geometry_msgs::PointStamped>("tx2/tf_filter/point",1);
+  ros::Publisher pubVector= pd.n_.advertise<geometry_msgs::PointStamped>("TX2/tf_filter/point",1);
 	ros::Rate loop_rate(10);
 	while (ros::ok()) {
 		//publish message

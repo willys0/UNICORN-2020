@@ -34,19 +34,23 @@
 	</node>	
 </group>
 
-<group ns="object_coordinates">
-	<node pkg="object_coordinates" type="tx2_object_coordinates" name="tx2_object_coordinates" output="screen"></node>
+<group ns="darknet_ros">
+	<include file="/home/nvidia/catkin_ws/src/darknet_ros/darknet_ros/launch/darknet_ros.launch"/>
 </group>
 
-<group ns="object_detection">
-	<node pkg="object_detection" type="movement_compensation" name="movement_compensation" output="screen">	
+<!--<group ns="object_coordinates">-->
+	<node pkg="object_coordinates" type="object_coordinates" name="tx2_object_coordinates" output="screen"></node>
+<!--</group> -->
+
+<!--<group ns="vector_creation">-->
+	<node pkg="vector_creation" type="vector_creation" name="vector_creation" output="screen">	
 </node>
 
-</group>
-<group ns="tf_filter">
-	<node pkg="tf_filter" type="tx2_tf_filter" name="tx2_tf_filter">
-	</node>
-</group>
+<!--</group>-->
+<!--<group ns="tf_filter"> -->
+	<node pkg="tf_filter" type="tf_filter" name="tx2_tf_filter"></node>
+<!--</group> -->
+
 <!-- Run zed camera -->
 <group ns="zed">
 <include file="$(find zed_wrapper)/launch/zed_camera.launch">
