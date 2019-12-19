@@ -48,7 +48,9 @@ cd ~/catkin_ws && rosdep install --from-paths src --ignore-src -r -y
 cd ~/catkin_ws && catkin_make
 ```
 
-### Dependencies for object detection and tracking
+### Dependencies for object detection and tracking using the StereoLabs ZED Camera
+* [ZED Camera SDK](https://www.stereolabs.com/developers/release/) - Install the SDK for JETPACK 3.3 on the TX2 platform if needed
+
 * [Darknet ROS](https://github.com/leggedrobotics/darknet_ros) - Follow the build and install instructions described in the package README
 
 ## Documentation
