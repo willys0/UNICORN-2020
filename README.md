@@ -1,7 +1,3 @@
-# DISCLAIMER
-
-Further information related to this Git and the UNICORN project can be found in the Wiki on Microsoft Teams([Project] UNICORN). 
-
 # UNICORN
 
 The trash-collecting robot.
