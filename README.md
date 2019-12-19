@@ -29,7 +29,6 @@ sudo apt-get install ros-kinetic-global-planner
 sudo apt-get install ros-kinetic-teb-local-planner
 cd ~/catkin_ws/src
 git clone https://github.com/HusqvarnaResearch/hrp.git
-git clone https://github.com/nlohmann/json.git
 ```
 
 Goto hrp/am_driver_safe and insert a CATKIN_IGNORE file.
@@ -48,6 +47,9 @@ git checkout kinetic-devel
 cd ~/catkin_ws && rosdep install --from-paths src --ignore-src -r -y
 cd ~/catkin_ws && catkin_make
 ```
+
+### Dependencies for object detection and tracking
+* [Darknet ROS](https://github.com/leggedrobotics/darknet_ros) - Follow the build and install instructions described in the package README
 
 ## Documentation
 
