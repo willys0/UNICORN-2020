@@ -16,7 +16,8 @@ Please read through the coding style guides we are using
 
 * [CppStyleGuide](http://wiki.ros.org/CppStyleGuide) - ROS Cpp Style Guide
 * [PyStyleGuide](http://wiki.ros.org/PyStyleGuide) - ROS Python Style Guide
-
+* [The Command Interface Node](https://github.com/jannesuuronen/UNICORN-CIN) - Repository containing the user interface for the robot
+* [LabVIEW implementations](https://github.com/jannesuuronen/UNICORN-2019-LabVIEW) - Repository containing the LabVIEW implementations for the robots sensors etc.
 ## Dependencies
 
 ```
