@@ -26,6 +26,7 @@ sudo apt-get install ros-kinetic-global-planner
 sudo apt-get install ros-kinetic-teb-local-planner
 cd ~/catkin_ws/src
 git clone https://github.com/HusqvarnaResearch/hrp.git
+git clone https://github.com/jannesuuronen/UNICORN-CIN
 ```
 
 Goto hrp/am_driver_safe and insert a CATKIN_IGNORE file.
