@@ -16,6 +16,7 @@ Please read through the coding style guides we are using
 
 * [CppStyleGuide](http://wiki.ros.org/CppStyleGuide) - ROS Cpp Style Guide
 * [PyStyleGuide](http://wiki.ros.org/PyStyleGuide) - ROS Python Style Guide
+* [Command Interface Node](https://github.com/jannesuuronen/UNICORN-CIN) - User Interface for controlling the robot
 
 ## Dependencies
 
@@ -30,7 +31,6 @@ sudo apt-get install ros-kinetic-teb-local-planner
 sudo apt-get install ros-kinetic-robot-localization
 cd ~/catkin_ws/src
 git clone https://github.com/HusqvarnaResearch/hrp.git
-git clone https://github.com/nlohmann/json.git
 ```
 
 Goto hrp/am_driver_safe and insert a CATKIN_IGNORE file.
