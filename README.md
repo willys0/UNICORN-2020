@@ -15,7 +15,6 @@ Please read through the coding style guides we are using
 
 * [The Command Interface Node](https://github.com/jannesuuronen/UNICORN-CIN) - Repository containing the user interface for the robot(command to clone repo. is listed below)
 * [LabVIEW implementations](https://github.com/jannesuuronen/UNICORN-2019-LabVIEW) - Repository containing the LabVIEW implementations for the robots sensors etc.
-* [Command Interface Node](https://github.com/jannesuuronen/UNICORN-CIN) - User Interface for controlling the robot
 ## Dependencies
 
 ```
