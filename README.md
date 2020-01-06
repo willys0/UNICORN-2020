@@ -12,8 +12,10 @@ Please read through the coding style guides we are using
 
 * [CppStyleGuide](http://wiki.ros.org/CppStyleGuide) - ROS Cpp Style Guide
 * [PyStyleGuide](http://wiki.ros.org/PyStyleGuide) - ROS Python Style Guide
+
 * [The Command Interface Node](https://github.com/jannesuuronen/UNICORN-CIN) - Repository containing the user interface for the robot(command to clone repo. is listed below)
 * [LabVIEW implementations](https://github.com/jannesuuronen/UNICORN-2019-LabVIEW) - Repository containing the LabVIEW implementations for the robots sensors etc.
+* [Command Interface Node](https://github.com/jannesuuronen/UNICORN-CIN) - User Interface for controlling the robot
 ## Dependencies
 
 ```
@@ -24,6 +26,7 @@ sudo apt-get install ros-kinetic-navigation
 sudo apt-get install ros-kinetic-range-sensor-layer
 sudo apt-get install ros-kinetic-global-planner
 sudo apt-get install ros-kinetic-teb-local-planner
+sudo apt-get install ros-kinetic-robot-localization
 cd ~/catkin_ws/src
 git clone https://github.com/HusqvarnaResearch/hrp.git
 git clone https://github.com/jannesuuronen/UNICORN-CIN
