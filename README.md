@@ -1,7 +1,3 @@
-# DISCLAIMER
-
-Further information related to this Git and the UNICORN project can be found in the Wiki on Microsoft Teams([Project] UNICORN). 
-
 # UNICORN
 
 The trash-collecting robot.
@@ -16,8 +12,10 @@ Please read through the coding style guides we are using
 
 * [CppStyleGuide](http://wiki.ros.org/CppStyleGuide) - ROS Cpp Style Guide
 * [PyStyleGuide](http://wiki.ros.org/PyStyleGuide) - ROS Python Style Guide
-* [Command Interface Node](https://github.com/jannesuuronen/UNICORN-CIN) - User Interface for controlling the robot
 
+* [The Command Interface Node](https://github.com/jannesuuronen/UNICORN-CIN) - Repository containing the user interface for the robot(command to clone repo. is listed below)
+* [LabVIEW implementations](https://github.com/jannesuuronen/UNICORN-2019-LabVIEW) - Repository containing the LabVIEW implementations for the robots sensors etc.
+* [Command Interface Node](https://github.com/jannesuuronen/UNICORN-CIN) - User Interface for controlling the robot
 ## Dependencies
 
 ```
@@ -31,6 +29,7 @@ sudo apt-get install ros-kinetic-teb-local-planner
 sudo apt-get install ros-kinetic-robot-localization
 cd ~/catkin_ws/src
 git clone https://github.com/HusqvarnaResearch/hrp.git
+git clone https://github.com/jannesuuronen/UNICORN-CIN
 ```
 
 Goto hrp/am_driver_safe and insert a CATKIN_IGNORE file.
@@ -49,6 +48,11 @@ git checkout kinetic-devel
 cd ~/catkin_ws && rosdep install --from-paths src --ignore-src -r -y
 cd ~/catkin_ws && catkin_make
 ```
+
+### Dependencies for object detection and tracking using the StereoLabs ZED Camera
+* [ZED Camera SDK](https://www.stereolabs.com/developers/release/) - Install the SDK for JETPACK 3.3 on the TX2 platform if needed
+
+* [Darknet ROS](https://github.com/leggedrobotics/darknet_ros) - Follow the build and install instructions described in the package README
 
 ## Documentation
 

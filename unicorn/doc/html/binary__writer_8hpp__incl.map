@@ -1,0 +1,18 @@
+<map id="binary_writer.hpp" name="binary_writer.hpp">
+<area shape="rect" id="node8" href="$binary__reader_8hpp.html" title="nlohmann/detail/input\l/binary_reader.hpp" alt="" coords="1646,80,1791,121"/>
+<area shape="rect" id="node19" href="$macro__scope_8hpp.html" title="nlohmann/detail/macro\l_scope.hpp" alt="" coords="2727,348,2881,389"/>
+<area shape="rect" id="node39" href="$output__adapters_8hpp.html" title="nlohmann/detail/output\l/output_adapters.hpp" alt="" coords="3123,259,3277,300"/>
+<area shape="rect" id="node15" href="$exceptions_8hpp.html" title="nlohmann/detail/exceptions.hpp" alt="" coords="2368,266,2573,293"/>
+<area shape="rect" id="node22" href="$input__adapters_8hpp.html" title="nlohmann/detail/input\l/input_adapters.hpp" alt="" coords="1807,259,1953,300"/>
+<area shape="rect" id="node31" href="$json__sax_8hpp.html" title="nlohmann/detail/input\l/json_sax.hpp" alt="" coords="2327,169,2473,211"/>
+<area shape="rect" id="node33" href="$is__sax_8hpp.html" title="nlohmann/detail/meta\l/is_sax.hpp" alt="" coords="665,169,812,211"/>
+<area shape="rect" id="node38" href="$value__t_8hpp.html" title="nlohmann/detail/value\l_t.hpp" alt="" coords="1087,259,1235,300"/>
+<area shape="rect" id="node18" href="$position__t_8hpp.html" title="nlohmann/detail/input\l/position_t.hpp" alt="" coords="3005,437,3150,479"/>
+<area shape="rect" id="node20" href="$hedley_8hpp.html" title="nlohmann/thirdparty\l/hedley/hedley.hpp" alt="" coords="2844,437,2980,479"/>
+<area shape="rect" id="node27" href="$iterator__traits_8hpp.html" title="nlohmann/detail/iterators\l/iterator_traits.hpp" alt="" coords="619,348,783,389"/>
+<area shape="rect" id="node28" href="$void__t_8hpp.html" title="nlohmann/detail/meta\l/void_t.hpp" alt="" coords="245,437,392,479"/>
+<area shape="rect" id="node29" href="$cpp__future_8hpp.html" title="nlohmann/detail/meta\l/cpp_future.hpp" alt="" coords="573,437,720,479"/>
+<area shape="rect" id="node34" href="$detected_8hpp.html" title="nlohmann/detail/meta\l/detected.hpp" alt="" coords="245,348,392,389"/>
+<area shape="rect" id="node35" href="$type__traits_8hpp.html" title="nlohmann/detail/meta\l/type_traits.hpp" alt="" coords="543,259,689,300"/>
+<area shape="rect" id="node36" href="$json__fwd_8hpp.html" title="nlohmann/json_fwd.hpp" alt="" coords="1374,355,1533,382"/>
+</map>

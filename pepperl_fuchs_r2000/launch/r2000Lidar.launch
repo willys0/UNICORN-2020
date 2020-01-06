@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="pepperl_fuchs_r2000" type="r2000_node" name="TX2_r2000Lidar" output="screen">
+    <param name="scanner_ip" value="10.0.0.3"/>
+    <param name="frame_id" value="/laserScan"/>
+    <param name="scan_frequency" value="35"/>
+    <param name="samples_per_scan" value="3600"/>
+    <param name="start_angle" value="-1200000"/>
+  </node>
+</launch>

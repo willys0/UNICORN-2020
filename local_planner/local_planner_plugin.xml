@@ -1,0 +1,6 @@
+ <library path="lib/liblocal_planner_lib">
+  <class name="local_planner/LocalPlanner" type="local_planner::LocalPlanner" base_class_type="nav_core::BaseLocalPlanner">
+    <description>This is a local planner plugin by ELA406 project.</description>
+  </class>
+ </library>
+

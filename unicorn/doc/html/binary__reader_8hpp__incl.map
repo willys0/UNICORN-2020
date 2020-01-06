@@ -1,0 +1,16 @@
+<map id="binary_reader.hpp" name="binary_reader.hpp">
+<area shape="rect" id="node14" href="$exceptions_8hpp.html" title="nlohmann/detail/exceptions.hpp" alt="" coords="264,177,469,203"/>
+<area shape="rect" id="node18" href="$macro__scope_8hpp.html" title="nlohmann/detail/macro\l_scope.hpp" alt="" coords="1082,259,1235,300"/>
+<area shape="rect" id="node21" href="$input__adapters_8hpp.html" title="nlohmann/detail/input\l/input_adapters.hpp" alt="" coords="2070,169,2215,211"/>
+<area shape="rect" id="node30" href="$json__sax_8hpp.html" title="nlohmann/detail/input\l/json_sax.hpp" alt="" coords="851,80,997,121"/>
+<area shape="rect" id="node32" href="$is__sax_8hpp.html" title="nlohmann/detail/meta\l/is_sax.hpp" alt="" coords="1521,80,1668,121"/>
+<area shape="rect" id="node37" href="$value__t_8hpp.html" title="nlohmann/detail/value\l_t.hpp" alt="" coords="565,259,713,300"/>
+<area shape="rect" id="node17" href="$position__t_8hpp.html" title="nlohmann/detail/input\l/position_t.hpp" alt="" coords="269,348,414,389"/>
+<area shape="rect" id="node19" href="$hedley_8hpp.html" title="nlohmann/thirdparty\l/hedley/hedley.hpp" alt="" coords="1121,348,1257,389"/>
+<area shape="rect" id="node26" href="$iterator__traits_8hpp.html" title="nlohmann/detail/iterators\l/iterator_traits.hpp" alt="" coords="2181,259,2345,300"/>
+<area shape="rect" id="node27" href="$void__t_8hpp.html" title="nlohmann/detail/meta\l/void_t.hpp" alt="" coords="2273,348,2420,389"/>
+<area shape="rect" id="node28" href="$cpp__future_8hpp.html" title="nlohmann/detail/meta\l/cpp_future.hpp" alt="" coords="1996,348,2143,389"/>
+<area shape="rect" id="node33" href="$detected_8hpp.html" title="nlohmann/detail/meta\l/detected.hpp" alt="" coords="2551,259,2697,300"/>
+<area shape="rect" id="node34" href="$type__traits_8hpp.html" title="nlohmann/detail/meta\l/type_traits.hpp" alt="" coords="1655,169,1801,211"/>
+<area shape="rect" id="node35" href="$json__fwd_8hpp.html" title="nlohmann/json_fwd.hpp" alt="" coords="1490,266,1649,293"/>
+</map>

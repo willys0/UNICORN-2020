@@ -324,10 +324,11 @@
       <wheelTorque>100</wheelTorque>
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>odom</odometryTopic>
-      <odometryFrame>odom_gazebo</odometryFrame>
+      <odometryFrame>odom_gazebo_dont_use</odometryFrame>
       <robotBaseFrame>chassis_link</robotBaseFrame>
       <publishWheelTF>false</publishWheelTF>
       <publishWheelJointState>false</publishWheelJointState>
+
     </plugin>
 
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />

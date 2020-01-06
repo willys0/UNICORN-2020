@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(unicorn)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -16,12 +16,12 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
   tf
   geometry_msgs
-  message_generation
-  
+  message_generation 
+  genmsg
 )
 
 ## System dependencies are found with CMake's conventions
-find_package(Boost REQUIRED)
+#find_package(Boost REQUIRED)
 #find_package(rostest REQUIRED)
 #find_package(GTest REQUIRED)
 
@@ -60,6 +60,12 @@ find_package(Boost REQUIRED)
 #   Message1.msg
 #   Message2.msg
 # )
+
+add_message_files(
+  FILES
+  command.msg
+  masterMessage.msg
+)
 
 ## Generate services in the 'srv' folder
   add_service_files(
@@ -136,19 +142,38 @@ include_directories(
 #   src/${PROJECT_NAME}/unicorn.cpp
 # )
 
-add_executable(laser_scan_filter src/laser_scan_filter.cpp)
-target_link_libraries(laser_scan_filter ${catkin_LIBRARIES})
+#add_executable(laser_scan_filter src/laser_scan_filter.cpp)
+#target_link_libraries(laser_scan_filter ${catkin_LIBRARIES})
 
 add_executable(am_unicorn_interface src/am_unicorn_interface.cpp)
 target_link_libraries(am_unicorn_interface ${catkin_LIBRARIES})
+add_dependencies(am_unicorn_interface unicorn_generate_messages_cpp)
 
-add_executable(unicorn_statemachine src/unicorn_statemachine.cpp)
-add_dependencies(unicorn_statemachine ${catkin_EXPORTED_TARGETS})
-add_library(unicorn_statemachine_lib src/unicorn_statemachine.cpp)
-target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES})
 
-add_executable(range_sensor_driver src/range_sensor_driver.cpp)
-target_link_libraries(range_sensor_driver ${catkin_LIBRARIES})
+#add_executable(unicorn_statemachine src/unicorn_statemachine.cpp)
+#add_dependencies(unicorn_statemachine ${catkin_EXPORTED_TARGETS})
+#add_library(unicorn_statemachine_lib src/unicorn_statemachine.cpp)
+#target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES})
+
+#add_executable(range_sensor_driver src/range_sensor_driver.cpp)
+#target_link_libraries(range_sensor_driver ${catkin_LIBRARIES})
+
+add_library(state_lib 
+  include/unicorn/aligning_state.h src/aligning_state.cpp
+  include/unicorn/reversing_state.h src/reversing_state.cpp
+  include/unicorn/idle_state.h src/idle_state.cpp 
+  include/unicorn/navigating_state.h src/navigating_state.cpp
+  include/unicorn/lifting_state.h src/lifting_state.cpp
+  include/unicorn/state_factory.h src/state_factory.cpp
+  include/unicorn/state_structures.h
+  include/unicorn/state_machine.h
+  ) 
+
+add_library(pid_controller_lib src/pid_controller.cpp)
+
+add_executable(unicorn_statemachine src/state_machine.cpp)
+add_dependencies(unicorn_statemachine unicorn_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
+target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES} pid_controller_lib state_lib)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries

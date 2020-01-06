@@ -1,5 +1,5 @@
 odom_frame: odom
-base_frame: base_link
+base_frame: chassis_link
 map_frame: map
 map_update_interval: 3.0 # Publish new map
 maxUrange: 19.0 # Should be just less than sensor range
@@ -7,16 +7,16 @@ maxRange: 20.1 # Should be just greater than sensor range
 particles: 30 # Increased from 30
 
 # Update frequencies
-linearUpdate: 0.3
-angularUpdate: 0.2
+linearUpdate: 0.1 # 0.3
+angularUpdate: 0.1 # 0.2
 temporalUpdate: 2.0
 resampleThreshold: 0.5  # 0.5
 
 # Initial Map Size
-xmin: -100.0
-ymin: -100.0
-xmax: 100.0
-ymax: 100.0
+xmin: -10.0
+ymin: -10.0
+xmax: 10.0
+ymax: 10.0
 delta: 0.05 #Resolution
 
 # All default
@@ -27,7 +27,7 @@ astep: 0.05
 iterations: 5
 lsigma: 0.075
 ogain: 3.0 # 3.0
-lskip: 0 # 0
+lskip: 10 # 0
 llsamplerange: 0.01
 llsamplestep: 0.01
 lasamplerange: 0.005
