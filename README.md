@@ -59,7 +59,8 @@ Generate documentation using rosdoc_lite by running:
 > ./generate_doc.sh
 
 Then access the documentation by running:
-> xdg-open docs/doc/html/annotated.html
+> xdg-open docs/doc/unicorn/html/annotated.html
+> xdg-open docs/doc/local_planner/html/annotated.html
 
 Or by going to the html folder and double-clicking on annotated.html.
 
