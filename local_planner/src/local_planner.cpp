@@ -143,7 +143,7 @@ void LocalPlanner::repulsiveForce(tf::Stamped<tf::Pose> robot_pose, tf::Vector3 
     int xt, yt, cost, force_x, force_y, deg;
     int scale = 1; // default 100
     int gain = 71; // 71 = 1meter // 2000 // Default 10000
-    float dmax = 21; // default 1.25 // 1.1
+    float dmax = 21; // Gives effect on the robot 2 meters from an obstacle. // default 1.25 // 1.1
 	float repulsive_force, x_force, y_force, z_force;
 
 	makeRepulsiveField(scale, gain, dmax, robot_pose.getOrigin().getX(), robot_pose.getOrigin().getY(), &repulsive_force, &deg);
