@@ -1,3 +1,8 @@
+# ROS specifics
+build/
+devel/
+CATKIN_IGNORE
+
 # Prerequisites
 *.d
 
