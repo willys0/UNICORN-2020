@@ -126,6 +126,7 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 add_library(local_planner_lib src/local_planner.cpp)
+add_dependencies(local_planner_lib ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}

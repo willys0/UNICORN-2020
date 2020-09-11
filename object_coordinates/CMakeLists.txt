@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS roscpp geometry_msgs nav_msgs sensor_msg
 find_package(Eigen REQUIRED)
 #message_generation
 
+add_compile_options(-std=c++11)
 #add_message_files(
 #	FILES
 #	vector.msg

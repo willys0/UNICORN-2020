@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   message_generation 
   genmsg
+  move_base_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -121,7 +122,7 @@ add_message_files(
 catkin_package(
  INCLUDE_DIRS include
 # LIBRARIES unicorn
- CATKIN_DEPENDS roscpp rospy std_msgs nav_msgs actionlib actionlib_msgs tf geometry_msgs message_runtime
+ CATKIN_DEPENDS roscpp rospy std_msgs nav_msgs actionlib actionlib_msgs tf geometry_msgs message_runtime move_base_msgs
 #  DEPENDS system_lib
 )
 
@@ -158,16 +159,17 @@ add_dependencies(am_unicorn_interface unicorn_generate_messages_cpp)
 #add_executable(range_sensor_driver src/range_sensor_driver.cpp)
 #target_link_libraries(range_sensor_driver ${catkin_LIBRARIES})
 
-add_library(state_lib 
+add_library(state_lib
   include/unicorn/aligning_state.h src/aligning_state.cpp
   include/unicorn/reversing_state.h src/reversing_state.cpp
-  include/unicorn/idle_state.h src/idle_state.cpp 
+  include/unicorn/idle_state.h src/idle_state.cpp
   include/unicorn/navigating_state.h src/navigating_state.cpp
   include/unicorn/lifting_state.h src/lifting_state.cpp
   include/unicorn/state_factory.h src/state_factory.cpp
   include/unicorn/state_structures.h
   include/unicorn/state_machine.h
-  ) 
+  )
+add_dependencies(state_lib ${catkin_EXPORTED_TARGETS})
 
 add_library(pid_controller_lib src/pid_controller.cpp)
 
