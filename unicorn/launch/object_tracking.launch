@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <group ns="darknet_ros">
+        <include file="/home/nvidia/catkin_ws/src/darknet_ros/darknet_ros/launch/darknet_ros.launch" />
+    </group>
+
+	<node pkg="object_coordinates" type="object_coordinates" name="tx2_object_coordinates" output="screen" />
+
+	<node pkg="vector_creation" type="vector_creation" name="vector_creation" output="screen" />	
+	
+    <node pkg="tf_filter" type="tf_filter" name="tx2_tf_filter"></node>
+
+</launch>

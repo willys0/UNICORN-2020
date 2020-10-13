@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <arg name="use_zed" default="true" />
+
+    <!-- Start R2000 Lidar node -->
+    <node pkg="pepperl_fuchs_r2000" type="r2000_node" name="TX2_r2000Lidar" output="screen">
+        <param name="scanner_ip" value="10.0.0.3"/>
+        <param name="frame_id" value="base_laser"/>
+        <param name="scan_frequency" value="30"/>
+        <param name="samples_per_scan" value="1200"/>
+        <param name="start_angle" value="-1200000"/>
+    </node>
+
+    <!-- Run zed camera -->
+    <group if="$(arg use_zed)">
+        <include file="$(find zed_wrapper)/launch/zed_camera.launch">
+            <arg name="gpu_id" value="-1"/>
+            <arg name="publish_tf" value="false"/>
+            <arg name="publish_urdf" value="false"/>
+            <arg name="odometry_frame" value="odom"/>
+            <arg name="base_frame" value="zed_center"/>
+            <arg name="camera_frame" value="zed_left_camera"/>
+            <arg name="depth_frame" value="zed_depth_camera"/> 
+        </include>
+
+        <!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->
+        <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
+        <node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid pcl_manager" output="screen">
+            <remap from="~input" to="/zed/point_cloud/cloud_registered" />
+            <remap from="~output" to="cloud_filtered" />
+            <rosparam>
+                filter_field_name: z
+                filter_limit_min: 0.3
+                filter_limit_max: 1.5
+                filter_limit_negative: False
+                leaf_size: 0.02
+            </rosparam>
+        </node>
+    </group>
+</launch>

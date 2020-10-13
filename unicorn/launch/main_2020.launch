@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+
+	<!-- roslaunch arguments -->
+	<arg name="scan_topic" 			default="TX2_r2000Lidar/laserScan"/>
+	<arg name="map_file"   			default="$(find unicorn_slam)/maps/work_room.yaml"/>
+
+	<arg name="do_slam" 	        default="true" />
+	<arg name="use_camera"			default="true" />
+	<arg name="use_object_tracking" default="false" />
+
+	<include file="$(find unicorn)/launch/control.launch" />
+
+	<include file="$(find unicorn)/launch/sensors.launch">
+		<arg name="use_zed" value="$(arg use_camera)" />
+	</include>
+	
+	<include file="$(find unicorn)/launch/navigation.launch" />
+
+	<group if="$(arg do_slam)">
+		<include file="$(find unicorn)/launch/slam.launch">
+			<arg name="scan_topic" value="$(arg scan_topic)" />
+		</include>
+	</group>
+
+	<group unless="$(arg do_slam)">
+		<!-- Christian: not sure wtf this does -->
+		<rosparam param="global_local">false</rosparam>
+
+		<!-- Run the map server -->
+		<node pkg="map_server" type="map_server" args="$(arg map_file)" respawn="true" name="map" />
+
+		<!--- Run AMCL -->
+		<node pkg="amcl" type="amcl" name="amcl" output="screen">
+			<rosparam command="load" file="$(find unicorn_slam)/config/amcl.yaml"/>
+			<remap from="scan" to="$(arg scan_topic)"/>
+		</node>	
+	</group>
+
+	<!-- load joint controller configurations from YAML file to parameter server -->
+	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
+
+	<!-- publish all the frames to TF -->
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
+		<param name="publish_frequency" value="50"/>
+		<param name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target.urdf.xacro'" />
+	</node>
+
+	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+		<param name="use_gui" value="false"/>
+	</node>
+
+	<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
+		<rosparam command="load" file="$(find unicorn)/config/ekf_odom_simple_am_driver.yaml" />
+	</node>
+
+</launch>
