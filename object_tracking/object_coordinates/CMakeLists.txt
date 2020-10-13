@@ -42,6 +42,6 @@ include_directories(
 ## Build 
 add_executable(object_coordinates src/object_coordinates_node.cpp)
 target_link_libraries(object_coordinates ${catkin_LIBRARIES})
-add_dependencies(object_coordinates object_coordinates_generate_messages_cpp)
+add_dependencies(object_coordinates object_coordinates_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
 
 
