@@ -15,10 +15,10 @@ int main(int argc, char **argv) {
 
     pub = n.advertise<std_msgs::UInt16>("/cmd_mode", 1, true);
     
-
-    msg.data = am_driver::Mode::MODE_LOOP_OFF;
-    pub.publish(msg);
-    ros::Duration(1).sleep();
-    
+    while(ros::ok()) {
+        msg.data = am_driver::Mode::MODE_LOOP_OFF;
+        pub.publish(msg);
+        ros::Duration(1).sleep();
+    }
     return 0;
 }
