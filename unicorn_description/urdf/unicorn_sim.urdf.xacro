@@ -94,7 +94,7 @@
     </collision>
   </link>
 
-    <!-- Main Body-base 
+    <!-- Main Body-base -->
 
   <link
     name="base_link_gazebo">
@@ -111,7 +111,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.01 0.01 0.01"/>
+        <box size="0.1 0.1 0.1"/>
       </geometry>
       <material
         name="">
@@ -142,12 +142,12 @@
     <parent link="chassis_link"/>
     <child link="base_link_gazebo" />
   <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
-  </joint> -->
+  </joint> 
 
 
   <!-- driving wheels -->
-  <wheel fb="back" lr="left" parent="chassis_link" translateY="0.24" translateX="0" translateZ="0.122" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
-  <wheel fb="back" lr="right" parent="chassis_link" translateY="-0.24" translateX="0 " translateZ="0.122" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="left" parent="base_link_gazebo" translateY="0.24" translateX="0" translateZ="0.122" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="right" parent="base_link_gazebo" translateY="-0.24" translateX="0 " translateZ="0.122" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   <!-- others wheels -->
   <swivel_wheel fb="front" lr="left" parent="chassis_link" translateY="0.16" translateX="-0.355" translateZ="0.1526" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
   <swivel_wheel fb="front" lr="right" parent="chassis_link" translateY="-0.16" translateX="-0.355" translateZ="0.1526" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
@@ -210,7 +210,7 @@
   </xacro:if> 
 
 
-  <!-- GPS -->
+  <!-- GPS 
   <gazebo>
     <plugin name="novatel_gps_sim" filename="libhector_gazebo_ros_gps.so">
       <alwaysOn>1</alwaysOn>
@@ -218,12 +218,12 @@
       <bodyName>chassis_link</bodyName>
       <topicName>gps</topicName>
       <velocityTopicName>gps_velocity</velocityTopicName>
-      <drift>5.0 5.0 5.0</drift>
-      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
+      <drift>0 0 0</drift>
+      <gaussianNoise>0 0 0</gaussianNoise>
       <velocityDrift>0 0 0</velocityDrift>
-      <velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
+      <velocityGaussianNoise>0 0 0</velocityGaussianNoise>
     </plugin>
-  </gazebo>
+  </gazebo>-->
 
  
   <!-- Problable need this stuff --> 
@@ -281,25 +281,7 @@
 
    
   </gazebo>
- <!--
-  
 
-    <gazebo reference="chassis_link">
-    <sensor name="automower_sensor" type="contact">
-      <always_on>true</always_on>
-      <update_rate>50</update_rate>
-      <contact>
-        <collision>base_link_collision</collision>
-      </contact>
-      <plugin name="automower_sensors_plugin" filename="libam_gazebo_sensors.so">
-        <always_on>true</always_on>
-        <update_rate>20</update_rate>
-        <bumperTopicName>sensor_status</bumperTopicName>
-        <loopTopicName>loop</loopTopicName>
-        <loopOutsideSensors>15</loopOutsideSensors>
-      </plugin>
-    </sensor>
-  </gazebo>-->
 
 
 </robot>
