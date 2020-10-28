@@ -1,23 +1,60 @@
-#Independent settings for the local planner's costmap. 
-#Detailed descriptions of these parameters can be found at http://www.ros.org/wiki/costmap_2d
+# #Independent settings for the local planner's costmap.
+# #Detailed descriptions of these parameters can be found at http://www.ros.org/wiki/costmap_2d
+#
+# #All distances are in meters
+#
+# local_costmap:
+#   #The order of the plugins affects the costmap
+#   plugins:
+#   - {name: sonar_layer,       type: "range_sensor_layer::RangeSensorLayer"}
+#   - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
+#   - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
+#
+#
+#   #Set the global and robot frames for the costmap
+#   global_frame: odom
+#   robot_base_frame: chassis_link
+#
+#   #Set the update and publish frequency of the costmap
+#   update_frequency: 4.0
+#   publish_frequency: 4.0
+#
+#   #We'll configure this costmap to be a rolling window... meaning it is always
+#   #centered at the robot
+#   static_map: false
+#   rolling_window: true
+#   width: 6.0
+#   height: 6.0
+#   resolution: 0.05
+#   origin_x: 0.25 #0.0
+#   origin_y: 0.0
+#
+#
+#   inflation_layer:
+#     inflation_radius: 3 #0.55
+#     cost_scaling_factor: 10.0
+#
 
-#All distances are in meters
+#Independent settings for the local planner's costmap. Detailed descriptions of these parameters can be found at http://www.ros.org/wiki/costmap_2d
 
 local_costmap:
-  #The order of the plugins affects the costmap
+  #We'll publish the voxel grid used by this costmap
   plugins:
-  - {name: sonar_layer,       type: "range_sensor_layer::RangeSensorLayer"}
+  - {name: static_layer,     type: "costmap_2d::StaticLayer"}
   - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
+  #- {name: voxel_layer,       type: "costmap_2d::VoxelLayer"}
   - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
-  
+  # - {name: static_layer,     type: "costmap_2d::StaticLayer"}
+
+  publish_voxel_map: false
 
   #Set the global and robot frames for the costmap
-  global_frame: odom
-  robot_base_frame: chassis_link
+  global_frame: /map
+  robot_base_frame: base_link
 
   #Set the update and publish frequency of the costmap
-  update_frequency: 4.0
-  publish_frequency: 4.0
+  update_frequency: 10.0
+  publish_frequency: 5.0
 
   #We'll configure this costmap to be a rolling window... meaning it is always
   #centered at the robot
@@ -26,11 +63,10 @@ local_costmap:
   width: 6.0
   height: 6.0
   resolution: 0.05
-  origin_x: 0.25 #0.0
+  origin_x: 0.25
   origin_y: 0.0
-  
-  
-  inflation_layer:
-    inflation_radius: 3 #0.55 
-    cost_scaling_factor: 10.0
 
+
+  inflation_layer:
+    inflation_radius: 3
+    cost_scaling_factor: 10.0
