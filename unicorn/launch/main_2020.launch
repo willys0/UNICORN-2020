@@ -9,17 +9,20 @@
 	<arg name="use_camera"			default="true" />
 	<arg name="use_object_tracking" default="false" />
 
-	<include file="$(find unicorn)/launch/control.launch" />
+	<arg name="sim" 				default="false" />
 
-	<include file="$(find unicorn)/launch/sensors.launch">
+	<include file="$(find unicorn)/launch/components/control.launch" />
+
+	<include file="$(find unicorn)/launch/components/sensors.launch">
 		<arg name="use_zed" value="$(arg use_camera)" />
 	</include>
 	
-	<include file="$(find unicorn)/launch/navigation.launch" />
+	<include file="$(find unicorn)/launch/components/navigation.launch" />
 
 	<group if="$(arg do_slam)">
-		<include file="$(find unicorn)/launch/slam.launch">
-			<arg name="scan_topic" value="$(arg scan_topic)" />
+		<include file="$(find unicorn)/launch/components/slam.launch">
+			<arg unless="$(arg sim)" name="scan_topic" value="$(arg scan_topic)" />
+			<arg if="$(arg sim)" name="scan_topic" value="scan" />
 		</include>
 	</group>
 
@@ -31,19 +34,34 @@
 		<node pkg="map_server" type="map_server" args="$(arg map_file)" respawn="true" name="map" />
 
 		<!--- Run AMCL -->
-		<node pkg="amcl" type="amcl" name="amcl" output="screen">
-			<rosparam command="load" file="$(find unicorn_slam)/config/amcl.yaml"/>
-			<remap from="scan" to="$(arg scan_topic)"/>
-		</node>	
+
+		<group unless="$(arg sim)">
+			<node pkg="amcl" type="amcl" name="amcl" output="screen">
+				<rosparam command="load" file="$(find unicorn_slam)/config/amcl.yaml"/>
+				<remap from="scan" to="$(arg scan_topic)"/>
+			</node>
+		</group>
+		<group if="$(arg sim)">
+			<node pkg="amcl" type="amcl" name="amcl" output="screen">
+				<rosparam if="$(arg sim)" command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
+				<remap from="scan" to="scan"/>
+			</node>
+		</group>
 	</group>
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
 
 	<!-- publish all the frames to TF -->
+
+	<group if="$(arg sim)">
+		<include file="$(find unicorn)/launch/components/gazebo.launch" />
+	</group>
+
+	<param unless="$(arg sim)" name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target.urdf.xacro'" />
+
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
 		<param name="publish_frequency" value="50"/>
-		<param name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target.urdf.xacro'" />
 	</node>
 
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
@@ -51,7 +69,8 @@
 	</node>
 
 	<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
-		<rosparam command="load" file="$(find unicorn)/config/ekf_odom_simple_am_driver.yaml" />
+		<rosparam unless="$(arg sim)" command="load" file="$(find unicorn)/config/ekf_odom_simple_am_driver.yaml" />
+		<rosparam if="$(arg sim)" command="load" file="$(find unicorn)/config/sim/ekf_odom_bob.yaml" />
 	</node>
 
 </launch>
