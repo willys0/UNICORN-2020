@@ -41,7 +41,7 @@
   <xacro:include filename="$(find am_description)/urdf/wheel.urdf.xacro" />
 
   <!-- Swivel wheel -->
-  <xacro:include filename="$(find am_description)/urdf/swivel_wheel.urdf.xacro" />
+  <!-- <xacro:include filename="$(find am_description)/urdf/swivel_wheel.urdf.xacro" /> -->
   <!-- Materials -->
   <xacro:include filename="$(find am_description)/urdf/materials.urdf.xacro" />
 
