@@ -17,7 +17,7 @@
 		<arg name="use_zed" value="$(arg use_camera)" />
 	</include>
 	
-	<include file="$(find unicorn)/launch/components/navigation.launch" />
+	<include file="$(find unicorn_navigation)/launch/move_base.launch" />
 
 	<group if="$(arg do_slam)">
 		<include file="$(find unicorn)/launch/components/slam.launch">
