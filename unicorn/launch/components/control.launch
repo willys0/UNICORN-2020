@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
     <!-- Starts interface between automower and unicorn to enable backward driving -->
-    <node name="am_unicorn_interface" 
+    <!--<node name="am_unicorn_interface"
         pkg="unicorn" 
         type="am_unicorn_interface" 
         output="screen">
-    </node>
+    </node>-->
 
 
     <!-- Start the am_driver -->
