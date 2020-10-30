@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
-    <arg name="global_planner" default="thetastar_planner/ThetaStarPlanner" />
+
+    <!--GLOBAL PLANNERS -->
+    <!--<arg name="global_planner" default="thetastar_planner/ThetaStarPlanner" /-->
+    <arg name="global_planner" default="global_planner/GlobalPlanner" />
+
+    <!--LOCAL PLANNERS -->
     <!--<arg name="local_planner"  default="local_planner/LocalPlanner" />-->
     <arg name="local_planner"  default="teb_local_planner/TebLocalPlannerROS" />
 
     <!-- Launch Move Base -->
     <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+        <rosparam file="$(find unicorn_navigation)/config/base_global_planner.yaml" command="load" />
         <!--rosparam file="$(find unicorn_navigation)/config/sim/base_local_planner_params.yaml" command="load" /-->
         <rosparam file="$(find unicorn_navigation)/config/base_local_planner_teb.yaml" command="load" />
         <param name="base_global_planner" value="$(arg global_planner)"/>
