@@ -10,7 +10,7 @@
     <arg name="local_planner"  default="teb_local_planner/TebLocalPlannerROS" />
 
     <!-- Launch Move Base -->
-    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen" clear_params="true">
         <rosparam file="$(find unicorn_navigation)/config/base_global_planner.yaml" command="load" />
         <!--rosparam file="$(find unicorn_navigation)/config/sim/base_local_planner_params.yaml" command="load" /-->
         <rosparam file="$(find unicorn_navigation)/config/base_local_planner_teb.yaml" command="load" />
