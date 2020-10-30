@@ -1,4 +1,4 @@
-odom_frame: odom_gazebo
+odom_frame: odom_chassis
 base_frame: chassis_link
 map_frame: map
 map_update_interval: 0.5 # Publish new map

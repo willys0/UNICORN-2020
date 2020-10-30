@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Launches Gazebo with predefined settings with the Unicorn platform -->
 <launch>
-	<arg name="gazebo_gui" default="true"/>
+	<arg name="gazebo_gui" default="false"/>
 
-	<rosparam param="odom_frame">odom_gazebo</rosparam>
+	<rosparam param="odom_frame">odom_chassis</rosparam>
 	<rosparam param="global_local">false</rosparam>
 	<rosparam param="frame_id">chassis_link</rosparam>
 	<rosparam param="use_sim_time">true</rosparam>

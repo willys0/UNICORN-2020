@@ -2,7 +2,7 @@
 <launch>
 
 	<!-- roslaunch arguments -->
-	<arg name="scan_topic" 			default="TX2_r2000Lidar/laserScan"/>
+	<arg name="scan_topic" 			default="/frontLidar/scan"/>
 	<arg name="map_file"   			default="$(find unicorn_slam)/maps/work_room.yaml"/>
 
 	<arg name="do_slam" 	        default="true" />
@@ -21,8 +21,7 @@
 
 	<group if="$(arg do_slam)">
 		<include file="$(find unicorn)/launch/components/slam.launch">
-			<arg unless="$(arg sim)" name="scan_topic" value="$(arg scan_topic)" />
-			<arg if="$(arg sim)" name="scan_topic" value="scan" />
+			<arg name="scan_topic" value="$(arg scan_topic)" />
 		</include>
 	</group>
 
@@ -38,13 +37,12 @@
 		<group unless="$(arg sim)">
 			<node pkg="amcl" type="amcl" name="amcl" output="screen">
 				<rosparam command="load" file="$(find unicorn_slam)/config/amcl.yaml"/>
-				<remap from="scan" to="$(arg scan_topic)"/>
 			</node>
 		</group>
 		<group if="$(arg sim)">
 			<node pkg="amcl" type="amcl" name="amcl" output="screen">
 				<rosparam if="$(arg sim)" command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
-				<remap from="scan" to="scan"/>
+				<remap from="scan" to="$(arg scan_topic)"/>
 			</node>
 		</group>
 	</group>
@@ -68,9 +66,10 @@
 		<param name="use_gui" value="false"/>
 	</node>
 
+	<include if="$(arg sim)" file="$(find unicorn)/launch/unicorn_GPS_to_UWB.launch"/>
 	<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
 		<rosparam unless="$(arg sim)" command="load" file="$(find unicorn)/config/ekf_odom_simple_am_driver.yaml" />
-		<rosparam if="$(arg sim)" command="load" file="$(find unicorn)/config/sim/ekf_odom_bob.yaml" />
+		<rosparam if="$(arg sim)" command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
 	</node>
 
 </launch>

@@ -9,9 +9,9 @@
 	<arg name="gazebo_gui" default="false"/>
 	<arg name="use_gmapping" default="true"/>
 	<arg name="use_hector" default="false"/>   <!-- Meant to be used if Hector slam is desired -->
-	<arg name="scan_topic" value="scan"/> <!-- from scan_filtered to scan, nothing found in scan_filtered-->
+	<arg name="scan_topic" value="frontLidar/scan"/> <!-- from scan_filtered to scan, nothing found in scan_filtered-->
 	<arg name="map_file" value="$(find unicorn_slam)/maps/gmap_map.yaml"/>
-	<rosparam param="odom_frame">odom_gazebo</rosparam>
+	<rosparam param="odom_frame">odom_chassis</rosparam>
 	<rosparam param="global_local">false</rosparam>
 	<rosparam param="frame_id">chassis_link</rosparam>
 
@@ -37,10 +37,18 @@
 	</group>
 
 
+
+	<include file="$(find unicorn)/launch/unicorn_GPS_to_UWB.launch"/>
 	<!-- start ekf node -->
-<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
-   <rosparam command="load" file="$(find unicorn)/config/sim/ekf_odom_bob.yaml" />
-</node>
+	<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
+	<rosparam command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
+	</node>
+
+	<!--rosparam command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" -->
+
+
+
+
 
 <!-- Peter Launch move base-->
 <!--include file="$(find unicorn)/launch/move_base_peter.xml"/>-->
@@ -56,7 +64,8 @@
 		<rosparam file="$(find unicorn_description)/config/costmap_common_params.yaml" command="load" ns="local_costmap" />
 		<rosparam file="$(find unicorn_description)/config/local_costmap_params_peter.yaml" command="load" />
 		<rosparam file="$(find unicorn_description)/config/global_costmap_params.yaml" command="load" />
-		<remap from="cmd_vel" to="/unicorn/cmd_vel"/> 
+		<!--remap from="cmd_vel" to="/unicorn/cmd_vel"/--> 
+		<remap from="scan" to="$(arg scan_topic)"/>
 	</node>
 	
 
@@ -68,10 +77,10 @@
 
 	<!-- Launch gazebo world -->
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-	<arg name="world_name" value="$(find husky_gazebo)/worlds/clearpath_playpen.world"/>
+		<arg name="world_name" value="$(find husky_gazebo)/worlds/clearpath_playpen.world"/>
 <!--arg name="world_name" value="$(find unicorn_slam)/worlds/clearpath_playpen_moving_obstacle.world"/-->
 				<!--arg name="world_name" value="$(find unicorn_slam)/worlds/testworld_moving_obstacle.world"/-->
-<arg name="paused" value="false"/>
+		<arg name="paused" value="false"/>
 		<arg name="use_sim_time" value="true"/>
 		<arg name="gui" value="$(arg gazebo_gui)"/>
 		<arg name="headless" value="false"/>
@@ -82,11 +91,19 @@
 	<param name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_sim.urdf.xacro'" />
 
 	<!-- push robot_description to factory and spawn robot in gazebo -->
-	<node name="automower_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model automower -x 0.0 -y 0.0 -z 0.2 -Y 0.0" /> <!-- 5.5 -2.6 0.2 -1.5707 -->
+	<node name="automower_spawn" 
+			pkg="gazebo_ros" 
+			type="spawn_model" 
+			output="screen" 
+			args="-urdf -param robot_description -model automower -x 0.0 -y 0.0 -z 0.2 -Y 0.0" > 
+
+	</node> <!-- 5.5 -2.6 0.2 -1.5707 -->
 
 	<!-- robot visualization in Rviz -->
 	<group if="$(arg show_rviz)">
-		<node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find am_description)/rviz/pf.rviz"/> 
+		<node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find am_description)/rviz/pf.rviz">
+
+		</node> 
 	</group>
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
@@ -112,8 +129,8 @@
 </rosparam>
 </node>-->
 	
-	<!-- Starts interface between automower and unicorn to enable backward driving -->
-	<node name="am_unicorn_interface" pkg="unicorn" type="am_unicorn_interface" output="screen"/>
+	<!-- Starts interface between automower and unicorn to enable backward driving 
+	<node name="am_unicorn_interface" pkg="unicorn" type="am_unicorn_interface" output="screen"/>-->
 
 
 	<!-- Starts the Arduino to enable ros and read/ write from it -->

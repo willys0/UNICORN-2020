@@ -1,0 +1,27 @@
+<!-- Converts GPS to coordinates to simulate UWB -->
+<launch>
+
+    <!--
+    <node pkg="tf2_ros" type="static_transform_publisher" name="static_tf1" args="0 0 0 0 0 0 chassis_link /zed/imu" />
+    <node pkg="tf2_ros" type="static_transform_publisher" name="static_tf2" args="0 0 0 0 0 0 chassis_link /gps" />
+    -->
+
+    <node pkg="robot_localization" type="navsat_transform_node" name="navsat_transform_node" respawn="false">
+
+        <param name="magnetic_declination_radians" value="0"/>
+        <param name="yaw_offset" value="3.92699081699"/>
+ 
+        <param name="publish_filtered_gps" value="false"/>
+        <param name="broadcast_utm_transform" value="false"/>
+        <param name="zero_altitude" value="true"/>
+ 
+
+        <remap from="/imu/data" to="/zed/imu" />
+        <remap from="/gps/fix" to="/gps" />
+        <remap from="/odometry/filtered" to="/odometry/filtered" />
+
+        <remap from="/odometry/gps" to="/odometry/UWB" />
+
+    </node>
+
+</launch>

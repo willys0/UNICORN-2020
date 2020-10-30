@@ -40,7 +40,8 @@ odom_alpha2:      1.25   # 0.2 rt
 odom_alpha3:      1.6    # 0.2,0.8 tt
 odom_alpha4:      0.25   # 0.2 tr
 odom_alpha5:      0.1    # 0.2,0.1
-odom_frame_id:    odom_gazebo
+odom_frame_id:    odom_chassis
 base_frame_id:    chassis_link
 global_frame_id: map 
+tf_broadcast: false
 #tf_broadcast: true #Added by peter

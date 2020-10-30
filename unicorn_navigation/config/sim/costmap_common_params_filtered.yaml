@@ -30,7 +30,7 @@ lethal_cost_threshold: 100
 #Configuration for the sensors that the costmap will use to update a map
 observation_sources: laser_scan_sensor point_cloud_sensor
 
-laser_scan_sensor: {sensor_frame: base_laser, data_type: LaserScan, topic: /scan, expected_update_rate: 0.8,
+laser_scan_sensor: {sensor_frame: base_laser, data_type: LaserScan, topic: /frontLidar/scan, expected_update_rate: 0.8,
    marking: true, clearing: true, max_obstacle_height: 1, min_obstacle_height: 0.08}
 
 point_cloud_sensor: {sensor_frame: camera_left_depth_link, data_type: PointCloud2, topic: /cloud_filtered,

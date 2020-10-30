@@ -5,7 +5,7 @@ local_costmap:
   publish_voxel_map: true
 
   #Set the global and robot frames for the costmap
-  global_frame: odom_gazebo
+  global_frame: odom_chassis
   #robot_base_frame: base_link_gazebo
   robot_base_frame: chassis_link
 
