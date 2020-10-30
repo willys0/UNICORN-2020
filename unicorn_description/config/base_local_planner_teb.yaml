@@ -26,7 +26,7 @@ DWAPlannerROS:
 
 TebLocalPlannerROS:
 
- odom_topic: odom_gazebo
+ odom_topic: odom_chassis
  map_frame: map
     
  # Trajectory

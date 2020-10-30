@@ -209,15 +209,15 @@
   <gazebo>
     <plugin name="novatel_gps_sim" filename="libhector_gazebo_ros_gps.so">
       <alwaysOn>true</alwaysOn>
-      <updateRate>5.0</updateRate>
-      <frameId>odom_gazebo</frameId>
+      <updateRate>5</updateRate>
+      <frameId>odom_chassis</frameId>
       <bodyName>chassis_link</bodyName>
       <topicName>gps</topicName>
       <velocityTopicName>gps_velocity</velocityTopicName>
-      <drift>0 0 0</drift>
-      <gaussianNoise>0 0 0</gaussianNoise>
+      <drift>5.0 5.0 5.0</drift>
+      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
       <velocityDrift>0 0 0</velocityDrift>
-      <velocityGaussianNoise>0 0 0</velocityGaussianNoise>
+      <velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
     </plugin>
   </gazebo>
 </xacro:if> 
@@ -236,10 +236,19 @@
       <wheelTorque>100</wheelTorque>
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>wheelencoder/odom</odometryTopic>
-      <odometryFrame>odom_gazebo</odometryFrame>
+      <odometryFrame>odom_chassis</odometryFrame>
       <robotBaseFrame>chassis_link</robotBaseFrame>
       <publishWheelTF>false</publishWheelTF>
       <publishWheelJointState>false</publishWheelJointState>
+
+
+      <gaussianNoise>0.1</gaussianNoise>
+      <accelDrift>0.5 0.5 0.5</accelDrift>
+      <accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
+      <rateDrift>0.1 0.1 0.1</rateDrift>
+      <rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
+      <headingDrift>0.1</headingDrift>
+      <headingGaussianNoise>1.00</headingGaussianNoise>
     </plugin>
 
 
@@ -247,28 +256,28 @@
 
     <plugin name="imu_plugin" filename="libhector_gazebo_ros_imu.so">
       <alwaysOn>true</alwaysOn>
-      <bodyName>zed_camera</bodyName>
+      <bodyName>chassis_link</bodyName>
       <topicName>zed/imu</topicName>
       <serviceName>imu_service</serviceName>
       <updateRate>100.0</updateRate>
-      <rpyOffsets>0 0 0</rpyOffsets> <!-- deprecated -->
-  <!--
+      <rpyOffsets>0 ${M_PI} 0</rpyOffsets> 
+  <!---->
         <gaussianNoise>0.1</gaussianNoise>
-        <accelDrift>0.5 0.5 0.5</accelDrift>
+        <accelDrift>0.1 0.1 0.1</accelDrift>
         <accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
         <rateDrift>0.1 0.1 0.1</rateDrift>
         <rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
         <headingDrift>0.1</headingDrift>
-        <headingGaussianNoise>1.00</headingGaussianNoise>-->
-  <!-- deprecated -->
+        <headingGaussianNoise>1.00</headingGaussianNoise>
+  <!-- deprecated
       <gaussianNoise>0.0</gaussianNoise>  
         <accelDrift>0.0 0.0 0.0</accelDrift>
         <accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise>
         <rateDrift>0.0 0.0 0.0</rateDrift>
         <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
         <headingDrift>0.0</headingDrift>
-        <headingGaussianNoise>0.00</headingGaussianNoise>
-    </plugin>
+        <headingGaussianNoise>0.00</headingGaussianNoise>-->
+    </plugin> 
 
 
     <plugin name="am_gazebo_wheelencoder" filename="libam_gazebo_wheelencoder.so">
