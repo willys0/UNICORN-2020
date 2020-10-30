@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <!-- Starts interface between automower and unicorn to enable backward driving -->
+    <!--<node name="am_unicorn_interface"
+        pkg="unicorn" 
+        type="am_unicorn_interface" 
+        output="screen">
+    </node>-->
+
+
+    <!-- Start the am_driver -->
+    <node name="am_driver_safe" pkg="am_driver_safe" type="am_driver_safe_node" output="screen">
+        <param name="serialPort" value="/dev/ttyACM0" type="str" />
+        <param name="printCharge" value="false"/>
+        <param name="publishTf" value="1"/>
+        <param name="pitchAndRoll" value="false"/>
+        <param name="publishGPS" value="false"/>
+        <param name="serialLog" value="false"/>
+        <param name="hil" value="0"/>
+        <param name="jsonFile" value="$(find am_driver_safe)/config/automower_hrp.json" type="string" />
+    </node> 
+</launch>

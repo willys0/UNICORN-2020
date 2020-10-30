@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<launch>       
-    <arg name="scan_topic" default="scan" />
-    <!-- Launch grid-mapping -->
-    <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
-        <rosparam file="$(find unicorn_slam)/config/gmapping_default.yaml"/>
-        <remap from="scan" to="$(arg scan_topic)" />
-    </node>
-</launch>

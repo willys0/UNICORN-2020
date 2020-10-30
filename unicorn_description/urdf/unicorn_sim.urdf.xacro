@@ -315,23 +315,46 @@
     <updateRate>100.0</updateRate>
     <rpyOffsets>0 0 0</rpyOffsets> <!-- deprecated -->
 <!--
-      <gaussianNoise>0.0</gaussianNoise>
+      <gaussianNoise>0.1</gaussianNoise>
       <accelDrift>0.5 0.5 0.5</accelDrift>
       <accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
       <rateDrift>0.1 0.1 0.1</rateDrift>
       <rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
       <headingDrift>0.1</headingDrift>
-      <headingGaussianNoise>1.00</headingGaussianNoise>
--->
+      <headingGaussianNoise>1.00</headingGaussianNoise>-->
 
-    <gaussianNoise>0.0</gaussianNoise>  <!-- deprecated -->
-      <accelDrift>0.0 0.0 0.0</accelDrift>
-      <accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise>
-      <rateDrift>0.0 0.0 0.0</rateDrift>
-      <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
-      <headingDrift>0.0</headingDrift>
-      <headingGaussianNoise>0.00</headingGaussianNoise>
     </plugin>
+
+
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />
+
+
+    <plugin name="imu_plugin" filename="libhector_gazebo_ros_imu.so">
+      <alwaysOn>true</alwaysOn>
+      <bodyName>chassis_link</bodyName>
+      <topicName>zed/imu</topicName>
+      <serviceName>imu_service</serviceName>
+      <updateRate>10.0</updateRate>
+      <rpyOffsets>0 0 0</rpyOffsets> <!-- deprecated -->
+  <!--
+        <gaussianNoise>0.1</gaussianNoise>
+        <accelDrift>0.5 0.5 0.5</accelDrift>
+        <accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
+        <rateDrift>0.1 0.1 0.1</rateDrift>
+        <rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
+        <headingDrift>0.1</headingDrift>
+        <headingGaussianNoise>1.00</headingGaussianNoise>-->
+
+  <!-- deprecated -->
+      <gaussianNoise>0.0</gaussianNoise>  
+        <accelDrift>0.0 0.0 0.0</accelDrift>
+        <accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise>
+        <rateDrift>0.0 0.0 0.0</rateDrift>
+        <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
+        <headingDrift>0.0</headingDrift>
+        <headingGaussianNoise>0.00</headingGaussianNoise>
+    </plugin>
+
 
     <plugin name="am_gazebo_wheelencoder" filename="libam_gazebo_wheelencoder.so">
   </plugin> 
