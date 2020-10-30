@@ -62,7 +62,7 @@ TebLocalPlannerROS:
  weight_acc_lim_x: 0
  weight_acc_lim_theta: 0
  weight_kinematics_nh: 1000
- weight_kinematics_forward_drive: 1
+ weight_kinematics_forward_drive: 1000.0
  weight_kinematics_turning_radius: 0
  weight_optimaltime: 1
  weight_obstacle: 50
