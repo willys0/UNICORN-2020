@@ -49,7 +49,7 @@
   <xacro:arg name="realsense_meshfile" default="package://unicorn_description/meshes/real_sense.STL" />
   
 
-
+ <!-- Main Body-base -->
   <link
     name="chassis_link">
     <inertial>
@@ -59,12 +59,12 @@
       <mass
         value="15" />
       <inertia
-        ixx="0.5"
+        ixx="1"
         ixy="0"
-        ixz="0"
+        ixz="3"
         iyy="3"
-        iyz="0"
-        izz="0.5" />
+        iyz="3"
+        izz="1" />
     </inertial>
     <visual>
       <origin
@@ -91,29 +91,35 @@
     </collision>
   </link>
 
-    <!-- Main Body-base 
-
+<!-- Lift -->
   <link
-    name="base_link_gazebo">
+    name="lift_link">
     <inertial>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="0.01" />
-      <box_inertia  m="${5}" x="${base_x_size}" y="${base_y_size}" z="${base_z_size}"/>
+        value="4" />
+      <inertia
+        ixx="1"
+        ixy="0"
+        ixz="3"
+        iyy="3"
+        iyz="3"
+        izz="1" />
     </inertial>
     <visual>
       <origin
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <box size="0.1 0.1 0.1"/>
+        <mesh
+          filename="package://unicorn_description/meshes/lift_link.STL" />
       </geometry>
       <material
         name="">
         <color
-          rgba="0.79216 0.81961 0.93333 1" />
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
       </material>
     </visual>
     <collision>
@@ -121,30 +127,35 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-          <box size="0.01 0.01 0.01"/>
+        <mesh
+          filename="package://unicorn_description/meshes/lift_link.STL" />
       </geometry>
-       <surface>
-         <friction>
-           <ode><mu>0</mu><mu2>0</mu2></ode>
-         </friction>
-      </surface> 
     </collision>
-  </link> 
- 
-  <gazebo reference="base_link_gazebo">
-    <material>Gazebo/Green</material>
-    <turnGravityOff>false</turnGravityOff>
-  </gazebo>
-  <joint name="base_link_gazebo_joint" type="fixed">
-    <parent link="chassis_link"/>
-    <child link="base_link_gazebo" />
-  <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
-  </joint> -->
+  </link>
+  <joint
+    name="lift_joint"
+    type="fixed">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="chassis_link" />
+    <child
+      link="lift_link" />
+    <axis
+      xyz="0 0 0" />
+    <joint_properties damping="0.0" friction="0.0" />
+  </joint>
+
+  
+
 
 
   <!-- driving wheels -->
-  <wheel fb="back" lr="left" parent="chassis_link" translateY="0.24" translateX="0" translateZ="0.122" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
-  <wheel fb="back" lr="right" parent="chassis_link" translateY="-0.24" translateX="0 " translateZ="0.122" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="left" parent="chassis_link" translateY="0.25" translateX="0" translateZ="0.122" wheel_radius="0.122" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="right" parent="chassis_link" translateY="-0.25" translateX="0 " translateZ="0.122" wheel_radius="0.122" wheel_height="0.032" flip="1"/>
+  
+
   <!-- others wheels -->
   <swivel_wheel fb="front" lr="left" parent="chassis_link" translateY="0.16" translateX="-0.355" translateZ="0.1526" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
   <swivel_wheel fb="front" lr="right" parent="chassis_link" translateY="-0.16" translateX="-0.355" translateZ="0.1526" wheel_radius="0.05" wheel_height="0.05" flip="0"/>

@@ -11,25 +11,25 @@ frequency: 50
 
 
 # odom/wheel
-odom1: wheelencoder/odom
-odom1_config: [false, false, false,
+odom0: wheelencoder/odom
+odom0_config: [false, false, false,
                false, false, false,
                true, true, false,
                false, false, true,
                false, false, false]
-odom1_differential: false
-odom1_queue_size: 100
+odom0_differential: false
+odom0_queue_size: 100
 
 
 # odom/gps
-odom0: /odometry/gps
-odom0_config: [true, true, false,
+pose0: /amcl_pose
+pose0_config: [true, true, false,
                false, false, false,
                false, false, false,
                false, false, false,
                false, false, false]
-odom0_differential: false
-odom0_queue_size: 50
+pose0_differential: false
+pose0_queue_size: 50
 
 # Odometry/zed
 imu0: zed/imu

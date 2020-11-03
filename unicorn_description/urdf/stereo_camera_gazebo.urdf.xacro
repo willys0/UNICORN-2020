@@ -8,9 +8,9 @@
     <link name="${frame_rgb}">
 
       <inertial>  
-        <mass value="1e-5" />
+        <mass value="0" />
         <origin xyz="0 0 0" rpy="0 0 0"/>
-        <inertia ixx="0.5" ixy="0" ixz="0" iyy="0.5" iyz="0" izz="0.5" />
+        <inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0" />
       </inertial>
 
      <visual>
