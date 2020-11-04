@@ -104,6 +104,10 @@
 	<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
 			<rosparam command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
 	</node>
+
+		<!-- Starts interface between automower and unicorn to enable backward driving -->
+	<node name="am_unicorn_interface" pkg="unicorn" type="am_unicorn_interface" output="screen"/>
+
 	<!--
 	<group if="$(arg use_gmapping)">
 		<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
@@ -124,9 +128,6 @@
  lower_angle: -1.57
 </rosparam>
 </node>-->
-	
-	<!-- Starts interface between automower and unicorn to enable backward driving 
-	<node name="am_unicorn_interface" pkg="unicorn" type="am_unicorn_interface" output="screen"/>-->
 
 
 	<!-- Starts the Arduino to enable ros and read/ write from it -->

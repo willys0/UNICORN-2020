@@ -128,7 +128,7 @@
     <visual>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="0 0 ${M_PI}" />
       <geometry>
         <mesh
           filename="package://unicorn_description/meshes/lift_link.STL" />
@@ -142,7 +142,7 @@
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="0 0 0" />
+        rpy="0 0 ${M_PI}" />
       <geometry>
         <mesh
           filename="package://unicorn_description/meshes/lift_link.STL" />
@@ -154,7 +154,7 @@
     type="fixed">
     <origin
       xyz="0 0 0"
-      rpy="0 0 0" />
+      rpy="0 0 ${M_PI}" />
     <parent
       link="chassis_link" />
     <child
@@ -163,8 +163,9 @@
       xyz="0 0 0" />
     <joint_properties damping="0.0" friction="0.0" />
   </joint>
+
 <!--
-    <link
+  <link
     name="wheel_link">
     <inertial>
       <origin
@@ -196,9 +197,13 @@
       </geometry>
     </collision>
   </link>
+  <gazebo reference="base_link_gazebo">
+    <material>Gazebo/Green</material>
+    <turnGravityOff>false</turnGravityOff>
+  </gazebo>
   <joint name="base_chassis_joint" type="fixed">
-    <parent link="chassis_link"/>   
-    <child link="wheel_link" />wheel_link
+    <parent link="chassis_link"/> 
+    <child link="wheel_link" />
   <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
   </joint>-->
 
@@ -207,8 +212,8 @@
   <wheel fb="back" lr="left" parent="chassis_link" rotationZ="3.14159" translateY="0.23" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   <wheel fb="back" lr="right" parent="chassis_link" rotationZ="0" translateY="-0.23" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   -->
-  <wheel fb="back" lr="left" parent="chassis_link"  translateY="0.23" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
-  <wheel fb="back" lr="right" parent="chassis_link" translateY="-0.23" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="left" parent="lift_link"  translateY="0.24" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="right" parent="lift_link" translateY="-0.24" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   
 
   <!-- others wheels -->
@@ -352,29 +357,6 @@
   </gazebo>
 </xacro:if> 
 
-
-
-
-
- <!--
-  
-
-    <gazebo reference="chassis_link">
-    <sensor name="automower_sensor" type="contact">
-      <always_on>true</always_on>
-      <update_rate>50</update_rate>
-      <contact>
-        <collision>base_link_collision</collision>
-      </contact>
-      <plugin name="automower_sensors_plugin" filename="libam_gazebo_sensors.so">
-        <always_on>true</always_on>
-        <update_rate>20</update_rate>
-        <bumperTopicName>sensor_status</bumperTopicName>
-        <loopTopicName>loop</loopTopicName>
-        <loopOutsideSensors>15</loopOutsideSensors>
-      </plugin>
-    </sensor>
-  </gazebo>-->
 
 
 </robot>
