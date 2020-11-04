@@ -5,13 +5,13 @@ world_frame: odom_chassis
 
 two_d_mode: true
 
-frequency: 50
+frequency: 1000
 
 
 
 
 # odom/wheel
-odom0: wheelencoder/odom
+odom0: wheel_encoder/odom
 odom0_config: [false, false, false,
                false, false, false,
                true, true, false,
@@ -29,7 +29,7 @@ pose0_config: [true, true, false,
                false, false, false,
                false, false, false]
 pose0_differential: false
-pose0_queue_size: 50
+pose0_queue_size: 100
 
 # Odometry/zed
 imu0: zed/imu

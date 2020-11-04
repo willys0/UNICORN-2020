@@ -57,11 +57,12 @@
 
 	<!-- Launch gazebo world -->
 	<include file="$(find gazebo_ros)/launch/empty_world.launch">
-	<arg name="world_name" value="$(find husky_gazebo)/worlds/clearpath_playpen.world"/>
+		<arg name="world_name" value="$(find husky_gazebo)/worlds/clearpath_playpen.world"/>
+		<remap from="tf" to="gazebo_tf"/>
 	
 <!--arg name="world_name" value="$(find unicorn_slam)/worlds/clearpath_playpen_moving_obstacle.world"/-->
 				<!--arg name="world_name" value="$(find unicorn_slam)/worlds/testworld_moving_obstacle.world"/-->
-<arg name="paused" value="false"/>
+		<arg name="paused" value="false"/>
 		<arg name="use_sim_time" value="true"/>
 		<arg name="gui" value="$(arg gazebo_gui)"/>
 		<arg name="headless" value="false"/>
@@ -86,6 +87,8 @@
 	<!-- Joint pos gui -->
 	<param name="use_gui" value="false"/> 
 
+
+	
 	<!-- source that publishes the joint positions as a sensor_msgs/JointState -->
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 	
@@ -94,13 +97,25 @@
 		<param name="publish_frequency" value="50"/>
 	</node>
 
-
-
-	<node pkg="tf" type="static_transform_publisher" name="map_transform" args="0 0 0 0 0 0 /map /odom_chassis 100"/>
-		<!-- start ekf node -->
+	<!-- Starts localization of robot 
+	<include file="$(find unicorn)/launch/components/localization.launch" />-->
+	<node pkg="tf" type="static_transform_publisher" name="map_transform" args="0 0 0 0 0 0 /map /odom_chassis 100000"/>
+	<!-- -->
 	<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
-		<rosparam command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
+			<rosparam command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
 	</node>
+	<!--
+	<group if="$(arg use_gmapping)">
+		<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
+			<rosparam command="load" file="$(find unicorn)/config/sim/unicorn_EKF_SLAMMING.yaml" />
+		</node>
+	</group>
+
+	<group unless="$(arg use_gmapping)">
+		<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
+			<rosparam command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
+		</node>
+	</group>-->
 			
 <!-- Starts laser filter to enable limitation of laserscan angle -->
 <!--<node name="laser_filter" pkg="unicorn" type="laser_scan_filter" output="screen">

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
-     Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
-     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+
+
 <robot name="unicorn" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:arg name="robot_namespace" default="/" />
@@ -11,7 +10,7 @@
   <xacro:include filename="$(find am_description)/urdf/swivel_wheel.urdf.xacro" />
 
     <!-- Wheel -->
-  <xacro:include filename="$(find unicorn_description)/urdf/wheel.urdf.xacro" />
+  <xacro:include filename="$(find am_description)/urdf/wheel.urdf.xacro" />
 
     <!-- camera pack-->
   <xacro:include filename="$(find unicorn_description)/urdf/stereo_camera_gazebo.urdf.xacro" />
@@ -70,7 +69,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="15" />
+        value="10" />
       <inertia
         ixx="1"
         ixy="0"
@@ -100,6 +99,11 @@
       <geometry>
         <mesh
           filename="package://unicorn_description/meshes/chassis_link.STL" />
+        <surface>
+         <friction>
+           <ode><mu>0.4</mu><mu2>0.4</mu2></ode>
+         </friction>
+      </surface>
       </geometry>
     </collision>
   </link>
@@ -159,13 +163,51 @@
       xyz="0 0 0" />
     <joint_properties damping="0.0" friction="0.0" />
   </joint>
+<!--
+    <link
+    name="wheel_link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.01" />
+      <box_inertia  m="${5*0.01}" x="${base_x_size}" y="${base_y_size}" z="${base_z_size}"/>
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+          <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="base_chassis_joint" type="fixed">
+    <parent link="chassis_link"/>   
+    <child link="wheel_link" />wheel_link
+  <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
+  </joint>-->
 
-  
 
-
-
-  <!-- driving wheels -->
-  <wheel fb="back" lr="left" parent="chassis_link" translateY="0.23" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <!-- driving wheels 
+  <wheel fb="back" lr="left" parent="chassis_link" rotationZ="3.14159" translateY="0.23" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="right" parent="chassis_link" rotationZ="0" translateY="-0.23" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  -->
+  <wheel fb="back" lr="left" parent="chassis_link"  translateY="0.23" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   <wheel fb="back" lr="right" parent="chassis_link" translateY="-0.23" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   
 
@@ -259,8 +301,8 @@
       <wheelDiameter>0.245</wheelDiameter>
       <wheelTorque>100</wheelTorque>
       <commandTopic>cmd_vel</commandTopic>
-      <odometryTopic>wheelencoder/odom</odometryTopic>
-      <odometryFrame>odom_chassis</odometryFrame>
+      <odometryTopic>wheel_encoder/odom</odometryTopic>
+      <odometryFrame>odom_chassis_dont_use</odometryFrame>
       <robotBaseFrame>chassis_link</robotBaseFrame>
       <publishWheelTF>false</publishWheelTF>
       <publishWheelJointState>false</publishWheelJointState>
@@ -280,11 +322,11 @@
 
     <plugin name="imu_plugin" filename="libhector_gazebo_ros_imu.so">
       <alwaysOn>true</alwaysOn>
-      <bodyName>chassis_link</bodyName>
+      <bodyName>zed_camera</bodyName>
       <topicName>zed/imu</topicName>
       <serviceName>imu_service</serviceName>
       <updateRate>100.0</updateRate>
-      <rpyOffsets>0 ${M_PI} 0</rpyOffsets> 
+      <rpyOffsets>0 0 0</rpyOffsets> 
   <!---->
         <gaussianNoise>0.1</gaussianNoise>
         <accelDrift>0.1 0.1 0.1</accelDrift>
@@ -309,90 +351,6 @@
 
   </gazebo>
 </xacro:if> 
-
-<xacro:unless value="$(arg sim)">
-  <!-- GAZEBO STUFF for unicorn -->
-  <gazebo>
-    <plugin name="automower_gazebo_controller" filename="libam_gazebo_controller_2wd.so">
-      <alwaysOn>true</alwaysOn>
-      <updateRate>100.0</updateRate>
-      <leftJoint>back_right_wheel_joint</leftJoint>
-      <rightJoint>back_left_wheel_joint</rightJoint>
-      <wheelSeparation>0.4645</wheelSeparation>
-      <wheelDiameter>0.245</wheelDiameter>
-      <wheelTorque>100</wheelTorque>
-      <commandTopic>cmd_vel</commandTopic>
-      <odometryTopic>wheelencoder/odom</odometryTopic>
-      <odometryFrame>odom_gazebo</odometryFrame>
-      <robotBaseFrame>chassis_link_gazebo</robotBaseFrame>
-      <publishWheelTF>false</publishWheelTF>
-      <publishWheelJointState>false</publishWheelJointState>
-    </plugin>
-
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />
-
-    <plugin name="imu_plugin" filename="libhector_gazebo_ros_imu.so">
-    <alwaysOn>false</alwaysOn>
-    <bodyName>chassis_link_gazebo</bodyName>
-    <topicName>imu</topicName>
-    <serviceName>imu_service</serviceName>
-    <updateRate>100.0</updateRate>
-    <rpyOffsets>0 0 0</rpyOffsets> <!-- deprecated -->
-<!--
-      <gaussianNoise>0.1</gaussianNoise>
-      <accelDrift>0.5 0.5 0.5</accelDrift>
-      <accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
-      <rateDrift>0.1 0.1 0.1</rateDrift>
-      <rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
-      <headingDrift>0.1</headingDrift>
-      <headingGaussianNoise>1.00</headingGaussianNoise>-->
-
-    </plugin>
-
-
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />
-
-
-    <plugin name="imu_plugin" filename="libhector_gazebo_ros_imu.so">
-      <alwaysOn>true</alwaysOn>
-      <bodyName>chassis_link</bodyName>
-      <topicName>zed/imu</topicName>
-      <serviceName>imu_service</serviceName>
-      <updateRate>10.0</updateRate>
-      <rpyOffsets>0 0 0</rpyOffsets> <!-- deprecated -->
-  <!--
-        <gaussianNoise>0.1</gaussianNoise>
-        <accelDrift>0.5 0.5 0.5</accelDrift>
-        <accelGaussianNoise>0.35 0.35 0.3</accelGaussianNoise>
-        <rateDrift>0.1 0.1 0.1</rateDrift>
-        <rateGaussianNoise>0.05 0.05 0.015</rateGaussianNoise>
-        <headingDrift>0.1</headingDrift>
-        <headingGaussianNoise>1.00</headingGaussianNoise>-->
-
-  <!-- deprecated -->
-      <gaussianNoise>0.0</gaussianNoise>  
-        <accelDrift>0.0 0.0 0.0</accelDrift>
-        <accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise>
-        <rateDrift>0.0 0.0 0.0</rateDrift>
-        <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
-        <headingDrift>0.0</headingDrift>
-        <headingGaussianNoise>0.00</headingGaussianNoise>
-    </plugin>
-
-
-    <plugin name="am_gazebo_wheelencoder" filename="libam_gazebo_wheelencoder.so">
-  </plugin> 
-  </gazebo>
-</xacro:unless> 
-
-
-
-
-
-
-
-
-
 
 
 

@@ -23,7 +23,7 @@ first_map_only:       true     # false
 # Laser Model Parameters 
 laser_min_range:            0.5   # -1.0
 laser_max_range:            19.0   # -1.0
-laser_max_beams:            180    # 180
+laser_max_beams:            360    # 180
 laser_z_hit:                0.95   # 0.95, 0.5
 laser_z_short:              0.05    # 0.1,  0.05
 laser_z_max:                0.05   # 0.05 
