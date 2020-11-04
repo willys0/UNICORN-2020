@@ -5,12 +5,12 @@
 	<arg name="use_teb_planner" default="false"/>
 	<arg name="show_rviz" default="true"/>
 	<arg name="paused" default="false"/>
-	<arg name="debug" default="false"/>  	
-	<arg name="gazebo_gui" default="false"/>
+	<arg name="debug" default="false"/>
+	<arg name="gazebo_gui" default="true"/>
 	<arg name="use_gmapping" default="true"/>
 	<arg name="use_hector" default="false"/>   <!-- Meant to be used if Hector slam is desired -->
 	<arg name="scan_topic" value="frontLidar/scan"/> <!-- from scan_filtered to scan, nothing found in scan_filtered-->
-	<arg name="map_file" value="$(find unicorn_slam)/maps/gmap_map.yaml"/>
+	<arg name="map_file" value="$(find unicorn_slam)/maps/mazeworld.yaml"/>
 	<rosparam param="odom_frame">odom_gazebo</rosparam>
 	<rosparam param="global_local">false</rosparam>
 	<rosparam param="frame_id">chassis_link</rosparam>
@@ -30,6 +30,7 @@
 		<!-- Run the map server -->
 		<node pkg="map_server" type="map_server" args="$(arg map_file)" respawn="true" name="map" />
 		<!--- Run AMCL -->
+
 		<node pkg="amcl" type="amcl" name="amcl" output="screen">
 			<rosparam command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
 			<remap from="scan" to="$(arg scan_topic)"/>
@@ -73,11 +74,19 @@
 	<param name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_sim.urdf.xacro'" />
 
 	<!-- push robot_description to factory and spawn robot in gazebo -->
-	<node name="automower_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model automower -x 0.0 -y 0.0 -z 0.2 -Y 0.0" /> <!-- 5.5 -2.6 0.2 -1.5707 -->
+	<node name="automower_spawn"
+			pkg="gazebo_ros"
+			type="spawn_model"
+			output="screen"
+			args="-urdf -param robot_description -model automower -x 0.0 -y 0.0 -z 0.2 -Y 0.0" >
+
+	</node> <!-- 5.5 -2.6 0.2 -1.5707 -->
 
 	<!-- robot visualization in Rviz -->
 	<group if="$(arg show_rviz)">
-		<node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find am_description)/rviz/pf.rviz"/> 
+		<node name="rviz" pkg="rviz" type="rviz" output="screen" args="-d $(find unicorn)/config/default.rviz">
+
+		</node>
 	</group>
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
@@ -85,13 +94,13 @@
 
 
 	<!-- Joint pos gui -->
-	<param name="use_gui" value="false"/> 
+	<param name="use_gui" value="false"/>
 
 
 	
 	<!-- source that publishes the joint positions as a sensor_msgs/JointState -->
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
-	
+
 	<!-- publish all the frames to TF -->
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
 		<param name="publish_frequency" value="50"/>
@@ -144,12 +153,12 @@
 	</node>
 -->
 <!-- test for a new static camera, not on the robot -->
-<!-- Edit, the camera has a static place in the world, need to test with a real camera to see the feed from the camera. 
+<!-- Edit, the camera has a static place in the world, need to test with a real camera to see the feed from the camera.
 	<node name="static_tf_orbbec2"
 		pkg="tf"
 		type = "static_transform_publisher"
 		args="5 5 0 0 0 0 map camera_link 100">
-	</node> 
+	</node>
 -->
 
 
