@@ -32,19 +32,20 @@
 		<!-- Run the map server -->
 		<node pkg="map_server" type="map_server" args="$(arg map_file)" respawn="true" name="map" />
 
-		<!--- Run AMCL -->
+	</group>
 
-		<group unless="$(arg sim)">
-			<node pkg="amcl" type="amcl" name="amcl" output="screen">
-				<rosparam command="load" file="$(find unicorn_slam)/config/amcl.yaml"/>
-			</node>
-		</group>
-		<group if="$(arg sim)">
-			<node pkg="amcl" type="amcl" name="amcl" output="screen">
-				<rosparam if="$(arg sim)" command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
-				<remap from="scan" to="$(arg scan_topic)"/>
-			</node>
-		</group>
+
+	<!--- Run AMCL -->
+	<group unless="$(arg sim)">
+		<node pkg="amcl" type="amcl" name="amcl" output="screen">
+			<rosparam command="load" file="$(find unicorn_slam)/config/amcl.yaml"/>
+		</node>
+	</group>
+	<group if="$(arg sim)">
+		<node pkg="amcl" type="amcl" name="amcl" output="screen">
+			<rosparam if="$(arg sim)" command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
+			<remap from="scan" to="$(arg scan_topic)"/>
+		</node>
 	</group>
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
@@ -66,9 +67,11 @@
 		<param name="use_gui" value="false"/>
 	</node>
 
+	<node pkg="tf" type="static_transform_publisher" name="map_transform" args="0 0 0 0 0 0 /map /odom_chassis 100000"/>
+
 	<include if="$(arg sim)" file="$(find unicorn)/launch/unicorn_GPS_to_UWB.launch"/>
 	<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
-		<rosparam unless="$(arg sim)" command="load" file="$(find unicorn)/config/ekf_odom_simple_am_driver.yaml" />
+		<rosparam unless="$(arg sim)" command="load" file="$(find unicorn)/config/unicorn_EKF.yaml" />
 		<rosparam if="$(arg sim)" command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
 	</node>
 
