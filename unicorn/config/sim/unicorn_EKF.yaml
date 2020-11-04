@@ -12,19 +12,19 @@ frequency: 1000
 
 # odom/wheel
 odom0: wheel_encoder/odom
-odom0_config: [false, false, false,
+odom0_config: [true, true, false,
+               false, false, true,
                false, false, false,
-               true, true, false,
                false, false, true,
                false, false, false]
-odom0_differential: false
+odom0_differential: true
 odom0_queue_size: 100
 
 
 # odom/gps
 pose0: /amcl_pose
 pose0_config: [true, true, false,
-               false, false, false,
+               false, false, true,
                false, false, false,
                false, false, false,
                false, false, false]
