@@ -37,11 +37,6 @@
 	</group>
 
 
-	<!-- start ekf node -->
-<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
-   <rosparam command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
-</node>
-
 
 
 
@@ -98,7 +93,15 @@
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
 		<param name="publish_frequency" value="50"/>
 	</node>
-	
+
+
+
+	<node pkg="tf" type="static_transform_publisher" name="map_transform" args="0 0 0 0 0 0 /map /odom_chassis 100"/>
+		<!-- start ekf node -->
+	<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
+		<rosparam command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
+	</node>
+			
 <!-- Starts laser filter to enable limitation of laserscan angle -->
 <!--<node name="laser_filter" pkg="unicorn" type="laser_scan_filter" output="screen">
 <rosparam>

@@ -200,7 +200,7 @@
   <!-- realsense Camera -->
 
 
-    <stereo_camera frame_rgb="realsense_camera" frame_depth="realsense_depth_joint" cameraName="realsense" simulation="$(arg sim)" filename="$(arg realsense_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+    <stereo_camera frame_rgb="realsense_camera" frame_depth="realsense_depth" cameraName="realsense" simulation="$(arg sim)" filename="$(arg realsense_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
 
     <joint name="realsense_gb_joint" type="fixed"> 
       <origin xyz="$(arg real_rgb_xyz)" rpy="$(arg real_rpy)"/>
@@ -209,9 +209,9 @@
     </joint>
 
     <joint name="realsense_depth_joint" type="fixed">
-      <origin xyz="$(arg real_depth_xyz)" rpy="${-pi/2} 0 ${-pi/2}"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
       <parent link="realsense_camera"/>
-      <child link="realsense_depth_joint"/>
+      <child link="realsense_depth"/>
     </joint>
 
 

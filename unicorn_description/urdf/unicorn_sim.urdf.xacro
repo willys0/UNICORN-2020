@@ -11,7 +11,7 @@
   <xacro:include filename="$(find am_description)/urdf/swivel_wheel.urdf.xacro" />
 
     <!-- Wheel -->
-  <xacro:include filename="$(find am_description)/urdf/wheel.urdf.xacro" />
+  <xacro:include filename="$(find unicorn_description)/urdf/wheel.urdf.xacro" />
 
     <!-- camera pack-->
   <xacro:include filename="$(find unicorn_description)/urdf/stereo_camera_gazebo.urdf.xacro" />
@@ -21,11 +21,24 @@
 
   <xacro:property name="M_PI" value="3.1415926535897931" />
   <xacro:property name="M_PI2" value="1.57079632679" />
-  <!-- base -->
+  <!-- base --><!-- 
     <xacro:property name="base_x_size" value="0.72" />
   <xacro:property name="base_y_size" value="0.55" />
   <xacro:property name="base_z_size" value="0.6" />
-  <xacro:property name="base_mass" value="21.446" /> <!-- 21.446 in kg-->
+  <xacro:property name="base_mass" value="21.446" /> 21.446 in kg-->
+
+    <!-- Main Body-base -->
+  <xacro:property name="base_x_size" value="0.72" />
+  <xacro:property name="base_y_size" value="0.55" />
+  <xacro:property name="base_z_size" value="0.23" />
+  <xacro:property name="base_mass" value="15" /> <!-- in kg-->
+
+    <!--Inertial macros for the box and cylinder. Units are kg*m^2-->
+  <xacro:macro name="box_inertia" params="m x y z">
+    <inertia ixx="${m*(y*y+z*z)/12}" ixy="0" ixz="0"
+             iyy="${m*(x*x+z*z)/12}" iyz="0"
+             izz="${m*(x*x+z*z)/12}" />
+  </xacro:macro>
 
   <!-- Front Lidar -->
   <xacro:arg name="laser_xyz" default="-0.0214 -0.0049 0.465" />
@@ -152,13 +165,13 @@
 
 
   <!-- driving wheels -->
-  <wheel fb="back" lr="left" parent="chassis_link" translateY="0.25" translateX="0" translateZ="0.122" wheel_radius="0.122" wheel_height="0.032" flip="1"/>
-  <wheel fb="back" lr="right" parent="chassis_link" translateY="-0.25" translateX="0 " translateZ="0.122" wheel_radius="0.122" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="left" parent="chassis_link" translateY="0.23" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="right" parent="chassis_link" translateY="-0.23" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   
 
   <!-- others wheels -->
-  <swivel_wheel fb="front" lr="left" parent="chassis_link" translateY="0.16" translateX="-0.355" translateZ="0.1526" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
-  <swivel_wheel fb="front" lr="right" parent="chassis_link" translateY="-0.16" translateX="-0.355" translateZ="0.1526" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
+  <swivel_wheel fb="front" lr="left" parent="chassis_link" translateY="0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
+  <swivel_wheel fb="front" lr="right" parent="chassis_link" translateY="-0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
 
 
 
