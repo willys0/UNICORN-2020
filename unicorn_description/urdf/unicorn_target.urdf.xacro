@@ -63,7 +63,7 @@
 
  <!-- Main Body-base -->
   <link
-    name="chassis_link">
+    name="base_link">
     <inertial>
       <origin
         xyz="0 0 0"
@@ -84,7 +84,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://unicorn_description/meshes/chassis_link.STL" />
+          filename="package://unicorn_description/meshes/base_link.STL" />
       </geometry>
       <material
         name="">
@@ -98,7 +98,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://unicorn_description/meshes/chassis_link.STL" />
+          filename="package://unicorn_description/meshes/base_link.STL" />
         <surface>
          <friction>
            <ode><mu>0.4</mu><mu2>0.4</mu2></ode>
@@ -156,7 +156,7 @@
       xyz="0 0 0"
       rpy="0 0 ${M_PI}" />
     <parent
-      link="chassis_link" />
+      link="base_link" />
     <child
       link="lift_link" />
     <axis
@@ -164,6 +164,51 @@
     <joint_properties damping="0.0" friction="0.0" />
   </joint>
 
+
+  <link
+    name="chassis_link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.01" />
+      <box_inertia  m="${5*0.01}" x="${base_x_size}" y="${base_y_size}" z="${base_z_size}"/>
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <!-- <mesh
+          filename="package://unicorn_description/meshes/base_link.STL" /> -->
+          <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <!-- <surface>
+         <friction>
+           <ode><mu>0</mu><mu2>0</mu2></ode>
+         </friction>
+      </surface> -->
+    </collision>
+  </link>
+  <joint name="chassis_link_joint" type="fixed">
+    <parent link="base_link"/> <!-- Switched -->
+    <child link="chassis_link" />
+  <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
+  </joint>
 <!--
   <link
     name="wheel_link">
@@ -202,23 +247,23 @@
     <turnGravityOff>false</turnGravityOff>
   </gazebo>
   <joint name="base_chassis_joint" type="fixed">
-    <parent link="chassis_link"/> 
+    <parent link="base_link"/> 
     <child link="wheel_link" />
   <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
   </joint>-->
 
 
   <!-- driving wheels 
-  <wheel fb="back" lr="left" parent="chassis_link" rotationZ="3.14159" translateY="0.23" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
-  <wheel fb="back" lr="right" parent="chassis_link" rotationZ="0" translateY="-0.23" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="left" parent="base_link" rotationZ="3.14159" translateY="0.23" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="right" parent="base_link" rotationZ="0" translateY="-0.23" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   -->
   <wheel fb="back" lr="left" parent="lift_link"  translateY="0.24" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   <wheel fb="back" lr="right" parent="lift_link" translateY="-0.24" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   
 
   <!-- others wheels -->
-  <swivel_wheel fb="front" lr="left" parent="chassis_link" translateY="0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
-  <swivel_wheel fb="front" lr="right" parent="chassis_link" translateY="-0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
+  <swivel_wheel fb="front" lr="left" parent="base_link" translateY="0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
+  <swivel_wheel fb="front" lr="right" parent="base_link" translateY="-0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
 
 
 
@@ -227,7 +272,7 @@
 
   <joint name="laser_mount_joint" type="fixed">
     <origin xyz="$(arg laser_xyz)" rpy="$(arg laser_rpy)" />
-    <parent link="chassis_link" />
+    <parent link="base_link" />
     <child link="base_laser" />
   </joint>
   
@@ -237,7 +282,7 @@
 
   <joint name="rear_laser_mount_joint" type="fixed">
     <origin xyz="$(arg rear_laser_xyz)" rpy="$(arg rear_laser_rpy)" />
-    <parent link="chassis_link" />
+    <parent link="base_link" />
     <child link="rear_laser" />
   </joint>
 
@@ -246,7 +291,7 @@
 
     <joint name="zed_camera_rgb_joint" type="fixed"> 
       <origin xyz="$(arg zed_xyz)" rpy="$(arg zed_rpy)"/>
-      <parent link="chassis_link"/>  
+      <parent link="base_link"/>  
       <child link="zed_camera"/>
     </joint>
 
@@ -264,7 +309,7 @@
 
     <joint name="realsense_gb_joint" type="fixed"> 
       <origin xyz="$(arg real_rgb_xyz)" rpy="$(arg real_rpy)"/>
-      <parent link="chassis_link"/>  
+      <parent link="base_link"/>  
       <child link="realsense_camera"/>
     </joint>
 
@@ -282,7 +327,7 @@
       <alwaysOn>true</alwaysOn>
       <updateRate>5</updateRate>
       <frameId>odom_chassis</frameId>
-      <bodyName>chassis_link</bodyName>
+      <bodyName>base_link</bodyName>
       <topicName>gps</topicName>
       <velocityTopicName>gps_velocity</velocityTopicName>
       <drift>5.0 5.0 5.0</drift>
@@ -308,7 +353,7 @@
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>wheel_encoder/odom</odometryTopic>
       <odometryFrame>odom_chassis_dont_use</odometryFrame>
-      <robotBaseFrame>chassis_link</robotBaseFrame>
+      <robotBaseFrame>base_link</robotBaseFrame>
       <publishWheelTF>false</publishWheelTF>
       <publishWheelJointState>false</publishWheelJointState>
 
