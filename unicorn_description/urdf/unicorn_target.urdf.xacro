@@ -84,7 +84,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://unicorn_description/meshes/base_link.STL" />
+          filename="package://unicorn_description/meshes/chassis_link.STL" />
       </geometry>
       <material
         name="">
@@ -98,7 +98,7 @@
         rpy="0 0 0" />
       <geometry>
         <mesh
-          filename="package://unicorn_description/meshes/base_link.STL" />
+          filename="package://unicorn_description/meshes/chassis_link.STL" />
         <surface>
          <friction>
            <ode><mu>0.4</mu><mu2>0.4</mu2></ode>
