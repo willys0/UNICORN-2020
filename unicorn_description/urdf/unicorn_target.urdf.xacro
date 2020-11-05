@@ -164,7 +164,7 @@
     <joint_properties damping="0.0" friction="0.0" />
   </joint>
 
-
+<!-- Dummy frame to fix reverse issue -->
   <link
     name="chassis_link">
     <inertial>
@@ -193,15 +193,8 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <geometry>
-        <!-- <mesh
-          filename="package://unicorn_description/meshes/base_link.STL" /> -->
           <box size="0.01 0.01 0.01"/>
       </geometry>
-      <!-- <surface>
-         <friction>
-           <ode><mu>0</mu><mu2>0</mu2></ode>
-         </friction>
-      </surface> -->
     </collision>
   </link>
   <joint name="chassis_link_joint" type="fixed">
