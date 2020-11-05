@@ -9,6 +9,8 @@
         <param name="scan_frequency" value="30"/>
         <param name="samples_per_scan" value="1200"/>
         <param name="start_angle" value="-1200000"/>
+
+        <remap from="/TX2_r2000Lidar/laserScan" to="/frontLidar/scan" />
     </node>
 
     <!-- Run zed camera -->
