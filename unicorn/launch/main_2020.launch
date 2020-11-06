@@ -3,7 +3,7 @@
 
 	<!-- roslaunch arguments -->
 	<arg name="scan_topic" 			default="/frontLidar/scan"/>
-	<arg name="map_file"   			default="$(find unicorn_slam)/maps/mazeworld.yaml"/>
+	<arg name="map_file"   			default="$(find unicorn_slam)/maps/c2.yaml"/>
 
 	<arg name="do_slam" 	        default="true" />
 	<arg name="use_camera"			default="true" />
@@ -38,7 +38,7 @@
 	<!--- Run AMCL -->
 	<group unless="$(arg sim)">
 		<node pkg="amcl" type="amcl" name="amcl" output="screen">
-			<rosparam command="load" file="$(find unicorn_slam)/config/amcl.yaml"/>
+			<rosparam command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
 		</node>
 	</group>
 	<group if="$(arg sim)">
