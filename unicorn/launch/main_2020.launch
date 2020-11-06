@@ -60,14 +60,14 @@
 	<param unless="$(arg sim)" name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target.urdf.xacro'" />
 
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
-		<param name="publish_frequency" value="50"/>
+		<param name="publish_frequency" value="100"/>
 	</node>
 
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
 		<param name="use_gui" value="false"/>
 	</node>
 
-	<node pkg="tf" type="static_transform_publisher" name="map_transform" args="0 0 0 0 0 0 /map /odom_chassis 1000"/>
+	<node pkg="tf" type="static_transform_publisher" name="map_transform" args="0 0 0 0 0 0 /map /odom_chassis 1"/>
 
 	<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
 		<rosparam unless="$(arg sim)" command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
