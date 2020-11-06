@@ -198,8 +198,8 @@
     </collision>
   </link>
   <joint name="chassis_joint" type="fixed">
-    <parent link="base_link"/> <!-- Switched -->
-    <child link="chassis_link" />
+    <parent link="chassis_link"/> <!-- Switched -->
+    <child link="base_link" />
   <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
   </joint>
 <!--
