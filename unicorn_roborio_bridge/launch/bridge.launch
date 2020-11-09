@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <node pkg="unicorn_roborio_bridge" type="unicorn_roborio_bridge_node" name="unicorn_roborio_bridge_node" />
+
+  <test test-name="unicorn_roborio_bridge-test" pkg="unicorn_roborio_bridge" type="unicorn_roborio_bridge-test" />
+
+</launch>
