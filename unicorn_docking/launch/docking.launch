@@ -6,6 +6,9 @@
   <include file="$(find apriltag_ros)/launch/continuous_detection.launch">
     <arg name="camera_name" value="$(arg camera_name)" />
     <arg name="image_topic" value="$(arg image_topic)" />
+
+    <param file="$(find unicorn_docking)/config/apriltag_settings.yaml" />
+    <param file="$(find unicorn_docking)/config/apriltags.yaml" />
   </include>
 
 </launch>
