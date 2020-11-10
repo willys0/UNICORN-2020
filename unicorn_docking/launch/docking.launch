@@ -1,14 +1,14 @@
 <launch>
   <arg name="camera_name" default="realsense/depth" />
   <arg name="image_topic" default="image_raw" />
-  <node pkg="unicorn_docking" type="unicorn_docking_node" name="unicorn_docking_node" />
 
-  <include file="$(find apriltag_ros)/launch/continuous_detection.launch">
+  <node pkg="unicorn_docking" type="unicorn_docking_node" name="unicorn_docking_node">
+    <remap from="/cmd_vel" to="/docking/cmd_vel" />
+  </node>
+
+  <include file="$(find unicorn_docking)/launch/apriltag.launch">
     <arg name="camera_name" value="$(arg camera_name)" />
     <arg name="image_topic" value="$(arg image_topic)" />
 
-    <param file="$(find unicorn_docking)/config/apriltag_settings.yaml" />
-    <param file="$(find unicorn_docking)/config/apriltags.yaml" />
   </include>
-
 </launch>
