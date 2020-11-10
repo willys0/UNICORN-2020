@@ -12,12 +12,15 @@
 	<arg name="sim" 				default="false" />
 
 
-	<include file="$(find unicorn)/launch/components/control.launch" />
-	
-
-	<include file="$(find unicorn)/launch/components/sensors.launch">
-		<arg name="use_zed" value="$(arg use_camera)" />
+	<include file="$(find unicorn)/launch/components/control.launch" >
+		<arg name="sim" value="$(arg sim)" />
 	</include>
+
+	<group unless="$(arg sim)">
+		<include file="$(find unicorn)/launch/components/sensors.launch">
+			<arg name="use_zed" value="$(arg use_camera)" />
+		</include>
+	</group>
 	
 	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
 		<arg name="sim" value="$(arg sim)" />
