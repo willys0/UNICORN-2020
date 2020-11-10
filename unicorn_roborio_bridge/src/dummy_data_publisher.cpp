@@ -23,6 +23,7 @@ int main(int argc, char** argv) {
     while(ros::ok()) {
 
         for(int i = 0; i < 11; i++) {
+            //float r = (float)(i + 1) * 0.2;
             float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) + 0.1;
 
             msg.lidar_ranges[i] = r;

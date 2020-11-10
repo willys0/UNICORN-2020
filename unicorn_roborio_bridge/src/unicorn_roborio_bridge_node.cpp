@@ -26,6 +26,7 @@ void rio_cb(const unicorn_roborio_bridge::RioMasterMsgConstPtr& msg) {
 
     lidar_scan.ranges = msg->lidar_ranges;
     // std::reverse(msg->lidar_ranges.begin(), msg->lidar_ranges.end());
+    std::reverse(std::begin(lidar_scan.ranges), std::end(lidar_scan.ranges));
     // TODO: Update header
     lidar_scan.header.stamp = ros::Time::now();
     lidar_scan.header.seq++;
@@ -45,24 +46,27 @@ sensor_msgs::LaserScan init_lidar_msg(void) {
 
     sensor_msgs::LaserScan msg;
 
+    ros::NodeHandle nh("r2100");
+
     msg.header.frame_id = "rear_laser";
 
     // msg.angle_min =  -0.767945; //-44.0;
-    msg.angle_min =  -0.698131701;
-    msg.angle_max =   0.767945; // 44.0;
-    msg.angle_increment = 0.139626; // 8.0;
-
-    msg.range_min = 0.1;
-    // Not sure about this
-    msg.range_max = 8.0;
+    nh.param<float>("angle_min", msg.angle_min, -0.698131701);
+    nh.param<float>("angle_max", msg.angle_max, 0.767945);
+    nh.param<float>("angle_increment", msg.angle_max, 0.139626);
+    nh.param<float>("range_min", msg.range_min, 0.1);
+    nh.param<float>("range_max", msg.range_max, 8.0);
 
     msg.time_increment = 0;
     msg.scan_time = 0;
 
-    for(int i = 0; i < 11; i++) {
-        //msg.ranges.push_back((float)(i + 1) * 0.2);
-        msg.ranges.push_back(1.0);
-    }
+    int s;
+    nh.param<int>("n_measures", s, 11);
+    msg.ranges.resize(s);
+
+    // for(int i = 0; i < 11; i++) {
+    //     //msg.ranges.push_back(1.0);
+    // }
 
     return msg;
 }

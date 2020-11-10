@@ -1,0 +1,11 @@
+r2100:
+    # Angles in radians
+    angle_min: -0.698131701
+    angle_max:  0.767945
+    angle_increment: 0.139626
+
+    # Ranges in meters
+    range_min: 0.1
+    range_max: 8.0
+
+    n_measures: 11
