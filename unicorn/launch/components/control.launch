@@ -1,12 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
+    <arg name="sim" 				default="false" />
     <!-- Starts interface between automower and unicorn to enable backward driving -->
-    <node name="am_unicorn_interface"
-        pkg="unicorn" 
-        type="am_unicorn_interface" 
-        output="screen">
-    </node>
-
+    <group unless="$(arg sim)">
+    </group>
+        <node name="am_unicorn_interface"
+            pkg="unicorn" 
+            type="am_unicorn_interface" 
+            output="screen">
+        </node>
+    
 
     <!-- Start the am_driver -->
     <node name="am_driver_safe" pkg="am_driver_safe" type="am_driver_safe_node" output="screen">
