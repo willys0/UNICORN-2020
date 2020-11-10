@@ -1,0 +1,11 @@
+<launch>
+  <arg name="camera_name" default="realsense/depth" />
+  <arg name="image_topic" default="image_raw" />
+  <node pkg="unicorn_docking" type="unicorn_docking_node" name="unicorn_docking_node" />
+
+  <include file="$(find apriltag_ros)/launch/continuous_detection.launch">
+    <arg name="camera_name" value="$(arg camera_name)" />
+    <arg name="image_topic" value="$(arg image_topic)" />
+  </include>
+
+</launch>
