@@ -7,10 +7,10 @@
   <xacro:arg name="sim" default="true" />
 
     <!-- Swivel wheel -->
-  <xacro:include filename="$(find am_description)/urdf/swivel_wheel.urdf.xacro" />
+  <xacro:include filename="$(find unicorn_description)/urdf/swivel_wheel.urdf.xacro" />
 
     <!-- Wheel -->
-  <xacro:include filename="$(find am_description)/urdf/wheel.urdf.xacro" />
+  <xacro:include filename="$(find unicorn_description)/urdf/wheel.urdf.xacro" />
 
     <!-- camera pack-->
   <xacro:include filename="$(find unicorn_description)/urdf/stereo_camera_gazebo.urdf.xacro" />
@@ -161,7 +161,7 @@
       link="lift_link" />
     <axis
       xyz="0 0 0" />
-    <joint_properties damping="0.0" friction="0.0" />
+    <joint_properties damping="0.5" friction="0.5" />
   </joint>
 
 <!--

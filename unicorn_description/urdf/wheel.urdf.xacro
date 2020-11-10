@@ -45,10 +45,11 @@
     </link>
 
     <gazebo reference="${fb}_${lr}_wheel">
-      <mu1 value="100.0" />
-      <mu2 value="100.0" />
-      <kp value="10000000.0" />
-      <kd value="1.0" />
+      <mu1 value="100000.0" />
+      <mu2 value="100000.0" />
+      <kp value="100000000000.0" />
+      <kd value="10000000.0" />
+      <dampingFactor value="1.5" />
       <fdir1 value="1 0 0" />
       <material>Gazebo/Black</material>
       <turnGravityOff>false</turnGravityOff>
@@ -60,7 +61,7 @@
       <origin xyz="${translateX} ${translateY} ${translateZ}" rpy="0 0 0" />
       <axis xyz="0 1 0" rpy="0 0 0" />
       <limit effort="1000" velocity="100" />
-      <joint_properties damping="0.0" friction="0.0" />
+      <joint_properties damping="0.5" friction="0.1" />
     </joint>
 
     <!-- Transmission is important to link the joints and the controller -->
