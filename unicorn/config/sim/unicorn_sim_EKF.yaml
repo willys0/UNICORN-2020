@@ -1,7 +1,7 @@
 #map_frame: map              # Defaults to "map" if unspecified
 odom_frame: odom_chassis
 base_link_frame: chassis_link
-world_frame: map
+world_frame: odom_chassis
 
 two_d_mode: true
 
@@ -11,36 +11,36 @@ frequency: 50
 
 
 # odom/wheel
-odom0: wheelencoder/odom
-odom0_config: [false, false, false,
-               false, false, false,
+odom0: wheel_encoder/odom
+odom0_config: [true, true, false,
+               false, false, true,
                true, true, false,
                false, false, true,
                false, false, false]
-odom0_differential: false
+odom0_differential: true
 odom0_queue_size: 100
 
 
-# odom/gps
-pose0: /amcl_pose
-pose0_config: [true, true, false,
-               false, false, true,
-               false, false, false,
-               false, false, false,
-               false, false, false]
-pose0_differential: false
-pose0_queue_size: 50
+# # odom/gps
+# pose0: /amcl_pose
+# pose0_config: [true, true, false,
+#                false, false, true,
+#                false, false, false,
+#                false, false, false,
+#                false, false, false]
+# pose0_differential: false
+# pose0_queue_size: 50
 
-# Odometry/zedS
-imu0: zed/imu
-imu0_config: [false, false, false,
-               false, false, true,
-               false,  false, false,
-               false, false, true,
-               true, false, false]
-imu0_differential: true
-#imu0_relative: false
-imu0_queue_size: 100
+# # Odometry/zedS
+# imu0: zed/imu
+# imu0_config: [false, false, false,
+#                false, false, true,
+#                false,  false, false,
+#                false, false, true,
+#                true, false, false]
+# imu0_differential: true
+# #imu0_relative: false
+# imu0_queue_size: 100
 #imu0_pose_rejection_threshold: 2
 #imu0_twist_rejection_threshold: 0.2
 #imu0_nodelay: true

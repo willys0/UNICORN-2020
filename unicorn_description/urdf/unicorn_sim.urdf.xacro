@@ -307,9 +307,10 @@
       <wheelTorque>100</wheelTorque>
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>wheel_encoder/odom</odometryTopic>
-      <odometryFrame>odom_chassis_dont_use</odometryFrame>
+      <odometryFrame>odom_chassis</odometryFrame>
       <robotBaseFrame>chassis_link</robotBaseFrame>
       <publishWheelTF>false</publishWheelTF>
+      <publishOdomTF>false</publishOdomTF>
       <publishWheelJointState>false</publishWheelJointState>
 
 

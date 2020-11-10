@@ -14,6 +14,7 @@ int main(int argc, char** argv){
   tf2_ros::Buffer tf_buffer;
   tf2_ros::TransformListener tf2_listener(tf_buffer);
   transform_frames = tf_buffer.lookupTransform("chassis_link", "lift_link", ros::Time(0), ros::Duration(1.0) );
+
   while(ros::ok())
   {
     odom_transform_interface.publishmsg();
@@ -24,8 +25,8 @@ int main(int argc, char** argv){
 
 odom_transform::odom_transform()
 {
-  odometry_sub_ = n_.subscribe("/wheel_encoder/odom", 0, &odom_transform::msgCallback, this);
-  odometry_transform_pub_ = n_.advertise<nav_msgs::Odometry>("/wheel_encoder/odom_transformed", 0);
+  odometry_sub_ = n_.subscribe("/wheel_encoder/odom", 10, &odom_transform::msgCallback, this);
+  odometry_transform_pub_ = n_.advertise<nav_msgs::Odometry>("/wheel_encoder/odom_transformed", 10,true);
 }
 
 void odom_transform::msgCallback(const nav_msgs::Odometry& odometry)
