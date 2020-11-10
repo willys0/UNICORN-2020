@@ -403,7 +403,7 @@ Visualization Manager:
               Transport Hint: raw
               Unreliable: false
               Value: false
-          Enabled: true
+          Enabled: false
           Name: Camera
       Enabled: true
       Name: Sensors
