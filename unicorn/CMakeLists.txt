@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
   tf
+  tf2
   geometry_msgs
   message_generation 
   genmsg
@@ -148,9 +149,10 @@ include_directories(
 
 add_executable(am_unicorn_interface src/am_unicorn_interface.cpp)
 target_link_libraries(am_unicorn_interface ${catkin_LIBRARIES})
-add_dependencies(am_unicorn_interface unicorn_generate_messages_cpp)
+add_dependencies(am_unicorn_interface ${PROJECT_NAME}_generate_messages_cpp)
 
-
+add_executable(odometry_transform src/odometry_transform.cpp)
+target_link_libraries(odometry_transform ${catkin_LIBRARIES})
 #add_executable(unicorn_statemachine src/unicorn_statemachine.cpp)
 #add_dependencies(unicorn_statemachine ${catkin_EXPORTED_TARGETS})
 #add_library(unicorn_statemachine_lib src/unicorn_statemachine.cpp)
@@ -169,7 +171,7 @@ add_library(state_lib
   include/unicorn/state_structures.h
   include/unicorn/state_machine.h
   )
-add_dependencies(state_lib ${catkin_EXPORTED_TARGETS})
+add_dependencies(state_lib ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
 
 add_library(pid_controller_lib src/pid_controller.cpp)
 

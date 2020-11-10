@@ -1,0 +1,92 @@
+TebLocalPlannerROS:
+
+  # ROBOT ----------------------------------------------------------------
+
+  max_vel_x: 0.3 # (double, default: 0.4) #Maximum translational velocity of the robot in meters/sec
+  max_vel_x_backwards: 0.3 # (double, default: 0.2) #Maximum absolute translational velocity of the robot while driving backwards in meters/sec. See optimization parameter weight_kinematics_forward_drive
+  max_vel_theta: 0.5 # (double, default: 0.3) #Maximum angular velocity of the robot in radians/sec
+  acc_lim_x: 1.0 # (double, default: 0.5) #Maximum translational acceleration of the robot in meters/sec^2
+  acc_lim_theta: 2.0 # (double, default: 0.5) #Maximum angular acceleration of the robot in radians/sec^2
+  # Ackermann vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+  min_turning_radius: 0.0 # (double, default: 0.0) #Minimum turning radius of a carlike robot (set to zero for a diff-drive robot). New in version 0.2.2
+  wheelbase: 1.3 # (double, default: 1.0) #The distance between the drive shaft and steering axle. The value might be negative for back-wheeled robots (only required if ~<name>/cmd_angle_instead_rotvelis set to true). New in version 0.2.3
+  cmd_angle_instead_rotvel: false # (bool, default: false) #Substitute the rotational velocity in the commanded velocity message by the corresponding steering angle [-pi/2,pi/2]. Note, changing the semantics of yaw rate depending on the application is not preferable. Here, it just complies with the inputs required by the stage simulator. Datatypes in ackermann_msgs are more appropriate, but are not supported by move_base. The local planner is not intended to send commands by itself. New in version 0.2.3
+  footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
+   # type: "line"
+   # line_start: [0.0, 0.0] # for type "line"
+   # line_end: [-0.3, 0.0] # for type "line"
+   type: "two_circles"
+   front_offset: 0.0 # for type "two_circles"
+   front_radius: 0.4 # for type "two_circles"
+   rear_offset: 0.25 # for type "two_circles"
+   rear_radius: 0.4 # for type "two_circles"
+   # vertices: [ [0.25, -0.05], [0.18, -0.05], [0.18, -0.18], [-0.19, -0.18], [-0.25, 0], [-0.19, 0.18], [0.18, 0.18], [0.18, 0.05], [0.25, 0.05] ] # for type "polygon"
+
+  # GOAL TOLERANCE -------------------------------------------------------
+
+  xy_goal_tolerance: 0.02 # (double, default: 0.2) #Allowed final euclidean distance to the goal position in meters
+  yaw_goal_tolerance: 0.01 # (double, default: 0.2) #Allowed final orientation error in radians
+  free_goal_vel: false # (bool, default: false) #Remove the goal velocity constraint such that the robot can arrive at the goal with maximum speed
+
+  # TRAJECTORY -----------------------------------------------------------
+
+  dt_ref: 0.3 # (double, default: 0.3) #Desired temporal resolution of the trajectory (the trajectory is not fixed to dt_ref since the temporal resolution is part of the optimization, but the trajectory will be resized between iterations if dt_ref +-dt_hysteresis is violated.
+  dt_hysteresis: 0.1 # (double, default: 0.1) #Hysteresis for automatic resizing depending on the current temporal resolution, usually approx. 10% of dt_ref is recommended
+  min_samples: 3 # (int, default: 3) #Minimum number of samples (should be always greater than 2)
+  global_plan_overwrite_orientation: true # (bool, default: true) #Overwrite orientation of local subgoals provided by the global planner (since they often provide only a 2D path)
+  force_reinit_new_goal_dist: 1.0 # (double, default: 1.0) #Reinitialize the trajectory if a previous goal is updated with a separation of more than the specified value in meters (skip hot-starting)
+  feasibility_check_no_poses: 5 # (int, default: 5) #Specify up to which pose on the predicted plan the feasibility should be checked each sampling interval. New in version 0.2.2
+  publish_feedback: false # (bool, default: false) #Publish planner feedback containing the full trajectory and a list of active obstacles (should be enabled only for evaluation or debugging). See list of publishers above. New in version 0.2.2
+  shrink_horizon_backup: false # (bool, default: true) #Allows the planner to shrink the horizon temporary (50%) in case of automatically detected issues. New in version 0.2.3
+
+  # OBSTACLE PARAMETERS --------------------------------------------------
+
+  min_obstacle_dist: 0.03 # (double, default: 0.5) #Minimum desired separation from obstacles in meters
+  include_costmap_obstacles: true # (bool, default: true) #Specify if obstacles of the local costmap should be taken into account. Each cell that is marked as obstacle is considered as a point-obstacle. Therefore do not choose a very small resolution of the costmap since it increases computation time. In future releases this circumstance is going to be addressed as well as providing an additional api for dynamic obstacles.
+  costmap_obstacles_front_only: false # (bool, default: true) #Limit the considered costmap obstacles to the front of the robot in order to reduce computational effort.
+  obstacle_poses_affected: 3 # (int, default: 10) #Each obstacle position is attached to the closest pose on the trajectory in order to keep a distance. Additional neighbors can be taken into account as well.
+  line_obstacle_poses_affected: 10 # (int, default: 25) #See obstacle_poses_affected, but specialized for line-shaped obstacles.
+  polygon_obstacle_poses_affected: 10 # (int, default: 25) #See obstacle_poses_affected, but specialized for polygon-shaped obstacles.
+  #The following parameters are relevant only if costmap_converter plugins are desired (see tutorial): New in version 0.2.0 
+  costmap_converter_plugin: ""
+  # (string, default: "") #Define plugin name in order to convert costmap cells to points/lines/polygons. Set an empty string to disable the conversion such that all cells are treated as point-obstacles.
+  costmap_converter_spin_thread: true # (bool, default: true) #If set to true, the costmap converter invokes its callback queue in a different thread.
+  costmap_converter_rate: 5.0 # (double, default: 5.0) #Rate that defines how often the costmap_converter plugin processes the current costmap (the value should not be much higher than the costmap update rate) [in Hz].
+
+  # OPTIMIZATION ---------------------------------------------------------
+
+  no_inner_iterations: 3 # (int, default: 5) #Number of actual solver iterations called in each outerloop iteration. See param no_outer_iterations.
+  no_outer_iterations: 3 # (int, default: 4) #Each outerloop iteration automatically resizes the trajectory according to the desired temporal resolution dt_ref and invokes the internal optimizer (that performs no_inner_iterations). The total number of solver iterations in each planning cycle is therefore the product of both values.
+  penalty_epsilon: 0.05 # (double, default: 0.1) #Add a small safety margin to penalty functions for hard-constraint approximations
+  weight_max_vel_x: 1.0 # (double, default: 2.0) #Optimization weight for satisfying the maximum allowed translational velocity
+  weight_max_vel_theta: 1.0 # (double, default: 1.0) #Optimization weight for satisfying the maximum allowed angular velocity
+  weight_acc_lim_x: 1.0 # (double, default: 1.0) #Optimization weight for satisfying the maximum allowed translational acceleration
+  weight_acc_lim_theta: 1.0 # (double, default: 1.0) #Optimization weight for satisfying the maximum allowed angular acceleration
+  weight_kinematics_nh: 1000.0 # (double, default: 1000.0) #Optimization weight for satisfying the non-holonomic kinematics (this parameter must be high since the kinematics equation constitutes an equality constraint, even a value of 1000 does not imply a bad matrix condition due to small 'raw' cost values in comparison to other costs).
+  weight_kinematics_forward_drive: 0.001 # (double, default: 1.0) #Optimization weight for forcing the robot to choose only forward directions (positive transl. velocities). A small weight (e.g. 1.0) still allows driving backwards.
+  weight_kinematics_turning_radius: 1.0 # (double, default: 1.0) #Optimization weight for enforcing a minimum turning radius (only for carlike robots). New in version 0.2.2
+  weight_optimaltime: 1.0 # (double, default: 1.0) #Optimization weight for contracting the trajectory w.r.t transition/execution time
+  weight_point_obstacle: 10.0 # (double, default: 1.0) #Optimization weight for keeping a minimum distance from point obstacles
+  weight_line_obstacle: 2.0 # (double, default: 10.0) #Optimization weight for satisfying a minimum separation from line obstacles.
+  weight_poly_obstacle: 3.0 # (double, default: 10.0) #Optimization weight for satisfying a minimum separation from polygon obstacles.
+
+  # PARALLEL PLANNING ----------------------------------------------------
+
+  enable_homotopy_class_planning: false # (bool, default: true) #Activate parallel planning in distinctive topologies (requires much more CPU resources, since multiple trajectories are optimized at once)
+  enable_multithreading: true # (bool, default: true) #Activate multiple threading in order to plan each trajectory in a different thread
+  max_number_classes: 5 # (int, default: 5) #Specify the maximum number of distinctive trajectories taken into account (limits computational effort)
+  roadmap_graph_no_samples: 15 # (int, default: 15) #Specify the number of samples generated for creating the roadmap graph
+  roadmap_graph_area_width: 6 # (double, default: 6) #Random keypoints/waypoints are sampled in a rectangular region between start and goal. Specify the width of that region in meters.
+  h_signature_prescaler: 1.0 # (double, default: 1.0) #Scale internal parameter: (H-signature) that is used to distinguish between homotopy classes. Warning: reduce this parameter only, if you observe problems with too many obstacles in the local cost map, do not choose it extremly low, otherwise obstacles cannot be distinguished from each other (0.2<value<=1).
+  h_signature_threshold: 0.1 # (double, default: 0.1) #Two H-signatures are assumed to be equal, if both the difference of real parts and complex parts are below the specified threshold.
+  obstacle_heading_threshold: 1.0 # (double, default: 1.0) #Specify the value of the scalar product between obstacle heading and goal heading in order to take them (obstacles) into account for exploration.
+  visualize_hc_graph: false # (bool, default: false) #Visualize the graph that is created for exploring distinctive trajectories (check marker message in rviz)
+
+  # MISCELLANEOUS --------------------------------------------------------
+
+  odom_topic: "odom"
+  # (string, default: "odom")
+  #Topic name of the odometry message, provided by the robot driver or simulator.
+  map_frame: "map"
+  # (string, default: "odom")
+  #Global planning frame (in case of a static map, this parameter must be usually changed to "/map". 
