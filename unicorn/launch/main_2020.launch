@@ -11,13 +11,18 @@
 
 	<arg name="sim" 				default="false" />
 
+
+	<include file="$(find unicorn)/launch/components/odom_trans.launch" />
 	<include file="$(find unicorn)/launch/components/control.launch" />
+	
 
 	<include file="$(find unicorn)/launch/components/sensors.launch">
 		<arg name="use_zed" value="$(arg use_camera)" />
 	</include>
 	
-	<include file="$(find unicorn_navigation)/launch/move_base.launch" />
+	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
+		<arg name="sim" value="$(arg sim)" />
+	</include>
 
 	<group if="$(arg do_slam)">
 		<include file="$(find unicorn)/launch/components/slam.launch">
