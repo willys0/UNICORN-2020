@@ -8,6 +8,8 @@
 
 #include <geometry_msgs/Twist.h>
 
+#include <std_msgs/Int32.h>
+
 void setGains() {
     ros::NodeHandle n("~/pid");
 
@@ -99,6 +101,38 @@ TEST(DockingControllerTestSuite, ifDockingStateAndNoTagNoVelocity) {
     geometry_msgs::Twist vel = controller.computeVelocity();
 
     ASSERT_FLOAT_EQ(vel.linear.x, 0.0);
+}
+
+TEST(DockingControllerTestSuite, canSetStateViaMessages) {
+    ros::NodeHandle n("~");
+    setGains();
+
+    DockingController controller;
+
+    // Make sure state is initially idle
+    ASSERT_EQ(controller.getState(), DockingController::DockState::IDLE);
+
+    ros::Publisher pub = n.advertise<std_msgs::Int32>("state", 1, false);
+    std_msgs::Int32 msg;
+    msg.data = DockingController::DockState::DOCKING;
+
+    pub.publish(msg);
+
+    ros::WallDuration(0.5).sleep();
+    ros::spinOnce();
+
+    // Make sure state is "docking"
+    ASSERT_EQ(controller.getState(), DockingController::DockState::DOCKING);
+
+    msg.data = DockingController::DockState::IDLE;
+
+    pub.publish(msg);
+
+    ros::WallDuration(0.5).sleep();
+    ros::spinOnce();
+
+    // Make sure state is "idle"
+    ASSERT_EQ(controller.getState(), DockingController::DockState::IDLE);
 }
 
 int main(int argc, char** argv) {
