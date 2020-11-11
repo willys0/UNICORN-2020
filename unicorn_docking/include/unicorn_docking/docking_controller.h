@@ -13,11 +13,15 @@
 class DockingController {
 
     public:
+        typedef enum DockState { IDLE, DOCKING } DockState;
         DockingController();
 
         geometry_msgs::Twist computeVelocity();
 
         double getDistanceToTag();
+
+        DockState getState() { return state_; }
+        void setState(DockState state) { state_ = state; }
 
     protected:
         void apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg);
@@ -34,6 +38,9 @@ class DockingController {
         geometry_msgs::Point desired_offset_;
 
         ros::Time last_time_;
+
+        DockState state_;
+
 };
 
 
