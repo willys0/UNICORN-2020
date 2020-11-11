@@ -19,6 +19,8 @@ class DockingController {
 
         double getDistanceToTag();
 
+        double getRotationToTag();
+
     protected:
         void apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg);
 
