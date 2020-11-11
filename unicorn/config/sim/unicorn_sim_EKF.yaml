@@ -11,7 +11,7 @@ frequency: 50
 
 
 # odom/wheel
-odom0: /wheel_encoder/odom
+odom0: /wheel_encoder/odom_transformed
 odom0_config: [true, true, false,
                false, false, true,
                true, true, false,
