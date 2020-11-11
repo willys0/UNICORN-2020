@@ -11,13 +11,20 @@
 
 	<arg name="sim" 				default="false" />
 
-	<include file="$(find unicorn)/launch/components/control.launch" />
 
-	<include file="$(find unicorn)/launch/components/sensors.launch">
-		<arg name="use_zed" value="$(arg use_camera)" />
+	<include file="$(find unicorn)/launch/components/control.launch" >
+		<arg name="sim" value="$(arg sim)" />
 	</include>
+
+	<group unless="$(arg sim)">
+		<include file="$(find unicorn)/launch/components/sensors.launch">
+			<arg name="use_zed" value="$(arg use_camera)" />
+		</include>
+	</group>
 	
-	<include file="$(find unicorn_navigation)/launch/move_base.launch" />
+	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
+		<arg name="sim" value="$(arg sim)" />
+	</include>
 
 	<group if="$(arg do_slam)">
 		<include file="$(find unicorn)/launch/components/slam.launch">
@@ -42,12 +49,12 @@
 		</node>
 	</group>
 	<group if="$(arg sim)">
-	<!-- 
+	<!-- -->
 		<node pkg="amcl" type="amcl" name="amcl" output="screen">
 			<rosparam if="$(arg sim)" command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
 			<remap from="scan" to="$(arg scan_topic)"/>
 		</node>
-		-->
+		
 	</group>
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
@@ -67,6 +74,7 @@
 
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
 		<param name="use_gui" value="false"/>
+		<param name="rate" value="50"/>
 	</node>
 
 	<node pkg="tf" type="static_transform_publisher" name="map_transform" args="0 0 0 0 0 0 /map /odom_chassis 100"/>

@@ -7,7 +7,7 @@
   <xacro:arg name="sim" default="false" />
 
     <!-- Swivel wheel -->
-  <xacro:include filename="$(find am_description)/urdf/swivel_wheel.urdf.xacro" />
+  <xacro:include filename="$(find unicorn_description)/urdf/swivel_wheel.urdf.xacro" />
 
     <!-- Wheel -->
   <xacro:include filename="$(find am_description)/urdf/wheel.urdf.xacro" />

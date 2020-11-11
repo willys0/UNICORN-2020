@@ -12,19 +12,21 @@
     
 
     <!-- Start the am_driver -->
-    <node name="am_driver_safe" pkg="am_driver_safe" type="am_driver_safe_node" output="screen">
-        <param name="serialPort" value="/dev/ttyUSB0" type="str" />
-        <param name="printCharge" value="false"/>
-        <param name="publishTf" value="0"/>
-        <param name="pitchAndRoll" value="false"/>
-        <param name="publishGPS" value="false"/>
-        <param name="serialLog" value="false"/>
-        <param name="hil" value="0"/>
-        <param name="jsonFile" value="$(find am_driver_safe)/config/automower_hrp.json" type="string" />
+    <group unless="$(arg sim)">
+        <node name="am_driver_safe" pkg="am_driver_safe" type="am_driver_safe_node" output="screen">
+            <param name="serialPort" value="/dev/ttyUSB0" type="str" />
+            <param name="printCharge" value="false"/>
+            <param name="publishTf" value="0"/>
+            <param name="pitchAndRoll" value="false"/>
+            <param name="publishGPS" value="false"/>
+            <param name="serialLog" value="false"/>
+            <param name="hil" value="0"/>
+            <param name="jsonFile" value="$(find am_driver_safe)/config/automower_hrp.json" type="string" />
 
-        <param name="odomFrame" value="odom_chassis" />
-        <param name="baseLinkFrame" value="lift_link" />
+            <param name="odomFrame" value="odom_chassis" />
+            <param name="baseLinkFrame" value="lift_link" />
 
-        <remap from="/odom" to="/wheel_encoder/odom" />
-    </node> 
+            <remap from="/odom" to="/wheel_encoder/odom" />
+        </node> 
+    </group>
 </launch>
