@@ -5,7 +5,11 @@ DockingController::DockingController() : nh_() {
     apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
 
     // TODO: Load initial gains from parameter server
-    pid_x_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh_);
+    pid_x_.initParam("~/pid/x");
+    pid_th_.initParam("~/pid/th");
+
+    //pid_x_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh_);
+    //pid_th_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh2_);
 
     last_time_ = ros::Time::now();
 
