@@ -9,6 +9,7 @@
 #include <control_toolbox/pid.h>
 
 #include <apriltag_ros/AprilTagDetectionArray.h>
+#include <std_msgs/Int32.h>
 
 class DockingController {
 
@@ -28,10 +29,13 @@ class DockingController {
     protected:
         void apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg);
 
+        void stateCb(const std_msgs::Int32::ConstPtr& msg);
+
     private:
         ros::NodeHandle nh_;
 
         ros::Subscriber apriltag_sub_;
+        ros::Subscriber state_sub_;
 
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;

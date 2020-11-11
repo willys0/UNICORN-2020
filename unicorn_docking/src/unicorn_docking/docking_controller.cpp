@@ -1,8 +1,9 @@
 #include <unicorn_docking/docking_controller.h>
 
-DockingController::DockingController() : nh_() {
+DockingController::DockingController() : nh_("~"), state_(DockingController::DockState::IDLE) {
 
     apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
+    state_sub_ = nh_.subscribe("state", 1, &DockingController::stateCb, this);
 
     // TODO: Load initial gains from parameter server
     pid_x_.initParam("~/pid/x");
@@ -40,6 +41,10 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             break;
         }
     }
+}
+
+void DockingController::stateCb(const std_msgs::Int32::ConstPtr& msg) {
+    setState((DockingController::DockState)msg->data);
 }
 
 geometry_msgs::Twist DockingController::computeVelocity() {
