@@ -8,6 +8,21 @@
 
 #include <geometry_msgs/Twist.h>
 
+void setGains() {
+    ros::NodeHandle n("~/pid");
+
+    n.setParam("x/p", 6.0);
+    n.setParam("x/i", 1.0);
+    n.setParam("x/d", 2.0);
+    n.setParam("x/i_max", 0.3);
+    n.setParam("x/i_min", -0.3);
+
+    n.setParam("th/p", 6.0);
+    n.setParam("th/i", 1.0);
+    n.setParam("th/d", 2.0);
+    n.setParam("th/i_max", 0.3);
+    n.setParam("th/i_min", -0.3);
+}
 
 apriltag_ros::AprilTagDetectionArray createForwardApriltagArray() {
     apriltag_ros::AprilTagDetection tag;
@@ -29,6 +44,8 @@ apriltag_ros::AprilTagDetectionArray createForwardApriltagArray() {
 
 TEST(DockingControllerTestSuite, ifNotDockingStateNoVelocity) {
     ros::NodeHandle n;
+    setGains();
+
     DockingController controller;
     controller.setState(DockingController::DockState::IDLE);
     apriltag_ros::AprilTagDetectionArray tagArray = createForwardApriltagArray();
@@ -49,6 +66,8 @@ TEST(DockingControllerTestSuite, ifNotDockingStateNoVelocity) {
 
 TEST(DockingControllerTestSuite, ifDockingStateSomeVelocity) {
     ros::NodeHandle n;
+    setGains();
+
     DockingController controller;
     controller.setState(DockingController::DockState::DOCKING);
     apriltag_ros::AprilTagDetectionArray tagArray = createForwardApriltagArray();
@@ -68,6 +87,7 @@ TEST(DockingControllerTestSuite, ifDockingStateSomeVelocity) {
 
 TEST(DockingControllerTestSuite, ifDockingStateAndNoTagNoVelocity) {
     ros::NodeHandle n;
+    setGains();
 
     DockingController controller;
 
