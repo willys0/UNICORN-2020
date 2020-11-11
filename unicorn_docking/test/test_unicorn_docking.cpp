@@ -135,6 +135,21 @@ TEST(DockingControllerTestSuite, canSetStateViaMessages) {
     ASSERT_EQ(controller.getState(), DockingController::DockState::IDLE);
 }
 
+TEST(DockingControllerTestSuite, setStateSetsState) {
+    ros::NodeHandle n("~");
+    setGains();
+
+    DockingController controller;
+    controller.setState(DockingController::DockState::IDLE);
+    ASSERT_EQ(controller.getState(), DockingController::DockState::IDLE);
+
+    controller.setState(DockingController::DockState::DOCKING);
+    ASSERT_EQ(controller.getState(), DockingController::DockState::DOCKING);
+
+    controller.setState(DockingController::DockState::IDLE);
+    ASSERT_EQ(controller.getState(), DockingController::DockState::IDLE);
+}
+
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     ros::init(argc, argv, "tester");
