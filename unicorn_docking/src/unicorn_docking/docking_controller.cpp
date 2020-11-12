@@ -23,7 +23,7 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
 double DockingController::getDistanceToTag() {
     double dist;
     dist = sqrt(  tag_pose_.position.x*tag_pose_.position.x
-                + tag_pose_.position.y*tag_pose_.position.y);
+                + tag_pose_.position.z*tag_pose_.position.z);
 
     // Pos relative to tag
     // WHAT HAPPENS IF TAG NOT VISIBLE?!?!?!?!????? use odom to calculate??
@@ -34,7 +34,8 @@ double DockingController::getDistanceToTag() {
 double DockingController::getRotationToTag() {
     // Det är PITCH jag vill ha!
     double rotation;
-    rotation = tag_pose_.orientation.z;
+    //rotation = tag_pose_.orientation.z;
+    rotation = tag_pose_.position.x;
     return rotation;
 }
 
@@ -60,7 +61,7 @@ geometry_msgs::Twist DockingController::computeVelocity() {
         msg.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistanceToTag(), current_time - last_time_);
 
         // TODO: make actual angle offset for pitch, most likely zero offset, so we dont use z offset.
-        msg.angular.z = -pid_th_.computeCommand(desired_offset_.z - getRotationToTag(), current_time - last_time_);
+        msg.angular.z = pid_th_.computeCommand(desired_offset_.z - getRotationToTag(), current_time - last_time_);
 
         last_time_ = current_time;
     }
