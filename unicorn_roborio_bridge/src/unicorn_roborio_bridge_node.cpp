@@ -13,7 +13,9 @@ ros::Publisher lift_state_pub;
 ros::Publisher rear_lidar_pub;
 // ros::Publisher  uwb_pos_pub;
 
-int                    lift_state;
+std_msgs::Int32        lift_state;
+float                  lift_freq;
+
 sensor_msgs::LaserScan lidar_scan;
 float                  lidar_freq;
 // geometry_msgs::Point uwb_pos;
@@ -22,7 +24,7 @@ int n_measures;
 
 void rio_cb(const unicorn_roborio_bridge::RioMasterMsgConstPtr& msg) {
 
-    lift_state = msg->lift_state;
+    lift_state.data = msg->lift_state;
 
     // uwb_pos    = msg->uwb_pos;
 
@@ -36,14 +38,23 @@ void rio_cb(const unicorn_roborio_bridge::RioMasterMsgConstPtr& msg) {
 }
 
 void lift_pub_timeout(const ros::TimerEvent& e) {
-    static std_msgs::Int32 msg;
-
-    msg.data = lift_state;
-    lift_state_pub.publish(msg);
+    lift_state_pub.publish(lift_state);
 }
 
 void lidar_pub_timeout(const ros::TimerEvent& e) {
     rear_lidar_pub.publish(lidar_scan);
+}
+
+std_msgs::Int32 init_lift_msg(void) {
+    std_msgs::Int32 msg;
+
+    ros::NodeHandle nh("lift");
+
+    msg.data = 0;
+
+    nh.param<float>("publish_frequency", lift_freq, 10.0);
+    
+    return msg;
 }
 
 sensor_msgs::LaserScan init_lidar_msg(void) {
@@ -89,12 +100,13 @@ int main(int argc, char** argv) {
     // TODO: Implement when we get UWBs
     // uwb_pos_pub =    nh.advertise("/uwb/position");
 
+    lift_state = init_lift_msg();
     lidar_scan = init_lidar_msg();
 
     rio_sub = nh.subscribe("/RIO_publisher", 10, &rio_cb);
 
     ros::Timer lidar_timer = nh.createTimer(ros::Duration(1.0 / lidar_freq), &lidar_pub_timeout);
-    ros::Timer lift_timer = nh.createTimer(ros::Duration(1.0 / 10.0), &lift_pub_timeout);
+    ros::Timer lift_timer = nh.createTimer(ros::Duration(1.0 / lift_freq), &lift_pub_timeout);
 
     ros::spin();
 }
