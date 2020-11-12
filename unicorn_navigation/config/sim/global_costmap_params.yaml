@@ -2,12 +2,12 @@
 
 global_costmap:
   #Set the global and robot frames for the costmap
-  global_frame: /map
+  global_frame: odom_chassis
   #robot_base_frame: base_link_gazebo
   robot_base_frame: chassis_link
 
   #Set the update and publish frequency of the costmap
-  update_frequency: 25.0
+  update_frequency: 10.0
   publish_frequency: 0.0
 
   #We'll use a map served by the map_server to initialize this costmap
@@ -17,5 +17,5 @@ global_costmap:
   footprint_padding: 0.02
 
   inflation_layer:
-    inflation_radius: 2.5
+    inflation_radius: 0.5
     cost_scaling_factor: 0.5
