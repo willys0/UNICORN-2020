@@ -17,6 +17,7 @@ int                    lift_state;
 sensor_msgs::LaserScan lidar_scan;
 // geometry_msgs::Point uwb_pos;
 
+int n_measures;
 
 void rio_cb(const unicorn_roborio_bridge::RioMasterMsgConstPtr& msg) {
 
@@ -24,10 +25,11 @@ void rio_cb(const unicorn_roborio_bridge::RioMasterMsgConstPtr& msg) {
 
     // uwb_pos    = msg->uwb_pos;
 
-    lidar_scan.ranges = msg->lidar_ranges;
-    // std::reverse(msg->lidar_ranges.begin(), msg->lidar_ranges.end());
-    std::reverse(std::begin(lidar_scan.ranges), std::end(lidar_scan.ranges));
-    // TODO: Update header
+    for(int i = 0, j = n_measures-1; i < n_measures; i++, j--) {
+        // TODO: Maybe we can do the calculation on the RIO instead
+        lidar_scan.ranges[i] = msg->lidar_ranges[j] / 1000.0;
+    }
+
     lidar_scan.header.stamp = ros::Time::now();
     lidar_scan.header.seq++;
 }
@@ -35,6 +37,7 @@ void rio_cb(const unicorn_roborio_bridge::RioMasterMsgConstPtr& msg) {
 void lift_pub_timeout(const ros::TimerEvent& e) {
     static std_msgs::Int32 msg;
 
+    msg.data = lift_state;
     lift_state_pub.publish(msg);
 }
 
@@ -60,9 +63,8 @@ sensor_msgs::LaserScan init_lidar_msg(void) {
     msg.time_increment = 0;
     msg.scan_time = 0;
 
-    int s;
-    nh.param<int>("n_measures", s, 11);
-    msg.ranges.resize(s);
+    nh.param<int>("n_measures", n_measures, 11);
+    msg.ranges.resize(n_measures);
 
     // for(int i = 0; i < 11; i++) {
     //     //msg.ranges.push_back(1.0);
@@ -77,7 +79,7 @@ int main(int argc, char** argv) {
 
     ros::NodeHandle nh;
 
-    rear_lidar_pub = nh.advertise<sensor_msgs::LaserScan>("/tmp/rearLidar/scan", 10);
+    rear_lidar_pub = nh.advertise<sensor_msgs::LaserScan>("/rearLidar/scan", 10);
     lift_state_pub = nh.advertise<std_msgs::Int32>("/lift/state", 1);
 
     // TODO: Implement when we get UWBs
@@ -85,7 +87,7 @@ int main(int argc, char** argv) {
 
     lidar_scan = init_lidar_msg();
 
-    rio_sub = nh.subscribe<unicorn_roborio_bridge::RioMasterMsg>("/RIO_publisher", 10, &rio_cb);
+    rio_sub = nh.subscribe("/RIO_publisher", 10, &rio_cb);
 
     ros::Timer lidar_timer = nh.createTimer(ros::Duration(1.0 / 100.0), &lidar_pub_timeout);
     ros::Timer lift_timer = nh.createTimer(ros::Duration(1.0 / 10.0), &lift_pub_timeout);

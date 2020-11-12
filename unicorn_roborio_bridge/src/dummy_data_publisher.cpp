@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
 
     ros::Publisher pub = nh.advertise<unicorn_roborio_bridge::RioMasterMsg>("/RIO_publisher", 10);
 
-    msg.lidar_ranges.resize(11);
+    //msg.lidar_ranges.resize(11);
     while(ros::ok()) {
 
         for(int i = 0; i < 11; i++) {

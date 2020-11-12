@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
-  <node pkg="unicorn_roborio_bridge" type="unicorn_roborio_bridge_node" name="unicorn_roborio_bridge_node" />
+  <arg name="roborio_master_message_topic"  default="/RIO_publisher_master_Message" />
+  <arg name="rear_lidar_scan_topic"         default="/rearLidar/scan" />
+  <arg name="lift_state_topic"              default="/lift/state" />
 
-  <test test-name="unicorn_roborio_bridge-test" pkg="unicorn_roborio_bridge" type="unicorn_roborio_bridge-test" />
+  <node pkg="unicorn_roborio_bridge" type="unicorn_roborio_bridge_node" name="unicorn_roborio_bridge_node">
+    <remap from="/RIO_publisher"  to="$(arg roborio_master_message_topic)" />
+    <remap from="/rearLidar/scan" to="$(arg rear_lidar_scan_topic)" />
+    <remap from="/lift/state"     to="$(arg lift_state_topic)" />
+  </node>
 
 </launch>
