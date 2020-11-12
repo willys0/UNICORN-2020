@@ -15,6 +15,7 @@ ros::Publisher rear_lidar_pub;
 
 int                    lift_state;
 sensor_msgs::LaserScan lidar_scan;
+float                  lidar_freq;
 // geometry_msgs::Point uwb_pos;
 
 int n_measures;
@@ -60,6 +61,9 @@ sensor_msgs::LaserScan init_lidar_msg(void) {
     nh.param<float>("range_min", msg.range_min, 0.1);
     nh.param<float>("range_max", msg.range_max, 8.0);
 
+
+    nh.param<float>("publish_frequency", lidar_freq, 30.0);
+
     msg.time_increment = 0;
     msg.scan_time = 0;
 
@@ -89,7 +93,7 @@ int main(int argc, char** argv) {
 
     rio_sub = nh.subscribe("/RIO_publisher", 10, &rio_cb);
 
-    ros::Timer lidar_timer = nh.createTimer(ros::Duration(1.0 / 100.0), &lidar_pub_timeout);
+    ros::Timer lidar_timer = nh.createTimer(ros::Duration(1.0 / lidar_freq), &lidar_pub_timeout);
     ros::Timer lift_timer = nh.createTimer(ros::Duration(1.0 / 10.0), &lift_pub_timeout);
 
     ros::spin();

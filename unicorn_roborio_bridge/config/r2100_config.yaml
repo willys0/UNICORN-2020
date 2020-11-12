@@ -9,3 +9,5 @@ r2100:
     range_max: 8.0
 
     n_measures: 11
+
+    publish_frequency: 30
