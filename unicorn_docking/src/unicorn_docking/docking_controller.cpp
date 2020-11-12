@@ -9,11 +9,15 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
     pid_x_.initParam("~/pid/x");
     pid_th_.initParam("~/pid/th");
 
+    nh_.param("offset/x",desired_offset_.x, 0.0);
+    nh_.param("offset/y",desired_offset_.y, 0.0);
+    nh_.param("offset/th",desired_offset_.z, 0.0);
     //pid_x_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh_);
     //pid_th_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh2_);
 
     last_time_ = ros::Time::now();
 
+    ROS_INFO("Setting dock offset to x: %.2f, y: %.2f, th: %.2f", desired_offset_.x, desired_offset_.y, desired_offset_.z);
 }
 
 double DockingController::getDistanceToTag() {
@@ -56,7 +60,7 @@ geometry_msgs::Twist DockingController::computeVelocity() {
         msg.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistanceToTag(), current_time - last_time_);
 
         // TODO: make actual angle offset for pitch, most likely zero offset, so we dont use z offset.
-        msg.angular.z = pid_th_.computeCommand(desired_offset_.z - getRotationToTag(), current_time - last_time_);
+        msg.angular.z = -pid_th_.computeCommand(desired_offset_.z - getRotationToTag(), current_time - last_time_);
 
         last_time_ = current_time;
     }
