@@ -48,12 +48,15 @@ void lidar_pub_timeout(const ros::TimerEvent& e) {
 std_msgs::Int32 init_lift_msg(void) {
     std_msgs::Int32 msg;
 
-    ros::NodeHandle nh("lift");
+    ros::NodeHandle nh("~/lift");
 
     msg.data = 0;
 
     nh.param<float>("publish_frequency", lift_freq, 10.0);
     
+    ROS_INFO("[Lift settings] publish_frequency: %.2f", 
+        lift_freq);
+
     return msg;
 }
 
@@ -61,7 +64,7 @@ sensor_msgs::LaserScan init_lidar_msg(void) {
 
     sensor_msgs::LaserScan msg;
 
-    ros::NodeHandle nh("r2100");
+    ros::NodeHandle nh("~/r2100");
 
     msg.header.frame_id = "rear_laser";
 
@@ -85,6 +88,8 @@ sensor_msgs::LaserScan init_lidar_msg(void) {
     //     //msg.ranges.push_back(1.0);
     // }
 
+    ROS_INFO("[R2100 settings] angle_min: %.2f, angle_max: %.2f, angle_increment: %.2f, range_min: %.2f, range_max: %.2f, publish_frequency: %.2f, n_measures: %d", 
+        msg.angle_min, msg.angle_max, msg.angle_increment, msg.range_min, msg.range_max, lidar_freq, n_measures);
     return msg;
 }
 
