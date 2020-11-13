@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
             //float r = (float)(i + 1) * 0.2;
             float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX) + 0.1;
 
-            msg.lidar_ranges[i] = r;
+            msg.lidar_ranges[i] = r * 1000;
         }
 
         pub.publish(msg);
