@@ -9,17 +9,21 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
     pid_x_.initParam("~/pid/x");
     pid_th_.initParam("~/pid/th");
 
+    nh_.param("offset/x",desired_offset_.x, 0.0);
+    nh_.param("offset/y",desired_offset_.y, 0.0);
+    nh_.param("offset/th",desired_offset_.z, 0.0);
     //pid_x_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh_);
     //pid_th_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh2_);
 
     last_time_ = ros::Time::now();
 
+    ROS_INFO("Setting dock offset to x: %.2f, y: %.2f, th: %.2f", desired_offset_.x, desired_offset_.y, desired_offset_.z);
 }
 
 double DockingController::getDistanceToTag() {
     double dist;
     dist = sqrt(  tag_pose_.position.x*tag_pose_.position.x
-                + tag_pose_.position.y*tag_pose_.position.y);
+                + tag_pose_.position.z*tag_pose_.position.z);
 
     // Pos relative to tag
     // WHAT HAPPENS IF TAG NOT VISIBLE?!?!?!?!????? use odom to calculate??

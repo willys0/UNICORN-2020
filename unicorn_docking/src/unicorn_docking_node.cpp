@@ -19,8 +19,10 @@ int main(int argc, char **argv) {
     vel_pub = n.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 
     while (ros::ok()) {
-        move_msg = docking_controller.computeVelocity();
-        vel_pub.publish(move_msg);
+        if(docking_controller.getState() == DockingController::DockState::DOCKING) {
+            move_msg = docking_controller.computeVelocity();
+            vel_pub.publish(move_msg);
+        }
         
         ros::spinOnce();
         ros::Duration(1.0/100.0).sleep();
