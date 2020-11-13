@@ -2,7 +2,7 @@
 <launch>
     <arg name="do_slam" 	        default="true" />
     <arg name="use_object_tracking" default="false" />
-    <arg name="map_file"   			default="$(find unicorn_slam)/maps/work_room.yaml"/>
+    <arg name="map_file"   			default="$(find unicorn_slam)/maps/gmap_map.yaml"/>
 
     <include file="$(find unicorn)/launch/main_2020.launch">
         <arg name="sim" value="true" />

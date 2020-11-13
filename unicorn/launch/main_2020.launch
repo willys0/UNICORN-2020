@@ -3,7 +3,7 @@
 
 	<!-- roslaunch arguments -->
 	<arg name="scan_topic" 			default="/frontLidar/scan"/>
-	<arg name="map_file"   			default="$(find unicorn_slam)/maps/work_room.yaml"/>
+	<arg name="map_file"   			default="$(find unicorn_slam)/maps/c2.yaml"/>
 
 	<arg name="do_slam" 	        default="true" />
 	<arg name="use_camera"			default="true" />
@@ -11,13 +11,20 @@
 
 	<arg name="sim" 				default="false" />
 
-	<include file="$(find unicorn)/launch/components/control.launch" />
 
-	<include file="$(find unicorn)/launch/components/sensors.launch">
-		<arg name="use_zed" value="$(arg use_camera)" />
+	<include file="$(find unicorn)/launch/components/control.launch" >
+		<arg name="sim" value="$(arg sim)" />
 	</include>
+
+	<group unless="$(arg sim)">
+		<include file="$(find unicorn)/launch/components/sensors.launch">
+			<arg name="use_zed" value="$(arg use_camera)" />
+		</include>
+	</group>
 	
-	<include file="$(find unicorn_navigation)/launch/move_base.launch" />
+	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
+		<arg name="sim" value="$(arg sim)" />
+	</include>
 
 	<group if="$(arg do_slam)">
 		<include file="$(find unicorn)/launch/components/slam.launch">
@@ -32,19 +39,22 @@
 		<!-- Run the map server -->
 		<node pkg="map_server" type="map_server" args="$(arg map_file)" respawn="true" name="map" />
 
-		<!--- Run AMCL -->
+	</group>
 
-		<group unless="$(arg sim)">
-			<node pkg="amcl" type="amcl" name="amcl" output="screen">
-				<rosparam command="load" file="$(find unicorn_slam)/config/amcl.yaml"/>
-			</node>
-		</group>
-		<group if="$(arg sim)">
-			<node pkg="amcl" type="amcl" name="amcl" output="screen">
-				<rosparam if="$(arg sim)" command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
-				<remap from="scan" to="$(arg scan_topic)"/>
-			</node>
-		</group>
+
+	<!--- Run AMCL -->
+	<group unless="$(arg sim)">
+		<node pkg="amcl" type="amcl" name="amcl" output="screen">
+			<rosparam command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
+		</node>
+	</group>
+	<group if="$(arg sim)">
+	<!-- -->
+		<node pkg="amcl" type="amcl" name="amcl" output="screen">
+			<rosparam if="$(arg sim)" command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
+			<remap from="scan" to="$(arg scan_topic)"/>
+		</node>
+		
 	</group>
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
@@ -64,12 +74,14 @@
 
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
 		<param name="use_gui" value="false"/>
+		<param name="rate" value="50"/>
 	</node>
 
-	<include if="$(arg sim)" file="$(find unicorn)/launch/unicorn_GPS_to_UWB.launch"/>
+	<node pkg="tf" type="static_transform_publisher" name="map_transform" args="0 0 0 0 0 0 /map /odom_chassis 100"/>
+
 	<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
-		<rosparam unless="$(arg sim)" command="load" file="$(find unicorn)/config/ekf_odom_simple_am_driver.yaml" />
-		<rosparam if="$(arg sim)" command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
+		<rosparam unless="$(arg sim)" command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
+		<rosparam if="$(arg sim)" command="load" file="$(find unicorn)/config/sim/unicorn_sim_EKF.yaml" />
 	</node>
 
 </launch>
