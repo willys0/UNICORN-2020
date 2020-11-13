@@ -37,6 +37,10 @@ double DockingController::getRotationToTag() {
     tf::quaternionMsgToTF(tag_pose_.orientation, quat_tf);
     tf::Matrix3x3(quat_tf).getRPY(roll, pitch, yaw);
 
+    // double yaw;
+
+    // yaw = asin(tag_pose_.position.z/tag_pose_.position.x);
+
     return yaw;
 }
 
@@ -44,6 +48,12 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
     for(auto& tag : msg->detections) {
         if(tag.id[0] == 0) {
             tag_pose_ = tag.pose.pose.pose;
+
+            double roll, pitch, yaw;
+            tf2::Quaternion quat_tf;
+            tf2::fromMsg(tag_pose_.orientation, quat_tf);
+            tf2::Matrix3x3(quat_tf).getRPY(roll, pitch, yaw);
+            ROS_INFO("roll: %.2f, pitch: %.2f, yaw: %.2f", roll, pitch, yaw);
             break;
         }
     }
@@ -65,6 +75,11 @@ geometry_msgs::Twist DockingController::computeVelocity() {
         msg.angular.z = pid_th_.computeCommand(desired_offset_.z - getRotationToTag(), current_time - last_time_);
 
         last_time_ = current_time;
+    }
+    else {
+        // Send a command to stop moving
+        msg.linear.x = 0.0;
+        msg.angular.z = 0.0;
     }
     return msg;
 }

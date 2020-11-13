@@ -13,10 +13,11 @@
 
 #include <tf/transform_datatypes.h>
 #include <geometry_msgs/Quaternion.h>
+#include <cmath>
 
-//#include <tf2/LinearMath/Matrix3x3.h>
-//#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-//#include <tf2/transform_datatypes.h>
+#include <tf2/LinearMath/Matrix3x3.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2/transform_datatypes.h>
 
 
 class DockingController {
