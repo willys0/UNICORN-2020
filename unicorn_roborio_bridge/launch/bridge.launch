@@ -7,9 +7,11 @@
 
   <remap from="/RIO_publisher"  to="$(arg roborio_master_message_topic)" />
 
-  <node pkg="unicorn_roborio_bridge" type="unicorn_roborio_bridge_node" name="unicorn_roborio_bridge_node">
+  <node pkg="unicorn_roborio_bridge" type="unicorn_roborio_bridge_node" name="unicorn_roborio_bridge_node" output="screen">
     <remap from="/rearLidar/scan" to="$(arg rear_lidar_scan_topic)" />
     <remap from="/lift/state"     to="$(arg lift_state_topic)" />
+    <rosparam command="load" file="$(find unicorn_roborio_bridge)/config/r2100_config.yaml"/>
+    <rosparam command="load" file="$(find unicorn_roborio_bridge)/config/lift_config.yaml"/>
   </node>
 
   <node if="$(arg publish_dummy_data)"
