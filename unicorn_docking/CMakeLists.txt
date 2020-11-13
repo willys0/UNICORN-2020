@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   geometry_msgs
   apriltag_ros
+  tf2
 )
 
 ## System dependencies are found with CMake's conventions

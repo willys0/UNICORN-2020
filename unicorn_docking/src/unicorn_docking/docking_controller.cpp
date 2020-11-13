@@ -28,10 +28,12 @@ double DockingController::getDistanceToTag() {
 }
 
 double DockingController::getRotationToTag() {
-    // Det är PITCH jag vill ha!
-    double rotation;
-    rotation = tag_pose_.orientation.z;
-    return rotation;
+    double roll, pitch, yaw;
+    tf::Quaternion quat_tf;
+    tf::quaternionMsgToTF(tag_pose_.orientation, quat_tf);
+    tf::Matrix3x3(quat_tf).getRPY(roll, pitch, yaw);
+
+    return yaw;
 }
 
 void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg) {
