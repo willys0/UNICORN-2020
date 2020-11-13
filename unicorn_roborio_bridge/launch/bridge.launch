@@ -3,11 +3,16 @@
   <arg name="roborio_master_message_topic"  default="/RIO_publisher_master_Message" />
   <arg name="rear_lidar_scan_topic"         default="/rearLidar/scan" />
   <arg name="lift_state_topic"              default="/lift/state" />
+  <arg name="publish_dummy_data"            default="false" />
+
+  <remap from="/RIO_publisher"  to="$(arg roborio_master_message_topic)" />
 
   <node pkg="unicorn_roborio_bridge" type="unicorn_roborio_bridge_node" name="unicorn_roborio_bridge_node">
-    <remap from="/RIO_publisher"  to="$(arg roborio_master_message_topic)" />
     <remap from="/rearLidar/scan" to="$(arg rear_lidar_scan_topic)" />
     <remap from="/lift/state"     to="$(arg lift_state_topic)" />
   </node>
+
+  <node if="$(arg publish_dummy_data)"
+        pkg="unicorn_roborio_bridge" type="unicorn_roborio_bridge_dummy_data_node" name="unicorn_roborio_bridge_dummy_data_node" />
 
 </launch>
