@@ -49,12 +49,12 @@
 		</node>
 	</group>
 	<group if="$(arg sim)">
-	<!-- 
+	<!-- -->
 		<node pkg="amcl" type="amcl" name="amcl" output="screen">
 			<rosparam if="$(arg sim)" command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
 			<remap from="scan" to="$(arg scan_topic)"/>
 		</node>
-		-->
+		
 	</group>
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
