@@ -8,8 +8,6 @@ two_d_mode: true
 frequency: 1000
 
 
-
-
 # odom/wheel
 odom0: wheel_encoder/odom
 odom0_config: [true, true, false,
@@ -32,15 +30,15 @@ pose0_differential: false
 pose0_queue_size: 100
 
 # Odometry/zed
-imu0: zed/imu
-imu0_config: [false, false, false,
-               false, false, true,
-               false,  false, false,
-               false, false, true,
-               true, false, false]
-imu0_differential: true
-#imu0_relative: false
-imu0_queue_size: 100
+# imu0: zed/imu
+# imu0_config: [false, false, false,
+#                false, false, true,
+#                false,  false, false,
+#                false, false, true,
+#                true, false, false]
+# imu0_differential: true
+# #imu0_relative: false
+# imu0_queue_size: 100
 #imu0_pose_rejection_threshold: 2
 #imu0_twist_rejection_threshold: 0.2
 #imu0_nodelay: true
