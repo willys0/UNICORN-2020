@@ -9,7 +9,7 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
     pid_x_.initParam("~/pid/x");
     pid_th_.initParam("~/pid/th");
 
-    nh_.param("offset/x",desired_offset_.x, 0.0);
+    nh_.param("offset/x",desired_offset_.x, 0.2);
     nh_.param("offset/y",desired_offset_.y, 0.0);
     nh_.param("offset/th",desired_offset_.z, 0.0);
     //pid_x_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh_);
