@@ -21,35 +21,33 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
 }
 
 double DockingController::getDistanceToTag() {
-    double dist;
-    dist = sqrt(  tag_pose_.position.x*tag_pose_.position.x
-                + tag_pose_.position.z*tag_pose_.position.z);
-
-    // Pos relative to tag
-    // WHAT HAPPENS IF TAG NOT VISIBLE?!?!?!?!????? use odom to calculate??
-    // WHAT IF OBJECT IN WAY???!?!?!?!????!??????
-    return dist;
+    // Returns the distance to the tag in the z direction. i.e the distance straight forward in the camera frame.
+    return tag_pose_.position.z;
 }
 
 double DockingController::getRotationToTag() {
-    double roll, pitch, yaw;
+    // Get the pitch of the tag
+    double tag_roll, tag_pitch, tag_yaw;
     tf::Quaternion quat_tf;
     tf::quaternionMsgToTF(tag_pose_.orientation, quat_tf);
-    tf::Matrix3x3(quat_tf).getRPY(roll, pitch, yaw);
+    tf::Matrix3x3(quat_tf).getRPY(tag_roll, tag_pitch, tag_yaw);
 
-    // double pitch;
+    // Get the rotation to the tag
+    double position_rot;
+    position_rot = asin(tag_pose_.position.z/tag_pose_.position.x);
 
-    // pitch = asin(tag_pose_.position.z/tag_pose_.position.x);
-
-    return pitch;
+    return position_rot;
 }
 
 void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg) {
+    double roll, pitch, yaw;
+
     for(auto& tag : msg->detections) {
         if(tag.id[0] == 0) {
+            // Save tag pose to tag_pose_
             tag_pose_ = tag.pose.pose.pose;
 
-            double roll, pitch, yaw;
+            // Print tag position in z, x and pitch        
             tf2::Quaternion quat_tf;
             tf2::fromMsg(tag_pose_.orientation, quat_tf);
             tf2::Matrix3x3(quat_tf).getRPY(roll, pitch, yaw);
@@ -65,21 +63,31 @@ void DockingController::stateCb(const std_msgs::Int32::ConstPtr& msg) {
 
 geometry_msgs::Twist DockingController::computeVelocity() {
     geometry_msgs::Twist msg;
+    double err_x, err_th;
 
     if(state_ == DOCKING) {
         ros::Time current_time = ros::Time::now();
 
-        msg.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistanceToTag(), current_time - last_time_);
+        // Calculate x ans theta errors
+        err_x = desired_offset_.x - getDistanceToTag();
+        err_th = desired_offset_.z - getRotationToTag();
 
-        // TODO: make actual angle offset for pitch, most likely zero offset, so we dont use z offset.
-        msg.angular.z = -pid_th_.computeCommand(desired_offset_.z - getRotationToTag(), current_time - last_time_);
+        // Check if abs errors are outside margins
+        if (abs(err_x) > 0.01 || abs(err_th) > 0.02) {
+            
+            msg.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistanceToTag(), current_time - last_time_);
+            // TODO: make actual angle offset for pitch, most likely zero offset, so we dont use z offset.
+            msg.angular.z = -pid_th_.computeCommand(desired_offset_.z - getRotationToTag(), current_time - last_time_);
 
-        last_time_ = current_time;
-    }
-    else {
-        // Send a command to stop moving
-        msg.linear.x = 0.0;
-        msg.angular.z = 0.0;
+            last_time_ = current_time;
+        }
+        else {
+            // Both errors are within margins, set velocity and rotation to zero 
+            ROS_INFO("Docking complete, errors within margin: err_x: %.2f, err_th: %.2f", err_x, err_th);
+            msg.linear.x = 0.0;
+            msg.angular.z = 0.0;
+        }
+
     }
     return msg;
 }
