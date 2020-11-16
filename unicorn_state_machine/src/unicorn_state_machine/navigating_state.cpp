@@ -2,6 +2,7 @@
 
 #include <unicorn_state_machine/idle_state.h>
 #include <unicorn_state_machine/dock_state.h>
+#include <unicorn_state_machine/error_state.h>
 
 #include <geometry_msgs/PoseStamped.h>
 
@@ -42,7 +43,12 @@ State* NavigatingState::run() {
             return new DockState(lift_cmd_, nh_);
         }
     }
-    // TODO: Handle move error
+    else {
+        // We failed to navigate to the position for some reason.
+
+        //  TODO: Handle move error
+        return new ErrorState("Failed to navigate to goal position", nh_);
+    }
 
     // TODO: What happens if we navigate to a pickup goal when we have failed to place
     // a bin back (i.e. the robot is currently holding a bin)?

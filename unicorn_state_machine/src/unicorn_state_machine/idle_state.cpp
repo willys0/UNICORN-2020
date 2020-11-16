@@ -15,6 +15,7 @@ State* IdleState::run() {
     ROS_INFO("[IdleState]");
 
     geometry_msgs::Pose goal;
+    goal.position.x = 0.0;
     goal.orientation.w = 1;
 
     return new NavigatingState(goal, 1, nh_);

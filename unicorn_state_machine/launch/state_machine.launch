@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <node pkg="unicorn_state_machine" type="unicorn_state_machine_node" name="unicorn_state_machine_node" output="screen">
+        <rosparam command="load" file="$(find unicorn_state_machine)/config/goals.yaml" />
+    </node>
+</launch>

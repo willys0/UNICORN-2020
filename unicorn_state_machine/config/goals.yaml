@@ -1,10 +1,13 @@
 goals:
     - x: 1.0
       y: 1.0
+      th: 0.0
       lift: 0
     - x: 2.0
       y: 2.0
+      th: 3.14
       lift: 1
     - x: 3.0
       y: 3.0
+      th: 1.44
       lift: 2
