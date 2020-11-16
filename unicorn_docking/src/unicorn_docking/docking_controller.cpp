@@ -53,7 +53,7 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             tf2::Quaternion quat_tf;
             tf2::fromMsg(tag_pose_.orientation, quat_tf);
             tf2::Matrix3x3(quat_tf).getRPY(roll, pitch, yaw);
-            ROS_INFO("roll: %.2f, pitch: %.2f, yaw: %.2f", roll, pitch, yaw);
+            ROS_INFO("z: %.2f, x: %.2f, pitch: %.2f", tag_pose_.position.z, tag_pose_.position.x, pitch);
             break;
         }
     }
