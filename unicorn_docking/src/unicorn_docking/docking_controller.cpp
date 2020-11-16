@@ -34,7 +34,15 @@ double DockingController::getRotationToTag() {
 
     // Get the rotation to the tag
     double position_rot;
-    position_rot = asin(tag_pose_.position.z/tag_pose_.position.x);
+    if (tag_pose_.position.x != 0.0) {
+        position_rot = asin(tag_pose_.position.z/tag_pose_.position.x);
+    }
+    else
+    {
+        position_rot = 0.0;
+    }
+    
+
 
     return position_rot;
 }
