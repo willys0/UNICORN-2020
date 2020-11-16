@@ -37,11 +37,11 @@ double DockingController::getRotationToTag() {
     tf::quaternionMsgToTF(tag_pose_.orientation, quat_tf);
     tf::Matrix3x3(quat_tf).getRPY(roll, pitch, yaw);
 
-    // double yaw;
+    // double pitch;
 
-    // yaw = asin(tag_pose_.position.z/tag_pose_.position.x);
+    // pitch = asin(tag_pose_.position.z/tag_pose_.position.x);
 
-    return yaw;
+    return pitch;
 }
 
 void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg) {
@@ -72,7 +72,7 @@ geometry_msgs::Twist DockingController::computeVelocity() {
         msg.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistanceToTag(), current_time - last_time_);
 
         // TODO: make actual angle offset for pitch, most likely zero offset, so we dont use z offset.
-        msg.angular.z = pid_th_.computeCommand(desired_offset_.z - getRotationToTag(), current_time - last_time_);
+        msg.angular.z = -pid_th_.computeCommand(desired_offset_.z - getRotationToTag(), current_time - last_time_);
 
         last_time_ = current_time;
     }
