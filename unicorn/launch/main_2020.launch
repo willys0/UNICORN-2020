@@ -46,6 +46,7 @@
 	<group unless="$(arg sim)">
 		<node pkg="amcl" type="amcl" name="amcl" output="screen">
 			<rosparam command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
+			<remap from="scan" to="$(arg scan_topic)"/>
 		</node>
 	</group>
 	<group if="$(arg sim)">
