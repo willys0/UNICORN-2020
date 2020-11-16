@@ -69,7 +69,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="10" />
+        value="15" />
       <inertia
         ixx="1"
         ixy="0"
@@ -161,7 +161,7 @@
       link="lift_link" />
     <axis
       xyz="0 0 0" />
-    <joint_properties damping="0.5" friction="0.5" />
+    <joint_properties damping="1" friction="0.5" />
   </joint>
 
 <!--
@@ -229,7 +229,7 @@
     <origin xyz="$(arg laser_xyz)" rpy="$(arg laser_rpy)" />
     <parent link="chassis_link" />
     <child link="base_laser" />
-    <joint_properties damping="0.5" friction="0.5" />
+    <joint_properties damping="1" friction="0.5" />
   </joint>
   
 
@@ -240,7 +240,7 @@
     <origin xyz="$(arg rear_laser_xyz)" rpy="$(arg rear_laser_rpy)" />
     <parent link="chassis_link" />
     <child link="rear_laser" />
-    <joint_properties damping="0.5" friction="0.5" />
+    <joint_properties damping="1" friction="0.5" />
   </joint>
 
   <!-- Zed Camera -->
@@ -250,14 +250,14 @@
       <origin xyz="$(arg zed_xyz)" rpy="$(arg zed_rpy)"/>
       <parent link="chassis_link"/>  
       <child link="zed_camera"/>
-      <joint_properties damping="0.5" friction="0.5" />
+      <joint_properties damping="1" friction="0.5" />
     </joint>
 
     <joint name="zed_camera_depth_joint" type="fixed">
       <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
       <parent link="zed_camera"/>
       <child link="zed_depth_joint"/>
-      <joint_properties damping="0.5" friction="0.5" />
+      <joint_properties damping="1" friction="0.5" />
     </joint>
 
 
@@ -270,14 +270,14 @@
       <origin xyz="$(arg real_rgb_xyz)" rpy="$(arg real_rpy)"/>
       <parent link="chassis_link"/>  
       <child link="realsense_camera"/>
-      <joint_properties damping="0.5" friction="0.5" />
+      <joint_properties damping="1" friction="0.5" />
     </joint>
 
     <joint name="realsense_depth_joint" type="fixed">
       <origin xyz="$(arg real_depth_xyz)" rpy="${-pi/2} 0 ${-pi/2}"/>
       <parent link="realsense_camera"/>
       <child link="realsense_depth_joint"/>
-      <joint_properties damping="0.5" friction="0.5" />
+      <joint_properties damping="1" friction="0.5" />
     </joint>
 
 
@@ -305,7 +305,7 @@
   <gazebo>
     <plugin name="automower_gazebo_controller" filename="libam_gazebo_controller_2wd.so">
       <alwaysOn>true</alwaysOn>
-      <updateRate>100.0</updateRate>
+      <updateRate>50.0</updateRate>
       <leftJoint>back_right_wheel_joint</leftJoint>
       <rightJoint>back_left_wheel_joint</rightJoint>
       <wheelSeparation>0.4645</wheelSeparation>

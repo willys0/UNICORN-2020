@@ -114,11 +114,11 @@
     </link>
 
     <gazebo reference="${fb}_${lr}_swivel_wheel">
-      <mu1 value="0.8" />
-      <mu2 value="0.8" />
-      <kp value="100000.0" />
-      <kd value="1000.0" />
-      <dampingFactor value="0.5" />
+      <mu1 value="100" />
+      <mu2 value="100" />
+      <kp value="1000000.0" />
+      <kd value="10000.0" />
+      <dampingFactor value="0.9" />
       <fdir1 value="1 0 0" />
       <material>Gazebo/Black</material>
       <turnGravityOff>false</turnGravityOff>
@@ -130,7 +130,7 @@
       <origin rpy="0 0 0" xyz="0 0 -0.04" />
       <axis xyz="0 0 1" rpy="0 0 0" />
       <limit effort="100" velocity="100" />
-      <joint_properties damping="0.1" friction="0.1" />
+      <joint_properties damping="1" friction="1" />
     </joint>
 
 

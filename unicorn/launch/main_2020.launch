@@ -69,12 +69,12 @@
 	<param unless="$(arg sim)" name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target.urdf.xacro'" />
 
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
-		<param name="publish_frequency" value="50"/>
+		<param name="publish_frequency" value="100"/>
 	</node>
 
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
 		<param name="use_gui" value="false"/>
-		<param name="rate" value="50"/>
+		<param name="rate" value="100"/>
 	</node>
 
 	<node pkg="tf" type="static_transform_publisher" name="map_transform" args="0 0 0 0 0 0 /map /odom_chassis 100"/>
