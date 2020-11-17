@@ -21,11 +21,7 @@
 
 	<group unless="$(arg sim)">
 		<include file="$(find unicorn)/launch/components/sensors.launch">
-
 			<arg name="use_zed" value="$(arg use_zed)" />
-
-			<arg name="use_zed" value="$(arg use_camera)" />
-
 			<arg name="use_realsense" value="$(arg use_realsense)" />
 		</include>
 	</group>
