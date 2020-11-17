@@ -39,16 +39,15 @@ class DockingController {
         DockState getState() { return state_; }
         void setState(DockState state) { state_ = state; }
 
+        void setDesiredOffset(geometry_msgs::Point offset) { desired_offset_ = offset; }
+
     protected:
         void apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg);
-
-        void stateCb(const std_msgs::Int32::ConstPtr& msg);
 
     private:
         ros::NodeHandle nh_;
 
         ros::Subscriber apriltag_sub_;
-        ros::Subscriber state_sub_;
 
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;
