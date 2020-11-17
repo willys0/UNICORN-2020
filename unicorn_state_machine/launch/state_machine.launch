@@ -2,5 +2,7 @@
 <launch>
     <node pkg="unicorn_state_machine" type="unicorn_state_machine_node" name="unicorn_state_machine_node" output="screen">
         <rosparam command="load" file="$(find unicorn_state_machine)/config/goals.yaml" />
+
+        <remap from="/dock" to="/unicorn_docking_node/dock_action" />
     </node>
 </launch>
