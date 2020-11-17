@@ -26,31 +26,36 @@ class DockingController {
         typedef enum DockState { IDLE, DOCKING } DockState;
         DockingController();
 
-        geometry_msgs::Twist computeVelocity();
+        bool computeVelocity(geometry_msgs::Twist& msg_out);
 
         double getDistanceToTag();
+
+        double getPitchComponent();
+
+        double getLateralComponent();
 
         double getRotationToTag();
         
         DockState getState() { return state_; }
         void setState(DockState state) { state_ = state; }
 
+        void setDesiredOffset(geometry_msgs::Point offset) { desired_offset_ = offset; }
+
     protected:
         void apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg);
-
-        void stateCb(const std_msgs::Int32::ConstPtr& msg);
 
     private:
         ros::NodeHandle nh_;
 
         ros::Subscriber apriltag_sub_;
-        ros::Subscriber state_sub_;
 
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;
 
         geometry_msgs::Pose  tag_pose_;
         geometry_msgs::Point desired_offset_;
+
+        double tagSide;
 
         ros::Time last_time_;
 
