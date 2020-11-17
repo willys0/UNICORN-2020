@@ -6,7 +6,10 @@
 	<arg name="map_file"   			default="$(find unicorn_slam)/maps/c2.yaml"/>
 
 	<arg name="do_slam" 	        default="true" />
+
 	<arg name="use_camera"			default="true" />
+	<arg name="use_realsense"			default="true" />
+
 	<arg name="use_object_tracking" default="false" />
 
 	<arg name="sim" 				default="false" />
@@ -19,9 +22,10 @@
 	<group unless="$(arg sim)">
 		<include file="$(find unicorn)/launch/components/sensors.launch">
 			<arg name="use_zed" value="$(arg use_camera)" />
+			<arg name="use_realsense" value="$(arg use_realsense)" />
 		</include>
 	</group>
-	
+
 	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
 		<arg name="sim" value="$(arg sim)" />
 	</include>
@@ -54,7 +58,7 @@
 			<rosparam if="$(arg sim)" command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
 			<remap from="scan" to="$(arg scan_topic)"/>
 		</node>
-		
+
 	</group>
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
