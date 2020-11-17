@@ -3,7 +3,6 @@
 DockingController::DockingController() : nh_("~"), state_(DockingController::DockState::IDLE) {
 
     apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
-    state_sub_ = nh_.subscribe("state", 1, &DockingController::stateCb, this);
 
     // TODO: Load initial gains from parameter server
     pid_x_.initParam("~/pid/x");
@@ -18,9 +17,7 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
     nh_.param("thresh_th", thresh_th_, 0.01);
     nh_.param("retry_error_times", retry_error_times_, 50);
 
-    nh_.param("offset/x",desired_offset_.x, 0.2);
-    nh_.param("offset/y",desired_offset_.y, 0.0);
-    nh_.param("offset/th",desired_offset_.z, 0.0);
+
     //pid_x_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh_);
     //pid_th_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh2_);
 
@@ -29,7 +26,6 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
     error_times_ = 0;
     last_time_ = ros::Time::now();
 
-    ROS_INFO("Setting dock offset to x: %.2f, y: %.2f, th: %.2f", desired_offset_.x, desired_offset_.y, desired_offset_.z);
 }
 
 double DockingController::getDistanceToTag() {
@@ -129,10 +125,6 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             break;
         }
     }
-}
-
-void DockingController::stateCb(const std_msgs::Int32::ConstPtr& msg) {
-    setState((DockingController::DockState)msg->data);
 }
 
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
