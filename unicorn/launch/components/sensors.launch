@@ -16,10 +16,10 @@
 
     <!-- Run realsense camera -->
     <group if="$(arg use_realsense)">
-        <include file="$(find realsense2_camera)/launch/rs_camera.launch"/>
-        <arg name="camera" value="realsense" />
-  </include>
-</group>
+        <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+            <arg name="camera" value="realsense" />
+        </include>
+    </group>
 
     <!-- Run zed camera -->
     <group if="$(arg use_zed)">
