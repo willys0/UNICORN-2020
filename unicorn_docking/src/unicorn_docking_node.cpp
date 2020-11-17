@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 
     while (ros::ok()) {
         if(docking_controller.getState() == DockingController::DockState::DOCKING) {
-            move_msg = docking_controller.computeVelocity();
+            docking_controller.computeVelocity(move_msg);
             vel_pub.publish(move_msg);
         }
         

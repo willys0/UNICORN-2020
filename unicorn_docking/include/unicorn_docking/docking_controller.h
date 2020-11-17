@@ -26,9 +26,13 @@ class DockingController {
         typedef enum DockState { IDLE, DOCKING } DockState;
         DockingController();
 
-        geometry_msgs::Twist computeVelocity();
+        bool computeVelocity(geometry_msgs::Twist& msg_out);
 
         double getDistanceToTag();
+
+        double getPitchComponent();
+
+        double getLateralComponent();
 
         double getRotationToTag();
         
@@ -51,6 +55,8 @@ class DockingController {
 
         geometry_msgs::Pose  tag_pose_;
         geometry_msgs::Point desired_offset_;
+
+        double tagSide;
 
         ros::Time last_time_;
 
