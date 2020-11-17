@@ -51,12 +51,22 @@ class DockingController {
         ros::Subscriber state_sub_;
 
         control_toolbox::Pid pid_x_;
+        control_toolbox::Pid pid_control_th_;
         control_toolbox::Pid pid_th_;
 
         geometry_msgs::Pose  tag_pose_;
         geometry_msgs::Point desired_offset_;
-
-        double tagSide;
+        
+        bool retrying_;
+        int max_retries_;
+        int nr_retries_;
+        double retry_offset_;
+        int error_times_;
+        
+        int retry_error_times_;
+        double thresh_x_;
+        double thresh_y_;
+        double thresh_th_;
 
         ros::Time last_time_;
 
