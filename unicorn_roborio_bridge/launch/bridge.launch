@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+  <arg name="roborio_master_message_topic"  default="/RIO_publisher_master_Message" />
+  <arg name="rear_lidar_scan_topic"         default="/rearLidar/scan" />
+  <arg name="lift_state_topic"              default="/lift/state" />
+  <arg name="lift_action_ns"                default="/lift/lift_action" />
+  <arg name="publish_dummy_data"            default="false" />
+
+  <remap from="/RIO_publisher"  to="$(arg roborio_master_message_topic)" />
+
+  <node pkg="unicorn_roborio_bridge" type="unicorn_roborio_bridge_node" name="unicorn_roborio_bridge_node" output="screen">
+    <remap from="/rearLidar/scan"   to="$(arg rear_lidar_scan_topic)" />
+    <remap from="/lift/state"       to="$(arg lift_state_topic)" />
+    <remap from="/lift/lift_action" to="$(arg lift_action_ns)" />
+    <rosparam command="load" file="$(find unicorn_roborio_bridge)/config/r2100_config.yaml"/>
+    <rosparam command="load" file="$(find unicorn_roborio_bridge)/config/lift_config.yaml"/>
+  </node>
+
+  <node if="$(arg publish_dummy_data)"
+        pkg="unicorn_roborio_bridge" type="unicorn_roborio_bridge_dummy_data_node" name="unicorn_roborio_bridge_dummy_data_node" />
+
+</launch>

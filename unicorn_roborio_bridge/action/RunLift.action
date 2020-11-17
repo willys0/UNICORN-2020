@@ -1,0 +1,6 @@
+int8 DIRECTION_PICKUP = 0
+int8 DIRECTION_DROPOFF = 1
+
+int8 direction
+---
+---
