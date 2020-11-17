@@ -24,7 +24,7 @@
             <param name="jsonFile" value="$(find am_driver_safe)/config/automower_hrp.json" type="string" />
 
             <param name="odomFrame" value="odom_chassis" />
-            <param name="baseLinkFrame" value="lift_link" />
+            <param name="baseLinkFrame" value="base_link" />
 
             <remap from="/odom" to="/wheel_encoder/odom" />
         </node> 

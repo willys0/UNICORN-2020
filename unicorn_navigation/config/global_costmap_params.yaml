@@ -37,15 +37,25 @@ global_costmap:
     #- {name: voxel_layer,       type: "costmap_2d::VoxelLayer"}
 
 
-  global_frame: /map
-  robot_base_frame: base_link
-  update_frequency: 1.0
-  static_map: True
-  publish_frequency: 0.5
-  use_first_map_only: True
+     #Independent settings for the local planner's costmap. Detailed descriptions of these parameters can be found at http://www.ros.org/wiki/costmap_2d
 
-  resolution: 0.05
+global_costmap:
+  #Set the global and robot frames for the costmap
+  global_frame: map
+  #robot_base_frame: base_link_gazebo
+  robot_base_frame: base_link
+
+  #Set the update and publish frequency of the costmap
+  update_frequency: 10.0
+  publish_frequency: 0.0
+
+  #We'll use a map served by the map_server to initialize this costmap
+  static_map: true
+  rolling_window: false
+
+  footprint_padding: 0.02
 
   inflation_layer:
-     inflation_radius: 0.40 # 0.60 # 4
-     cost_scaling_factor: 1 # 3
+    inflation_radius: 0.5
+    cost_scaling_factor: 0.5
+
