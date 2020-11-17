@@ -8,8 +8,10 @@ void parse_goal_yaml() {
 
     nh.param("goals", v, v);
 
+    XmlRpc::XmlRpcValue inner;
     for(int i = 0; i < v.size(); i++) {
-        ROS_INFO("x: %f, y %f, th %f, lift: %d");
+        inner = v["x"];
+        ROS_INFO("x: %f, y %f, th %f, lift: %d", 0.0, 0.0, 0.0, 0);
     }
 }
 
