@@ -28,7 +28,6 @@ State* DockState::run() {
     // return new IdleState(nh_);
 
     // Call the docking controller to initiate a dock
-
     unicorn_docking::DockGoal goal;
     client.sendGoal(goal);
     client.waitForResult();

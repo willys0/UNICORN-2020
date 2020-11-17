@@ -11,6 +11,14 @@ UndockState::UndockState(int lift_cmd, ros::NodeHandle node) :
 State* UndockState::run() {
     ROS_INFO("[UndockState] undock: %d", lift_cmd_);
 
+    // TODO: Infinite while loop for safety purposes since nothing is implemented
+    // yet. FIX IT!
+    while(ros::ok()) {
+        ROS_INFO("[UndockState] undock: %d", lift_cmd_);
+
+        ros::spinOnce();
+    }
+
     // TODO: Call the docking controller to initiate an undock
 
     // TODO: If failed to pickup or dropoff a bin, go to docking state

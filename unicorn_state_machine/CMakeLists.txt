@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
   unicorn_docking
+  unicorn_roborio_bridge
 )
 
 ## System dependencies are found with CMake's conventions
