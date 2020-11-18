@@ -19,6 +19,9 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2/transform_datatypes.h>
 
+#include <tf2_ros/transform_listener.h>
+#include <geometry_msgs/TransformStamped.h>
+
 
 class DockingController {
 
@@ -55,6 +58,9 @@ class DockingController {
 
         geometry_msgs::Pose  tag_pose_;
         geometry_msgs::Point desired_offset_;
+
+        tf2_ros::Buffer tf_buffer_;
+        tf2_ros::TransformListener tf_listener_;
         
         bool retrying_;
         int max_retries_;

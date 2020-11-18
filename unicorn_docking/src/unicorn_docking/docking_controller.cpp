@@ -1,6 +1,6 @@
 #include <unicorn_docking/docking_controller.h>
 
-DockingController::DockingController() : nh_("~"), state_(DockingController::DockState::IDLE) {
+DockingController::DockingController() : nh_("~"), state_(DockingController::DockState::IDLE), tf_listener_(tf_buffer_) {
 
     apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
 
@@ -50,49 +50,33 @@ double DockingController::getLateralComponent() {
     //pi_4 = 2*3.14159265359/3;
 
     pitch = getPitchComponent();
-    dist_to_tag = sqrt(tag_pose_.position.z*tag_pose_.position.z + tag_pose_.position.x*tag_pose_.position.x);
-    d = dist_to_tag*sin(pitch);
-    
-    // robot is on left side of normal from apriltag
-    if (pitch > 0) {
-        return d;
-    }
-    else
-    {
-        return d;
-    }
-    
-    // a = tag_pose_.position.z*cos(pitch);
-    // WHAT TO DO???????
-    // amplitude = d/a;
 
-    // // rotation from camera to tag
-    // if (tag_pose_.position.z == 0.0) {
-    //     rot_to_tag = 0.0;
-    // }
-    // else {
-    //     rot_to_tag = asin(tag_pose_.position.x/tag_pose_.position.z);
-    // }
+    geometry_msgs::TransformStamped wheel_base_transform;
+    try
+    {
+        wheel_base_transform = tf_buffer_.lookupTransform("chassis_link","realsense_camera",ros::Time(0));
+    }
+    catch(tf2::TransformException &ex)
+    {
+        ROS_WARN("%s",ex.what());
+        return 0;
+    }
     
-    // // robot is on left side of normal from apriltag
-    // if (pitch > 0) {
-    //     // rotation 
-    //     if (rot_to_tag < -pi_4) {
-    //         return -amplitude*pitch;
-    //     }
-    //     else {
-    //         return amplitude*pitch;
-    //     }
-    // }
-    // else {
-    //     // rotation 
-    //     if (rot_to_tag > pi_4) {
-    //         return amplitude*pitch;
-    //     }
-    //     else {
-    //         return -amplitude*pitch;
-    //     }
-    // }
+    // Transform x
+    geometry_msgs::Vector3 transformed_point;
+    transformed_point.x = tag_pose_.position.x + wheel_base_transform.transform.translation.x;
+    transformed_point.y = tag_pose_.position.y + wheel_base_transform.transform.translation.y;
+    transformed_point.z = tag_pose_.position.z;
+
+    ROS_INFO("x: %.2f transX: %.2f y: %.2f transY: %.2f z: %.2f transZ: %.2f", 
+        tag_pose_.position.x, wheel_base_transform.transform.translation.x, 
+        tag_pose_.position.y, wheel_base_transform.transform.translation.y, 
+        tag_pose_.position.z, wheel_base_transform.transform.translation.z);
+
+    dist_to_tag = sqrt(transformed_point.z*transformed_point.z + transformed_point.x*transformed_point.x);
+    d = dist_to_tag*sin(pitch+getRotationToTag());
+    
+    return d;
     
 }
 
@@ -121,7 +105,7 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             tf2::Quaternion quat_tf;
             tf2::fromMsg(tag_pose_.orientation, quat_tf);
             tf2::Matrix3x3(quat_tf).getRPY(roll, pitch, yaw);
-            //ROS_INFO("z: %.2f, x: %.2f, pitch: %.2f, d: %.2f", tag_pose_.position.z, tag_pose_.position.x, pitch, getLateralComponent());
+            ROS_INFO("z: %.2f, x: %.2f, pitch: %.2f, d: %.2f", tag_pose_.position.z, tag_pose_.position.x, pitch, getLateralComponent());
             break;
         }
     }
@@ -145,6 +129,8 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
                 retrying_ = false;
             }
             else{
+                // TODO: MAKE BACKING UPP BETTER
+                // ################################################################
                 msg_out.linear.x = pid_x_.computeCommand(retry_offset_ - getDistanceToTag(), current_time - last_time_);
                 // Maby okay with negative
                 //des_rot = -pid_control_th_.computeCommand(desired_offset_.z - getLateralComponent(), current_time - last_time_);
@@ -190,7 +176,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
                     msg_out.angular.z = pid_th_.computeCommand(des_rot - getRotationToTag(), current_time - last_time_);
 
                     last_time_ = current_time;
-                    ROS_INFO("des_rot: %.2f", des_rot);
+                    //ROS_INFO("des_rot: %.2f", des_rot);
                 }
                 
 
