@@ -17,13 +17,37 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
     nh_.param("thresh_th", thresh_th_, 0.01);
     nh_.param("retry_error_times", retry_error_times_, 50);
 
-
-    //pid_x_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh_);
-    //pid_th_.initPid(6.0, 1.0, 2.0, 0.3, -0.3, nh2_);
-
     retrying_ = false;
     nr_retries_ = 0;
     error_times_ = 0;
+
+    // Get transform from camera frame to chassi frame
+    geometry_msgs::TransformStamped wheel_base_transform;
+    try
+    {
+        wheel_base_transform = tf_buffer_.lookupTransform("chassis_link","realsense_camera",ros::Time(0));
+    }
+    catch(tf2::TransformException &ex)
+    {
+        ROS_WARN("%s",ex.what());
+        //return 0;
+    }
+
+    // For wheel_base_transform.transform.translation:
+    // (the distance is from realsense_camera to chassis_link frame.)
+    // z is (0.34)
+    // x is (-0.41)
+    // y is (-0.04)
+
+    // Get left/right distance relative to wheel base
+    camera_to_wheelbase_transform.x = wheel_base_transform.transform.translation.y;
+
+    // Height of tag isn't used, no need to transform
+    camera_to_wheelbase_transform.y = 0;
+
+    // Get the tag distance in relation to wheel base
+    camera_to_wheelbase_transform.z = -wheel_base_transform.transform.translation.x;
+
     last_time_ = ros::Time::now();
 
 }
@@ -44,36 +68,13 @@ double DockingController::getPitchComponent() {
 }
 
 double DockingController::getLateralComponent() {
-
-    // get the rotation to the perpendicular of the tag normal. ?
-    double a, d, pitch, pi_4, amplitude, rot_to_tag,dist_to_tag;
-    //pi_4 = 2*3.14159265359/3;
+    // Gets the distance perpendicular from the tag normal to the robot.
+    
+    double d, pitch, dist_to_tag;
 
     pitch = getPitchComponent();
 
-    geometry_msgs::TransformStamped wheel_base_transform;
-    try
-    {
-        wheel_base_transform = tf_buffer_.lookupTransform("chassis_link","realsense_camera",ros::Time(0));
-    }
-    catch(tf2::TransformException &ex)
-    {
-        ROS_WARN("%s",ex.what());
-        return 0;
-    }
-    
-    // Transform x
-    geometry_msgs::Vector3 transformed_point;
-    transformed_point.x = tag_pose_.position.x + wheel_base_transform.transform.translation.x;
-    transformed_point.y = tag_pose_.position.y + wheel_base_transform.transform.translation.y;
-    transformed_point.z = tag_pose_.position.z;
-
-    ROS_INFO("x: %.2f transX: %.2f y: %.2f transY: %.2f z: %.2f transZ: %.2f", 
-        tag_pose_.position.x, wheel_base_transform.transform.translation.x, 
-        tag_pose_.position.y, wheel_base_transform.transform.translation.y, 
-        tag_pose_.position.z, wheel_base_transform.transform.translation.z);
-
-    dist_to_tag = sqrt(transformed_point.z*transformed_point.z + transformed_point.x*transformed_point.x);
+    dist_to_tag = sqrt(tag_point_rel_wheel_base_.z*tag_point_rel_wheel_base_.z + tag_point_rel_wheel_base_.x*tag_point_rel_wheel_base_.x);
     d = dist_to_tag*sin(pitch+getRotationToTag());
     
     return d;
@@ -83,29 +84,33 @@ double DockingController::getLateralComponent() {
 double DockingController::getRotationToTag() {
     double rot_to_tag;
     // rotation from camera to tag
-    if (tag_pose_.position.z == 0.0) {
+    if (tag_point_rel_wheel_base_.z == 0.0) {
         rot_to_tag = 0.0;
     }
     else {
-        rot_to_tag = asin(tag_pose_.position.x/tag_pose_.position.z);
+        rot_to_tag = asin(tag_point_rel_wheel_base_.x/tag_point_rel_wheel_base_.z);
     }
     return rot_to_tag;
 }
 
 
 void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg) {
-    double roll, pitch, yaw;
-
     for(auto& tag : msg->detections) {
         if(tag.id[0] == 0) {
             // Save tag pose to tag_pose_
+            // For tag_pose_.position:
+            // z is depth of tag in camera frame. Higher value equals further away.
+            // x is position of tag left and right of screen center. Right side is positive, left is degative.
+            // y is position of tag  upp and down.
             tag_pose_ = tag.pose.pose.pose;
 
-            // Print tag position in z, x and pitch        
-            tf2::Quaternion quat_tf;
-            tf2::fromMsg(tag_pose_.orientation, quat_tf);
-            tf2::Matrix3x3(quat_tf).getRPY(roll, pitch, yaw);
-            ROS_INFO("z: %.2f, x: %.2f, pitch: %.2f, d: %.2f", tag_pose_.position.z, tag_pose_.position.x, pitch, getLateralComponent());
+            tag_point_rel_wheel_base_.x = tag_pose_.position.x + camera_to_wheelbase_transform.x;
+            tag_point_rel_wheel_base_.y = tag_pose_.position.y + camera_to_wheelbase_transform.y;
+            tag_point_rel_wheel_base_.z = tag_pose_.position.z + camera_to_wheelbase_transform.z;
+
+            // Print tag position rel wheel base in z, x and pitch        
+            ROS_INFO("z: %.2f, x: %.2f, pitch: %.2f, d: %.2f", 
+            tag_pose_.position.z, tag_point_rel_wheel_base_.x, getPitchComponent(), getLateralComponent());
             break;
         }
     }
@@ -119,7 +124,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
 
         // Calculate x ans theta errors
         err_x = desired_offset_.x - getDistanceToTag();
-        err_y = desired_offset_.y - tag_pose_.position.y;
+        err_y = desired_offset_.y - tag_point_rel_wheel_base_.x;
         err_th = desired_offset_.z - getRotationToTag();
 
 
@@ -133,8 +138,8 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
                 // ################################################################
                 msg_out.linear.x = pid_x_.computeCommand(retry_offset_ - getDistanceToTag(), current_time - last_time_);
                 // Maby okay with negative
-                //des_rot = -pid_control_th_.computeCommand(desired_offset_.z - getLateralComponent(), current_time - last_time_);
-                msg_out.angular.z = -pid_th_.computeCommand(desired_offset_.z - getPitchComponent(), current_time - last_time_);
+                des_rot = -pid_control_th_.computeCommand(desired_offset_.z - getLateralComponent(), current_time - last_time_);
+                msg_out.angular.z = -pid_th_.computeCommand(des_rot - getRotationToTag(), current_time - last_time_);
 
                 last_time_ = current_time;
             }
@@ -161,13 +166,9 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
                         }
 
                     }
-                    else
-                    {
+                    else {
                         error_times_++;
                     }
-                    
-                    
-                    
                 }
                 else {
                     // Move towards desired position
@@ -178,8 +179,6 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
                     last_time_ = current_time;
                     //ROS_INFO("des_rot: %.2f", des_rot);
                 }
-                
-
             }
             else {
                 if(fabs(err_x) <= thresh_x_) {

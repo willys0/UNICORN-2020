@@ -58,6 +58,8 @@ class DockingController {
 
         geometry_msgs::Pose  tag_pose_;
         geometry_msgs::Point desired_offset_;
+        geometry_msgs::Vector3 tag_point_rel_wheel_base_;
+        geometry_msgs::Vector3 camera_to_wheelbase_transform;
 
         tf2_ros::Buffer tf_buffer_;
         tf2_ros::TransformListener tf_listener_;
