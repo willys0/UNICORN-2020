@@ -1,5 +1,5 @@
 <launch>
-  <arg name="camera_name" default="realsense/depth" />
+  <arg name="camera_name" default="realsense/color" />
   <arg name="image_topic" default="image_raw" />
 
   <node pkg="unicorn_docking" type="unicorn_docking_node" name="unicorn_docking_node" output="screen">
