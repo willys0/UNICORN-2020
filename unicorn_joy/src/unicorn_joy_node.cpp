@@ -32,7 +32,7 @@ void joy_cb(const sensor_msgs::JoyConstPtr& msg, RunLiftActionClient* ac) {
         else if(msg->buttons[6]) {
             ROS_INFO("Down");
             unicorn_roborio_bridge::RunLiftGoal goal;
-            goal.direction = goal.DIRECTION_PICKUP;
+            goal.direction = goal.DIRECTION_DROPOFF;
             ac->sendGoal(goal);
         }
         else if(msg->buttons[7]) {
