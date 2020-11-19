@@ -17,6 +17,7 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
     nh_.param("thresh_y", thresh_y_, 0.01);
     nh_.param("thresh_th", thresh_th_, 0.01);
     nh_.param("retry_error_times", retry_error_times_, 50);
+    nh_.param("nr_for_pitch_average",nr_for_pitch_average_, 15);
 
     retrying_ = false;
     nr_retries_ = 0;
