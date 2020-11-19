@@ -24,7 +24,10 @@
 			<arg name="use_zed" value="$(arg use_zed)" />
 			<arg name="use_realsense" value="$(arg use_realsense)" />
 		</include>
+
+		<include file="$(find unicorn_roborio_bridge)/launch/bridge.launch" />
 	</group>
+
 
 	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
 		<arg name="sim" value="$(arg sim)" />
