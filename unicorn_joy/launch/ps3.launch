@@ -1,0 +1,14 @@
+<launch>
+	<node pkg="joy" type="joy_node" name="joy_node" />
+	<node pkg="teleop_twist_joy" type="teleop_node" name="teleop_twist_joy_node" output="screen">
+		<param name="~/enable_button" value="10" />
+		<param name="~/axis_angular" value="2" />
+		<param name="~/scale_linear" value="1.0" />
+		<param name="~/scale_angular" value="1.0" />
+		<remap from="/cmd_vel" to="/unicorn/cmd_vel" />
+	</node>
+	<node pkg="unicorn_joy" type="unicorn_joy_node" name="unicorn_joy_node">
+		<remap from="joy" to="/joy"/>
+		<remap from="TX2_unicorn_state" to="/TX2_unicorn_state" />
+	</node>
+</launch>

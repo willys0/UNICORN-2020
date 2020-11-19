@@ -56,8 +56,8 @@
             <alwaysOn>true</alwaysOn>
             <updateRate>0.0</updateRate>
             <cameraName>${cameraName}</cameraName>
-            <imageTopicName>/${cameraName}/depth/image_raw</imageTopicName>
-            <cameraInfoTopicName>/${cameraName}/depth/camera_info</cameraInfoTopicName>
+            <imageTopicName>/${cameraName}/color/image_raw</imageTopicName>
+            <cameraInfoTopicName>/${cameraName}/color/camera_info</cameraInfoTopicName>
             <depthImageTopicName>/${cameraName}/depth/image_raw</depthImageTopicName>
             <depthImageInfoTopicName>/${cameraName}/depth/camera_info</depthImageInfoTopicName>
             <pointCloudTopicName>/${cameraName}/depth/points</pointCloudTopicName>

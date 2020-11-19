@@ -10,6 +10,8 @@
 #include <unicorn_roborio_bridge/RioMasterMsg.h>
 #include <unicorn_roborio_bridge/RunLiftAction.h>
 
+#include <geometry_msgs/PoseWithCovarianceStamped.h>
+
 #define RIO_LIFT_ACTION_STOP    0
 #define RIO_LIFT_ACTION_PICKUP  1
 #define RIO_LIFT_ACTION_DROPOFF 2
@@ -23,19 +25,22 @@ ros::Subscriber rio_sub;
 
 ros::Publisher lift_state_pub;
 ros::Publisher rear_lidar_pub;
-// ros::Publisher  uwb_pos_pub;
+ros::Publisher uwb_pos_pub;
+
+ros::Publisher run_lift_pub;
 
 std_msgs::Int32        lift_state;
 float                  lift_freq;
 
 sensor_msgs::LaserScan lidar_scan;
 float                  lidar_freq;
-// geometry_msgs::Point uwb_pos;
+
+geometry_msgs::PoseWithCovarianceStamped uwb_pos;
+float uwb_freq;
 
 int n_measures;
 
 void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftActionServer* as, ros::NodeHandle nh) {
-    ros::Publisher run_lift_pub;
     std_msgs::Int32 msg;
     int dir;
 
@@ -55,16 +60,15 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
     }
 
     // Wait for lift to be idle
-    ROS_INFO("[Roborio Bridge] Waiting for lift to be idle...");
-    while(lift_state.data != RIO_LIFT_STATE_IDLE) {
-        if(!ros::ok()) {
-            as->setAborted();
-            return;
-        }
-    }
+    // ROS_INFO("[Roborio Bridge] Waiting for lift to be idle...");
+    // while(lift_state.data != RIO_LIFT_STATE_IDLE) {
+    //     if(!ros::ok()) {
+    //         as->setAborted();
+    //         return;
+    //     }
+    // }
 
     ROS_INFO("[Roborio Bridge] Sending command to lift.");
-    run_lift_pub = nh.advertise<std_msgs::Int32>("/TX2_unicorn_picking_routine", 1);
     msg.data = dir;
     run_lift_pub.publish(msg);
 
@@ -88,6 +92,12 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
             msg.data = RIO_LIFT_ACTION_STOP;
             run_lift_pub.publish(msg);
 
+            ros::spinOnce();
+
+            ROS_INFO("[Roborio Bridge] Lift preemption requested, stopping lift...");
+           
+            ros::Duration(1).sleep();
+
             ROS_INFO("[Roborio Bridge] Lift action preempted.");
             as->setPreempted();
 
@@ -110,15 +120,11 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
         ros::spinOnce();
     }
 
-    run_lift_pub.shutdown();
-
 }
 
 void rio_cb(const unicorn_roborio_bridge::RioMasterMsgConstPtr& msg) {
 
     lift_state.data = msg->lift_state;
-
-    // uwb_pos    = msg->uwb_pos;
 
     for(int i = 0; i < n_measures; i++) {
         // TODO: Maybe we can do the calculation on the RIO instead
@@ -127,6 +133,11 @@ void rio_cb(const unicorn_roborio_bridge::RioMasterMsgConstPtr& msg) {
 
     lidar_scan.header.stamp = ros::Time::now();
     lidar_scan.header.seq++;
+
+    uwb_pos.header.stamp = ros::Time::now();
+    uwb_pos.header.seq++;
+
+    uwb_pos.pose.pose.position = msg->uwb_pos;
 }
 
 void lift_pub_timeout(const ros::TimerEvent& e) {
@@ -135,6 +146,10 @@ void lift_pub_timeout(const ros::TimerEvent& e) {
 
 void lidar_pub_timeout(const ros::TimerEvent& e) {
     rear_lidar_pub.publish(lidar_scan);
+}
+
+void uwb_pub_timeout(const ros::TimerEvent& e) {
+    uwb_pos_pub.publish(uwb_pos);
 }
 
 std_msgs::Int32 init_lift_msg(void) {
@@ -185,6 +200,35 @@ sensor_msgs::LaserScan init_lidar_msg(void) {
     return msg;
 }
 
+geometry_msgs::PoseWithCovarianceStamped init_uwb_msg() {
+    geometry_msgs::PoseWithCovarianceStamped msg;
+
+    ros::NodeHandle nh("~/uwb");
+
+    // TODO: Do we need to assign a frame to the header?
+    nh.param<std::string>("reference_frame", msg.header.frame_id, "");
+    nh.param<float>("publish_frequency", uwb_freq, 30.0);
+
+    // TODO: Incorporate orientation if we can get it later
+    msg.pose.pose.orientation.x = 0;
+    msg.pose.pose.orientation.y = 0;
+    msg.pose.pose.orientation.z = 0;
+    msg.pose.pose.orientation.w = 1;
+
+    boost::array<double, 36UL> covariance({
+        1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+        0.0, 0.0, 0.0, 0.0, 0.0, 1.0
+    });
+    msg.pose.covariance.swap(covariance);
+
+    ROS_INFO("[UWB settings] reference_frame: %s, publish_frequency: %f", msg.header.frame_id.c_str(), uwb_freq);
+    return msg;
+}
+
 int main(int argc, char** argv) {
 
     ros::init(argc, argv, "unicorn_roborio_bridge_node");
@@ -193,12 +237,13 @@ int main(int argc, char** argv) {
 
     rear_lidar_pub = nh.advertise<sensor_msgs::LaserScan>("/rearLidar/scan", 10);
     lift_state_pub = nh.advertise<std_msgs::Int32>("/lift/state", 1);
+    uwb_pos_pub = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("/uwb/pose", 10);
 
-    // TODO: Implement when we get UWBs
-    // uwb_pos_pub =    nh.advertise("/uwb/position");
+    run_lift_pub = nh.advertise<std_msgs::Int32>("/TX2_unicorn_picking_routine", 1);
 
     lift_state = init_lift_msg();
     lidar_scan = init_lidar_msg();
+    uwb_pos = init_uwb_msg();
 
     rio_sub = nh.subscribe("/RIO_publisher", 10, &rio_cb);
 
@@ -207,6 +252,7 @@ int main(int argc, char** argv) {
 
     ros::Timer lidar_timer = nh.createTimer(ros::Duration(1.0 / lidar_freq), &lidar_pub_timeout);
     ros::Timer lift_timer = nh.createTimer(ros::Duration(1.0 / lift_freq), &lift_pub_timeout);
+    ros::Timer uwb_timer = nh.createTimer(ros::Duration(1.0 / uwb_freq), &uwb_pub_timeout);
 
 
     ros::spin();

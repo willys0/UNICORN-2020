@@ -6,7 +6,10 @@
 	<arg name="map_file"   			default="$(find unicorn_slam)/maps/c2.yaml"/>
 
 	<arg name="do_slam" 	        default="true" />
-	<arg name="use_camera"			default="true" />
+
+	<arg name="use_zed"						default="true" />
+	<arg name="use_realsense"			default="true" />
+
 	<arg name="use_object_tracking" default="false" />
 
 	<arg name="sim" 				default="false" />
@@ -18,10 +21,14 @@
 
 	<group unless="$(arg sim)">
 		<include file="$(find unicorn)/launch/components/sensors.launch">
-			<arg name="use_zed" value="$(arg use_camera)" />
+			<arg name="use_zed" value="$(arg use_zed)" />
+			<arg name="use_realsense" value="$(arg use_realsense)" />
 		</include>
+
+		<include file="$(find unicorn_roborio_bridge)/launch/bridge.launch" />
 	</group>
-	
+
+
 	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
 		<arg name="sim" value="$(arg sim)" />
 	</include>
@@ -46,6 +53,7 @@
 	<group unless="$(arg sim)">
 		<node pkg="amcl" type="amcl" name="amcl" output="screen">
 			<rosparam command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
+			<remap from="scan" to="$(arg scan_topic)"/>
 		</node>
 	</group>
 	<group if="$(arg sim)">
@@ -54,7 +62,7 @@
 			<rosparam if="$(arg sim)" command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
 			<remap from="scan" to="$(arg scan_topic)"/>
 		</node>
-		
+
 	</group>
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
@@ -69,12 +77,12 @@
 	<param unless="$(arg sim)" name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target.urdf.xacro'" />
 
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
-		<param name="publish_frequency" value="50"/>
+		<param name="publish_frequency" value="100"/>
 	</node>
 
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
 		<param name="use_gui" value="false"/>
-		<param name="rate" value="50"/>
+		<param name="rate" value="100"/>
 	</node>
 
 	<node pkg="tf" type="static_transform_publisher" name="map_transform" args="0 0 0 0 0 0 /map /odom_chassis 100"/>
