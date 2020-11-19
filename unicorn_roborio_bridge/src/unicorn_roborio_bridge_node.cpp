@@ -60,13 +60,13 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
     }
 
     // Wait for lift to be idle
-    ROS_INFO("[Roborio Bridge] Waiting for lift to be idle...");
-    while(lift_state.data != RIO_LIFT_STATE_IDLE) {
-        if(!ros::ok()) {
-            as->setAborted();
-            return;
-        }
-    }
+    // ROS_INFO("[Roborio Bridge] Waiting for lift to be idle...");
+    // while(lift_state.data != RIO_LIFT_STATE_IDLE) {
+    //     if(!ros::ok()) {
+    //         as->setAborted();
+    //         return;
+    //     }
+    // }
 
     ROS_INFO("[Roborio Bridge] Sending command to lift.");
     msg.data = dir;
