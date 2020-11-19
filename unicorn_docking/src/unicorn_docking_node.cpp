@@ -52,10 +52,13 @@ void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionSer
         vel_pub.publish(move_msg);
         ros::Duration(1.0/100.0).sleep();
     }
-
+    move_msg.linear.x = 0.0;
+    move_msg.angular.z = 0.0;
+    vel_pub.publish(move_msg);
     // TODO: Handle errors in some nice way
 
     controller->setState(DockingController::DockState::IDLE);
+    ros::Duration(0.1).sleep();
     vel_pub.shutdown();
 
 }

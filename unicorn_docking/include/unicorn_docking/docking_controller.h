@@ -37,6 +37,8 @@ class DockingController {
 
         double getLateralComponent();
 
+        double getDesiredRotation();
+
         double getRotationToTag();
         
         DockState getState() { return state_; }
@@ -52,8 +54,9 @@ class DockingController {
 
         ros::Subscriber apriltag_sub_;
 
+        ros::Publisher  detection_pub_;
+
         control_toolbox::Pid pid_x_;
-        control_toolbox::Pid pid_control_th_;
         control_toolbox::Pid pid_th_;
 
         geometry_msgs::Pose  tag_pose_;
@@ -63,7 +66,10 @@ class DockingController {
 
         tf2_ros::Buffer tf_buffer_;
         tf2_ros::TransformListener tf_listener_;
-        
+
+        std::vector<double> tag_pitch_mean_vec_;
+        int nr_for_pitch_average_;   
+
         bool retrying_;
         int max_retries_;
         int nr_retries_;
