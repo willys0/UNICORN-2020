@@ -27,6 +27,8 @@ ros::Publisher lift_state_pub;
 ros::Publisher rear_lidar_pub;
 ros::Publisher uwb_pos_pub;
 
+ros::Publisher run_lift_pub;
+
 std_msgs::Int32        lift_state;
 float                  lift_freq;
 
@@ -39,7 +41,6 @@ float uwb_freq;
 int n_measures;
 
 void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftActionServer* as, ros::NodeHandle nh) {
-    ros::Publisher run_lift_pub;
     std_msgs::Int32 msg;
     int dir;
 
@@ -68,7 +69,6 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
     }
 
     ROS_INFO("[Roborio Bridge] Sending command to lift.");
-    run_lift_pub = nh.advertise<std_msgs::Int32>("/TX2_unicorn_picking_routine", 1);
     msg.data = dir;
     run_lift_pub.publish(msg);
 
@@ -92,6 +92,12 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
             msg.data = RIO_LIFT_ACTION_STOP;
             run_lift_pub.publish(msg);
 
+            ros::spinOnce();
+
+            ROS_INFO("[Roborio Bridge] Lift preemption requested, stopping lift...");
+           
+            ros::Duration(1).sleep();
+
             ROS_INFO("[Roborio Bridge] Lift action preempted.");
             as->setPreempted();
 
@@ -113,8 +119,6 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
 
         ros::spinOnce();
     }
-
-    run_lift_pub.shutdown();
 
 }
 
@@ -234,6 +238,8 @@ int main(int argc, char** argv) {
     rear_lidar_pub = nh.advertise<sensor_msgs::LaserScan>("/rearLidar/scan", 10);
     lift_state_pub = nh.advertise<std_msgs::Int32>("/lift/state", 1);
     uwb_pos_pub = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("/uwb/pose", 10);
+
+    run_lift_pub = nh.advertise<std_msgs::Int32>("/TX2_unicorn_picking_routine", 1);
 
     lift_state = init_lift_msg();
     lidar_scan = init_lidar_msg();
