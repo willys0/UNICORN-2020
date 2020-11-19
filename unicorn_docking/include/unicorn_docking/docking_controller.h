@@ -37,6 +37,8 @@ class DockingController {
 
         double getLateralComponent();
 
+        double getDistAlongTagNorm();
+
         double getDesiredRotation();
 
         double getRotationToTag();

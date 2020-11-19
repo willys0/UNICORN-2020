@@ -66,8 +66,8 @@ double DockingController::getPitchComponent() {
     tf::Matrix3x3(quat_tf).getRPY(tag_roll, tag_pitch, tag_yaw);
 
 
-    if(tag_pitch_mean_vec_.empty() == false && tag_pitch_mean_vec_.size() == 15) {
-        for (int i = 0; i < 15-1; i++)
+    if(tag_pitch_mean_vec_.empty() == false && tag_pitch_mean_vec_.size() == nr_for_pitch_average_) {
+        for (int i = 0; i < nr_for_pitch_average_-1; i++)
         {
             tag_pitch_mean_vec_[i] = tag_pitch_mean_vec_[i+1];
             tag_pitch_med += tag_pitch_mean_vec_[i];
@@ -103,14 +103,29 @@ double DockingController::getLateralComponent() {
     
 }
 
-double DockingController::getDesiredRotation() {
-    double d, des_rot, des_rot_med;
-    d = abs(getLateralComponent());
-    
-    des_rot = 2*exp(5*d-3);
+double DockingController::getDistAlongTagNorm() {
+    double d, pitch, dist_to_tag;
 
+    pitch = getPitchComponent();
+
+    dist_to_tag = sqrt(tag_pose_.position.z*tag_pose_.position.z + tag_pose_.position.x*tag_pose_.position.x);
+    d = dist_to_tag*cos(getRotationToTag()+pitch);
+    
+    return d;
+}
+
+double DockingController::getDesiredRotation() {
+    double d, des_rot;
+    d = getLateralComponent();
+    
+    des_rot = exp(6*abs(d)-3);
+
+    // Cap totation at max pi/2
+    if(des_rot > 1.5){
+        des_rot = 1.5;
+    }
     // Rotation from image norm to tag norm
-    if(getPitchComponent()+getRotationToTag() < 0){
+    if(d > 0){
         des_rot = -1*des_rot;
     }
 
@@ -155,6 +170,9 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             tag_point_rel_wheel_base_.y = tag_pose_.position.y + camera_to_wheelbase_transform.y;
             tag_point_rel_wheel_base_.z = tag_pose_.position.z + camera_to_wheelbase_transform.z;
 
+            ROS_INFO("pitch: %+.2f, rot_to_tag: %+.2f, z: %+.2f, x: %+.2f d: %.2f, nz: %.2f", 
+            getPitchComponent(), getRotationToTag(), tag_pose_.position.z, tag_pose_.position.x, getLateralComponent(), getDistAlongTagNorm());
+
             break;
         }
     }
@@ -167,9 +185,9 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
         ros::Time current_time = ros::Time::now();
 
         // Calculate x, y and theta errors
-        err_x = desired_offset_.x - getDistanceToTag();
-        err_y = desired_offset_.y - tag_point_rel_wheel_base_.x;
-        err_th = desired_offset_.z - getRotationToTag();
+        err_x = desired_offset_.x - getDistAlongTagNorm();
+        err_y = desired_offset_.y - getLateralComponent();
+        err_th = desired_offset_.z - getPitchComponent();
 
 
         if(retrying_ == true){
@@ -182,7 +200,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
                 // TODO: MAKE BACKING UPP BETTER
                 // ################################################################
                 msg_out.linear.x = pid_x_.computeCommand(retry_offset_ - getDistanceToTag(), current_time - last_time_);
-                msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
+                msg_out.angular.z = pid_th_.computeCommand(-getDesiredRotation() - getRotationToTag(), current_time - last_time_);
 
                 last_time_ = current_time;
             }
@@ -219,6 +237,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
                     msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
 
                     last_time_ = current_time;
+                    //ROS_INFO("err_x: %.2f, err_y: %.2f, err_th: %.2f, des_rot: %.2f, norm_x: %.2f", err_x, err_y, err_th, getDesiredRotation(), getDistAlongTagNorm());
                 }
             }
             else {
