@@ -27,7 +27,7 @@
             <arg name="gpu_id" value="-1"/>
             <arg name="publish_tf" value="false"/>
             <arg name="publish_urdf" value="false"/>
-            <arg name="odometry_frame" value="odom"/>
+            <arg name="odometry_frame" value="/zed/odom"/>
             <arg name="base_frame" value="zed_camera"/><!--Default: zed_center-->
             <!--arg name="camera_frame" value="zed_left_camera"/-->
             <!--arg name="depth_frame" value="zed_depth_camera"/-->
