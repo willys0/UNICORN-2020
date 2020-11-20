@@ -35,10 +35,10 @@ laser_model_type:           likelihood_field_prob
 
 # Odometery model parameters
 odom_model_type:  diff
-odom_alpha1:      0.2   # 0.2 rr
-odom_alpha2:      0.2   # 0.2 rt
-odom_alpha3:      0.2    # 0.2,0.8 tt
-odom_alpha4:      0.5   # 0.2 tr
+odom_alpha1:      0.3   # 0.2 rr
+odom_alpha2:      0.05   # 0.2 rt
+odom_alpha3:      0.05    # 0.2,0.8 tt
+odom_alpha4:      0.1   # 0.2 tr
 odom_alpha5:      0.2    # 0.2,0.1
 odom_frame_id:    odom_chassis
 base_frame_id:    chassis_link
