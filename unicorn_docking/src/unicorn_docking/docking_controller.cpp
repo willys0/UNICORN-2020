@@ -19,9 +19,7 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
     nh_.param("retry_error_times", retry_error_times_, 50);
     nh_.param("nr_for_pitch_average",nr_for_pitch_average_, 15);
 
-    retrying_ = false;
-    nr_retries_ = 0;
-    error_times_ = 0;
+    tag_pitch_mean_vec_.resize(nr_for_pitch_average_, 0.0);
 
     // Get transform from camera frame to chassi frame
     geometry_msgs::TransformStamped wheel_base_transform;
@@ -67,23 +65,14 @@ double DockingController::getPitchComponent() {
     tf::Matrix3x3(quat_tf).getRPY(tag_roll, tag_pitch, tag_yaw);
 
 
-    if(tag_pitch_mean_vec_.empty() == false && tag_pitch_mean_vec_.size() == nr_for_pitch_average_) {
-        for (int i = 0; i < nr_for_pitch_average_-1; i++)
-        {
-            tag_pitch_mean_vec_[i] = tag_pitch_mean_vec_[i+1];
-            tag_pitch_med += tag_pitch_mean_vec_[i];
-        }
-        tag_pitch_mean_vec_.push_back(tag_pitch);
-        tag_pitch_med += tag_pitch;
+    for(int i = 1; i < nr_for_pitch_average_ - 1; i++) {
+        tag_pitch_mean_vec_[i+1] = tag_pitch_mean_vec_[i];
+        tag_pitch_med += tag_pitch_mean_vec_[i];
     }
-    else {
-        tag_pitch_mean_vec_.push_back(tag_pitch);
-        for (int i = 0; i < tag_pitch_mean_vec_.size(); i++)
-        {
-            tag_pitch_med += tag_pitch_mean_vec_[i];
-        }
-    }
-    
+
+    tag_pitch_mean_vec_[0] = tag_pitch;
+    tag_pitch_med += tag_pitch;
+
     tag_pitch_med = tag_pitch_med/tag_pitch_mean_vec_.size();
 
 
