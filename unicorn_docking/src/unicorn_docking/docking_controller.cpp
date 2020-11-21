@@ -48,7 +48,17 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
     // Get the tag distance in relation to wheel base
     camera_to_wheelbase_transform.z = -wheel_base_transform.transform.translation.x;
 
+
+    reset();
+
+}
+
+void DockingController::reset() {
     last_time_ = ros::Time::now();
+
+    retrying_ = false;
+    nr_retries_ = 0;
+    error_times_ = 0;
 
 }
 

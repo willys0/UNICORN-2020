@@ -20,6 +20,7 @@ void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionSer
     vel_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 
 
+    controller->reset();
     controller->setDesiredOffset(desired_offset);
     controller->setState(DockingController::DockState::DOCKING);
 

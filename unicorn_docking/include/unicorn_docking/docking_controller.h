@@ -29,6 +29,8 @@ class DockingController {
         typedef enum DockState { IDLE, DOCKING } DockState;
         DockingController();
 
+        void reset();
+
         bool computeVelocity(geometry_msgs::Twist& msg_out);
 
         double getDistanceToTag();
