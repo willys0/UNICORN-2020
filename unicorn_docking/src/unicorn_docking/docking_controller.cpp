@@ -201,7 +201,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
                 // TODO: MAKE BACKING UPP BETTER
                 // ################################################################
                 msg_out.linear.x = pid_x_.computeCommand(retry_offset_ - getDistanceToTag(), current_time - last_time_);
-                msg_out.angular.z = pid_th_.computeCommand(-getDesiredRotation() - getRotationToTag(), current_time - last_time_);
+                msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
 
                 last_time_ = current_time;
             }
