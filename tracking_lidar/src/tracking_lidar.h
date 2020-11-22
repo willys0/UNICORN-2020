@@ -28,6 +28,8 @@ public:
 private:
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
+	nav_msgs::OccupancyGrid map_data_;
+	sensor_msgs::LaserScan scan_data_;
 	ros::Subscriber odometry_sub_;
 	ros::Subscriber map_sub_;
 	ros::Subscriber scan_sub_;

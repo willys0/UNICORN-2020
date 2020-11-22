@@ -8,7 +8,7 @@ int main(int argc, char** argv){
   ros::NodeHandle nh;
   ROS_INFO("Started Lidar Tracking node");
   tracting_lidar tracting_lidar_interface;
-  ros::Rate r(100.0);
+  ros::Rate r(30.0);
 
 
   //tf2_ros::Buffer tf_buffer;
@@ -35,16 +35,20 @@ tracting_lidar::tracting_lidar()
 void tracting_lidar::odomCallback(const nav_msgs::Odometry& odometry)
 {
     ROS_INFO("New odom Message!");
+    odometry_data_ = odometry;
 }
 
 void tracting_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
 {
     ROS_INFO("New map Message!");
+    map_data_ = map;
 }
 
 void tracting_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 {
     ROS_INFO("New scan Message!");
+    scan_data_ = scan;
+    // Do stuff here 
 }
 
 
