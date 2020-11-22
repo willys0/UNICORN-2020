@@ -52,6 +52,8 @@
   <build_depend>move_base</build_depend>
   <build_export_depend>move_base</build_export_depend>
   <exec_depend>move_base</exec_depend>
+  <exec_depend>teb_local_planner</exec_depend>
+  <exec_depend>global_planner</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

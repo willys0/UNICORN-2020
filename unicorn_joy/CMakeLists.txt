@@ -10,10 +10,13 @@ project(unicorn_joy)
 find_package(catkin REQUIRED
     roscpp
     std_msgs
-    sensor_msgs)
+    sensor_msgs
+    unicorn_roborio_bridge
+    actionlib
+    actionlib_msgs)
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
