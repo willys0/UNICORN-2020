@@ -65,7 +65,7 @@
 	<!-- publish all the frames to TF -->
 
 	<group if="$(arg sim)">
-		<include file="$(find unicorn)/launch/components/gazebo.launch" />
+		<include file="$(find unicorn_simulator)/launch/gazebo.launch" />
 	</group>
 
 	<param unless="$(arg sim)" name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target.urdf.xacro'" />
