@@ -6,6 +6,9 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
 
     apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
     detection_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("detected_tag", 1);
+
+    reconfig_server_.setCallback(boost::bind(&DockingController::dynamicReconfigCallback, this, _1, _2));
+
     // TODO: Load initial gains from parameter server
     pid_x_.initParam("~/pid/x");
     pid_th_.initParam("~/pid/th");
@@ -178,6 +181,11 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
     }
 }
 
+void DockingController::dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, uint32_t level) {
+    thresh_x_ = config.x_error_thresh;
+    thresh_y_ = config.y_error_thresh;
+    thresh_th_ = config.th_error_thresh;
+}
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
     double err_x, err_y, err_th, des_rot;
 

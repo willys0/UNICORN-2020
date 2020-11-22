@@ -22,6 +22,9 @@
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
 
+#include <dynamic_reconfigure/server.h>
+#include <unicorn_docking/DockingControllerConfig.h>
+
 
 class DockingController {
 
@@ -53,12 +56,16 @@ class DockingController {
     protected:
         void apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg);
 
+        void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, uint32_t level);
+
     private:
         ros::NodeHandle nh_;
 
         ros::Subscriber apriltag_sub_;
 
         ros::Publisher  detection_pub_;
+
+        dynamic_reconfigure::Server<unicorn_docking::DockingControllerConfig> reconfig_server_;
 
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;
