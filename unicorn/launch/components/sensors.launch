@@ -23,6 +23,8 @@
 
     <!-- Run zed camera -->
     <group if="$(arg use_zed)">
+        <remap from="/odom" to="/zed/odom" />
+
         <include file="$(find zed_wrapper)/launch/zed_camera.launch">
             <arg name="gpu_id" value="-1"/>
             <arg name="publish_tf" value="false"/>

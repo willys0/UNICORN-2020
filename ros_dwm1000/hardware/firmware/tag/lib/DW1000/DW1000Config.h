@@ -1,8 +1,0 @@
-#ifndef DW1000CONFIG_H
-#define DW1000CONFIG_H
-
-#define ANCHOR_DEVICE_ID_0 1
-#define ANCHOR_DEVICE_ID_1 1
-
-
-#endif
