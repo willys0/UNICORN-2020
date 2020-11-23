@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name='Apriltag36_11_bundle_0_4'>
+    <link name='main'>
+      <pose frame=''>0 0 0 0 0 0</pose>
+      <visual name='main_Visual'>
+        <geometry>
+          <box>
+            <size>0.105 0.105 0.0001</size>
+          </box>
+        </geometry>
+        <material>
+          <script>
+            <uri>model://Apriltag36_11_bundle_0_4/materials/scripts</uri>
+            <uri>model://Apriltag36_11_bundle_0_4/materials/textures</uri>
+            <name>Apriltag36_11_bundle_0_4</name>
+          </script>
+        </material>
+      </visual>
+    </link>
+    <static>1</static>
+  </model>
+</sdf>
+
