@@ -31,6 +31,7 @@ private:
 	void adaptive_breaK_point(const sensor_msgs::LaserScan& scan);
 	void static_map_filter(const nav_msgs::OccupancyGrid& map);
 	void polygon_extraction();
+	void extract_corners(float startpoint,int *polygon, int length);
 
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
@@ -43,6 +44,8 @@ private:
 	float lambda;
 	int max_dist_laser;
 	int static_remove_dist;
+	float polygon_tolerance;
+	int polygon_min_points;
 
 
 	float xy_positions[800][2];

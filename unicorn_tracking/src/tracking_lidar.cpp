@@ -29,6 +29,11 @@ tracting_lidar::tracting_lidar()
   n_.param("lambda",lambda, 0.15f);
   n_.param("Max_Laser_dist",max_dist_laser, 10);
   n_.param("Static_map_removal_tolerance",static_remove_dist, 4);
+  n_.param("polygon_tolerance",polygon_tolerance, 1.04f);
+  n_.param("polygon_min_points_required",polygon_min_points, 4);
+  
+
+  
   //odometry_transform_pub_ = n_.advertise<nav_msgs::Odometry>("/wheel_encoder/odom_transformed", 10,true);
 }
 
@@ -68,6 +73,7 @@ void tracting_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
     {
       adaptive_breaK_point(scan_data_);
       static_map_filter(map_data_);
+      polygon_extraction();
 
 
 
@@ -148,24 +154,38 @@ void tracting_lidar::static_map_filter(const nav_msgs::OccupancyGrid& map)
 
 
 void tracting_lidar::polygon_extraction(){
-  /*
+  /**/
   int i, current_cluster = clusters[0];
   int start_point = 0, end_point;
+  int polygon[800];
+  memset(polygon, 0, 800*sizeof(polygon[0])); 
 
   for(i=1; i < 800; i++){
     if(clusters[i] != current_cluster){
       end_point = i-1;
-      if(clusters[i] != -1){
+      if(current_cluster != -1){
 
-
+          ROS_INFO("New cluster %d %d %d",start_point,end_point,end_point-start_point+1);
+          polygon[start_point] = 1;
+          polygon[end_point] = 1;
+          extract_corners(start_point,polygon,end_point-start_point+1);
 
       }
-
+      current_cluster = clusters[i];
+      start_point = i;
     }
 
   }
-    
-*/
+}
+
+void tracting_lidar::extract_corners(float startpoint,int *polygon, int length)
+{
+  if(length < polygon_min_points)
+    return;
+  
+  int point_check = ceil(float(length)/2);
+  ROS_INFO("halfway points %d",point_check);
+
 
 
 }
