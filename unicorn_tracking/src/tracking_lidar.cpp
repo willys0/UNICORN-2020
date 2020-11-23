@@ -1,7 +1,10 @@
 #include "tracking_lidar.h"
 
 
-static geometry_msgs::TransformStamped transform_frames;
+
+static bool map_received = false;
+static int* adaptive_breaK_point(const sensor_msgs::LaserScan& scan);
+
 int main(int argc, char** argv){
   ros::init(argc, argv, "tracking_lidar");
 
@@ -11,45 +14,162 @@ int main(int argc, char** argv){
   ros::Rate r(30.0);
 
 
-  //tf2_ros::Buffer tf_buffer;
-  //tf2_ros::TransformListener tf2_listener(tf_buffer);
-  //transform_frames = tf_buffer.lookupTransform("chassis_link", "map", ros::Time(0), ros::Duration(1.0) );
-
-  while(ros::ok())
-  {
-    //ROS_INFO("Tracking node running");
-    ros::spinOnce();
-    r.sleep();
-  }
+  ros::spin();
 }
 
 
 tracting_lidar::tracting_lidar()
+: n_("~")
 {
+
   odometry_sub_ = n_.subscribe("/odometry/filtered", 10, &tracting_lidar::odomCallback, this);
   map_sub_ = n_.subscribe("/map", 10, &tracting_lidar::mapCallback, this);
   scan_sub_ = n_.subscribe("/frontLidar/scan", 10, &tracting_lidar::scanCallback, this);
+  
+  n_.param("lambda",lambda, 0.15f);
+  n_.param("Max_Laser_dist",max_dist_laser, 10);
+  n_.param("Static_map_removal_tolerance",static_remove_dist, 4);
   //odometry_transform_pub_ = n_.advertise<nav_msgs::Odometry>("/wheel_encoder/odom_transformed", 10,true);
 }
 
 void tracting_lidar::odomCallback(const nav_msgs::Odometry& odometry)
 {
-    ROS_INFO("New odom Message!");
+    //ROS_INFO("New odom Message!");
     odometry_data_ = odometry;
+    
+    tf::Quaternion q(odometry.pose.pose.orientation.x,odometry.pose.pose.orientation.y,odometry.pose.pose.orientation.z,odometry.pose.pose.orientation.w);
+    tf::Matrix3x3 m(q);
+    m.getRPY(roll,pitch,yaw);
+    yaw = -yaw;
+
+    x = odometry.pose.pose.position.x;
+    y = odometry.pose.pose.position.y;
+    z = odometry.pose.pose.position.z;
+
+    //ROS_INFO("Orientation %lf  %lf %lf",roll,pitch,yaw);
+
 }
 
 void tracting_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
 {
-    ROS_INFO("New map Message!");
+    //ROS_INFO("New map Message!");
     map_data_ = map;
+    map_received = true;
+    mapx = map_data_.info.height;
+    mapy = map_data_.info.width;
 }
 
 void tracting_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 {
-    ROS_INFO("New scan Message!");
+    //ROS_INFO("New scan Message!");
     scan_data_ = scan;
+    
+    if(map_received)
+    {
+      adaptive_breaK_point(scan_data_);
+      static_map_filter(map_data_);
+
+
+
+    }
+
+    
     // Do stuff here 
 }
+
+
+
+void tracting_lidar::adaptive_breaK_point(const sensor_msgs::LaserScan& scan)
+{
+
+  int i,j = 0;
+  float current_angle,r,p,dmax, deg2rad = PI/180;
+  int max_itterations = round((scan.angle_max - scan.angle_min)/scan.angle_increment);
+  // ROS_INFO("New scan Message %d ",max_itterations);
+  for(i = 0; i < max_itterations+1; i++)
+  {
+    current_angle = float(i)*scan.angle_increment+scan.angle_min;
+    // Calculate xy position
+    xy_positions[i][1] = (scan.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw)) + x;
+    xy_positions[i][2] = (scan.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw)) + y;
+
+    if(i == 0)
+    {
+      clusters[i] = 0;
+    }else
+    {
+      r = sqrt(pow(xy_positions[i-1][1],2) + (xy_positions[i-1][2],2));
+      p = sqrt(pow(xy_positions[i-1][1] - xy_positions[i][1],2) + pow(xy_positions[i-1][2] - xy_positions[i][2],2));
+      dmax = r*sin(scan.angle_increment)/sin(lambda + scan.angle_increment) + 3*scan.angle_increment;
+      if(dmax < p)
+        j++;
+      
+      clusters[i] = j;
+      
+    }
+    if(scan.ranges[i] > max_dist_laser)
+      clusters[i] = -1;
+    //ROS_INFO("New cluster %f %f %d",xy_positions[i][1],xy_positions[i][2],clusters[i]);
+
+  }
+}
+
+void tracting_lidar::static_map_filter(const nav_msgs::OccupancyGrid& map)
+{
+  int i,m,n;
+  uint32_t x_map,y_map;
+  // uint8_t (*map_matrix)[4000] = reinterpret_cast<uint8_t (*)[4000]>(map.data);
+
+  // ROS_INFO("-----------------------------------------------------------");
+  for(i=0; i < 800;i++){
+
+    x_map = round(xy_positions[i][1]/map.info.resolution) + (map.info.width/2);
+    y_map = round(xy_positions[i][2]/map.info.resolution) + (map.info.height/2);
+    /**/
+    if(clusters[i] != -1)
+    {
+      for(m=-static_remove_dist; m <= static_remove_dist;m++)
+        for(n=-static_remove_dist; n <= static_remove_dist;n++){
+
+          if(map.data[(x_map+m) + (y_map+n-1)*map.info.width] > 0){
+            clusters[i] = -1;
+            m = static_remove_dist+1;
+            n = static_remove_dist+1;
+          }
+
+        }
+
+    }
+   // ROS_INFO("New cluster %d %d %d %d",x_map,y_map,clusters[i],i);
+
+  }
+}
+
+
+
+void tracting_lidar::polygon_extraction(){
+  /*
+  int i, current_cluster = clusters[0];
+  int start_point = 0, end_point;
+
+  for(i=1; i < 800; i++){
+    if(clusters[i] != current_cluster){
+      end_point = i-1;
+      if(clusters[i] != -1){
+
+
+
+      }
+
+    }
+
+  }
+    
+*/
+
+
+}
+
 
 
 /*

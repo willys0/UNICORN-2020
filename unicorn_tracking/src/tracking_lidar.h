@@ -8,14 +8,16 @@
 #include <nav_msgs/OccupancyGrid.h>
 #include <sensor_msgs/LaserScan.h>
 #include <tf2_ros/transform_listener.h>
-
-
-
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 /* C / C++ */
 #include <iostream>
 #include <termios.h>
+#include <math.h>
+#include <stdio.h>
+#include <cstdint>
+
+#define PI 3.14159265
 
 class tracting_lidar
 {
@@ -26,6 +28,10 @@ public:
 	void scanCallback(const sensor_msgs::LaserScan& scan);
 	void publishmsg();
 private:
+	void adaptive_breaK_point(const sensor_msgs::LaserScan& scan);
+	void static_map_filter(const nav_msgs::OccupancyGrid& map);
+	void polygon_extraction();
+
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
 	nav_msgs::OccupancyGrid map_data_;
@@ -33,6 +39,18 @@ private:
 	ros::Subscriber odometry_sub_;
 	ros::Subscriber map_sub_;
 	ros::Subscriber scan_sub_;
+
+	float lambda;
+	int max_dist_laser;
+	int static_remove_dist;
+
+
+	float xy_positions[800][2];
+	float xy_map_positions[800][2];
+  	int clusters[800];
+	double roll, pitch, yaw;
+	double x,y,z;
+	uint32_t mapx,mapy;
 
 };
 #endif
