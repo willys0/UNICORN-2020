@@ -1,7 +1,9 @@
 geometry_msgs/Point desired_offset
 ---
 float32 forward_error
-float32 rotation_error
+float32 lateral_error
+float32 angular_error
 ---
 float32 forward_error
-float32 rotation_error
+float32 lateral_error
+float32 angular_error

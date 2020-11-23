@@ -3,11 +3,13 @@
 ![Unicorn](docs/unicorn.jpg)
 ![Unicorn sim](docs/unicorn_sim.jpg)
 
-The trash-collecting robot.
+This repository contains the main ROS packages for the 2020th iteration of UNICORN, the trash-collecting robot.
 
-This project was made using ROS Kinetic and the ROS navigation stack.
+This project was made for ROS Kinetic.
 
-* [ROS Navigation](http://wiki.ros.org/navigation/Tutorials/RobotSetup) - ROS Navigation stack setup guide
+* [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) - ROS Kinetic installation instructions for Ubuntu 16.04.
+
+* [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment) - Guide for setting up your ROS workspace. 
 
 ## Getting Started
 
@@ -17,6 +19,33 @@ Please read through the coding style guides we are using
 * [PyStyleGuide](http://wiki.ros.org/PyStyleGuide) - ROS Python Style Guide
 
 * [(Outdated) LabVIEW implementations](https://github.com/jannesuuronen/UNICORN-2019-LabVIEW) - Repository containing the LabVIEW implementations for the robots sensors etc.
+
+### Dependencies
+
+Make sure you have cloned the repository into the src folder of your workspace (the following instructions assumes that it is called catkin_ws).
+
+```
+cd ~/catkin_ws/src
+git clone https://github.com/HusqvarnaResearch/hrp.git
+git clone https://github.com/husky/husky.git
+
+rosdep install --from-path src --ignore-src -r -y
+```
+
+Goto hrp/am_driver_safe and insert a CATKIN_IGNORE file.
+```
+cd hrp/am_driver_safe
+touch CATKIN_IGNORE
+```
+
+The above dependencies should be enough to get the simulator working.
+
+### Dependencies for the robot
+* [ZED Camera SDK](https://www.stereolabs.com/developers/release/) - Install the SDK for JETPACK 3.3 on the TX2 platform if needed
+
+*TODO: Add realsense camera instructions*
+
+*TODO: Probably add even more instructions*
 
 ### Run the Simulator
 
@@ -43,29 +72,6 @@ A rviz configuration including all sensors is included in the unicorn package, a
 ```
 roslaunch unicorn rviz.launch
 ```
-
-## Dependencies
-
-Make sure you have cloned the repository into the src folder of your workspace (the following instructions assumes that it is called catkin_ws).
-
-```
-cd ~/catkin_ws/src
-git clone https://github.com/HusqvarnaResearch/hrp.git
-git clone https://github.com/husky/husky.git
-
-rosdep install --from-path src --ignore-src -r -y
-```
-
-Goto hrp/am_driver_safe and insert a CATKIN_IGNORE file.
-```
-cd hrp/am_driver_safe
-touch CATKIN_IGNORE
-```
-
-The above dependencies should be enough to get the simulator working.
-
-### Dependencies for the actual robot
-* [ZED Camera SDK](https://www.stereolabs.com/developers/release/) - Install the SDK for JETPACK 3.3 on the TX2 platform if needed
 
 ## Documentation
 

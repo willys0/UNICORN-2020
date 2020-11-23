@@ -187,21 +187,21 @@ void DockingController::dynamicReconfigCallback(unicorn_docking::DockingControll
     thresh_th_ = config.th_error_thresh;
 }
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
-    double err_x, err_y, err_th, des_rot;
+    double des_rot;
 
     if(state_ == DOCKING) {
         ros::Time current_time = ros::Time::now();
 
         // Calculate x, y and theta errors
-        err_x = desired_offset_.x - getDistAlongTagNorm();
-        err_y = desired_offset_.y - getLateralComponent();
-        err_th = desired_offset_.z - getPitchComponent();
+        err_x_ = desired_offset_.x - getDistAlongTagNorm();
+        err_y_ = desired_offset_.y - getLateralComponent();
+        err_th_ = desired_offset_.z - getPitchComponent();
 
 
         if(retrying_ == true){
             // Calculate x errors
-            err_x = retry_offset_ - getDistanceToTag();
-            if(fabs(err_x) <= 4*thresh_x_){
+            err_x_ = retry_offset_ - getDistanceToTag();
+            if(fabs(err_x_) <= 4*thresh_x_){
                 retrying_ = false;
             }
             else{
@@ -212,14 +212,14 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
 
                 last_time_ = current_time;
             }
-            ROS_INFO("RETRY #: %d, err_x: %.2f, err_y: %.2f, err_th: %.2f, des_rot: %.2f", nr_retries_, err_x, err_y, err_th, getDesiredRotation());
+            ROS_INFO("RETRY #: %d, err_x_: %.2f, err_y_: %.2f, err_th_: %.2f, des_rot: %.2f", nr_retries_, err_x_, err_y_, err_th_, getDesiredRotation());
             
         }
         else{
             // If y error or theta error is above their respective thresholds
-            if(fabs(err_y) > thresh_y_ || fabs(err_th) > thresh_th_) {
+            if(fabs(err_y_) > thresh_y_ || fabs(err_th_) > thresh_th_) {
                 // If x position is below error threshold
-                if(fabs(err_x) <= thresh_x_) {
+                if(fabs(err_x_) <= thresh_x_) {
                     if (error_times_ > retry_error_times_) {
                         error_times_ = 0;
                         // If max number of retries have not been reached
@@ -245,13 +245,13 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
                     msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
 
                     last_time_ = current_time;
-                    //ROS_INFO("err_x: %.2f, err_y: %.2f, err_th: %.2f, des_rot: %.2f, norm_x: %.2f", err_x, err_y, err_th, getDesiredRotation(), getDistAlongTagNorm());
+                    //ROS_INFO("err_x_: %.2f, err_y_: %.2f, err_th_: %.2f, des_rot: %.2f, norm_x: %.2f", err_x_, err_y_, err_th_, getDesiredRotation(), getDistAlongTagNorm());
                 }
             }
             else {
-                if(fabs(err_x) <= thresh_x_) {
+                if(fabs(err_x_) <= thresh_x_) {
                     // All errors are within margins, set velocity and rotation to zero 
-                    ROS_INFO("Docking complete after %d retries, errors within margin: err_x: %.2f, err_y: %.2f, err_th: %.2f", nr_retries_, err_x, err_y, err_th);
+                    ROS_INFO("Docking complete after %d retries, errors within margin: err_x_: %.2f, err_y_: %.2f, err_th_: %.2f", nr_retries_, err_x_, err_y_, err_th_);
                     msg_out.linear.x = 0.0;
                     msg_out.angular.z = 0.0;
                     return true;

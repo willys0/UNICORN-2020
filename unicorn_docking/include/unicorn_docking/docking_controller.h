@@ -53,6 +53,10 @@ class DockingController {
 
         void setDesiredOffset(geometry_msgs::Point offset) { desired_offset_ = offset; }
 
+        double xError() { return err_x_; }
+        double yError() { return err_y_; }
+        double thError() { return err_th_; }
+
     protected:
         void apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg);
 
@@ -91,6 +95,10 @@ class DockingController {
         double thresh_x_;
         double thresh_y_;
         double thresh_th_;
+
+        double err_x_;
+        double err_y_;
+        double err_th_;
 
         ros::Time last_time_;
 

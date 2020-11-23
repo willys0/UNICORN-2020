@@ -29,7 +29,10 @@ void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionSer
     while(true) {
         if(as->isPreemptRequested()) {
             unicorn_docking::DockResult rslt;
-            // TODO: Add data to results
+
+            rslt.forward_error = controller->xError();
+            rslt.lateral_error = controller->yError();
+            rslt.angular_error = controller->thError();
             as->setPreempted(rslt);
 
             ROS_INFO("[Docking Controller] Dock action preempted.");
@@ -40,14 +43,19 @@ void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionSer
             controller->setState(DockingController::DockState::IDLE);
 
             unicorn_docking::DockResult rslt;
-            // TODO: Add data to results
+
+            rslt.forward_error = controller->xError();
+            rslt.lateral_error = controller->yError();
+            rslt.angular_error = controller->thError();
             as->setSucceeded(rslt);
 
             ROS_INFO("[Docking Controller] Dock action finished!");
             break;
         }
 
-        // TODO: Add data to feedback
+        fbk.forward_error = controller->xError();
+        fbk.lateral_error = controller->yError();
+        fbk.angular_error = controller->thError();
         as->publishFeedback(fbk);
 
         vel_pub.publish(move_msg);
