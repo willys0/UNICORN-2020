@@ -15,12 +15,18 @@
 #include <geometry_msgs/Quaternion.h>
 #include <cmath>
 
-#include <tf2/LinearMath/Matrix3x3.h>
+// #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <tf2/transform_datatypes.h>
+#include <tf2/utils.h>
+//#include <tf2/LinearMath/Vector3.h>
 
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
+
+#include <visualization_msgs/Marker.h>
+#include <geometry_msgs/PoseStamped.h>
+
+#include <std_msgs/Float64.h>
 
 
 class DockingController {
@@ -63,6 +69,12 @@ class DockingController {
         ros::Subscriber apriltag_sub_;
 
         ros::Publisher  detection_pub_;
+
+        ros::Publisher  d_pub_;
+        ros::Publisher  n_pub_;
+        ros::Publisher  desired_rot_pub_;
+        ros::Publisher  rot_to_tag_pub_;
+        ros::Publisher  tag_pitch_pub_;
 
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;
