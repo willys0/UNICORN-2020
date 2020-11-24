@@ -18,6 +18,7 @@ class LiftInterface {
         void startPickupRoutine();
         void startDropoffRoutine();
         void stopLift();
+        void cancelLift();
 
         LiftState getCurrentState();
 
