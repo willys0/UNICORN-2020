@@ -31,7 +31,8 @@ private:
 	void adaptive_breaK_point(const sensor_msgs::LaserScan& scan);
 	void static_map_filter(const nav_msgs::OccupancyGrid& map);
 	void polygon_extraction();
-	void extract_corners(float startpoint,int *polygon, int length);
+	void extract_corners(int startpoint,int *polygon, int length);
+	void search_longest(int startpoint, int current_point,int end_point, int length, float distance_S, int itteration, int max_itteration, int *best_point, float *best_dist);
 
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
@@ -54,6 +55,7 @@ private:
 	double roll, pitch, yaw;
 	double x,y,z;
 	uint32_t mapx,mapy;
+
 
 };
 #endif

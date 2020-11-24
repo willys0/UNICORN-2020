@@ -178,19 +178,101 @@ void tracting_lidar::polygon_extraction(){
   }
 }
 
-void tracting_lidar::extract_corners(float startpoint,int *polygon, int length)
+void tracting_lidar::extract_corners(int startpoint,int *polygon, int length)
 {
   if(length < polygon_min_points)
     return;
   
-  int point_check = ceil(float(length)/2);
-  ROS_INFO("halfway points %d",point_check);
+
+  int max_itteration = ceil(log2(float(length)));
+  float distance_start =  sqrt(pow(xy_positions[startpoint][1] - xy_positions[startpoint + length - 1][1],2) + pow(xy_positions[startpoint][2] - xy_positions[startpoint + length - 1][2],2));
+  
+  int *best_point = &startpoint;
+  float *best_dist = &distance_start;
+
+  search_longest(startpoint, startpoint+length-1,startpoint, length, distance_start, 1, max_itteration, best_point, best_dist);
+
+  //ROS_INFO("halfway points %d",point_check);
 
 
 
 }
 
+void tracting_lidar::search_longest(int startpoint,int end_point, int current_point, int length, float distance_S, int itteration, int max_itteration, int *best_point, float *best_dist)
+{
 
+  if(length < 1 || (startpoint+length)>799)
+    return; 
+  
+  float distance_1, distance_2, distance_total;
+  int j = floor(float(length)/(2));
+  int check_point = current_point + j-1;
+  itteration++;
+
+
+  distance_1 =  sqrt(pow(xy_positions[startpoint][1] - xy_positions[check_point][1],2) + pow(xy_positions[startpoint][2] - xy_positions[check_point][2],2));
+  distance_2 =  sqrt(pow(xy_positions[check_point][1] - xy_positions[end_point][1],2) + pow(xy_positions[check_point][2] - xy_positions[end_point][2],2));
+  distance_total = distance_1 + distance_2;
+
+  ROS_INFO("check point %d %d %f %f",check_point, length,distance_S, distance_total);
+  if(distance_total > *best_dist){
+    *best_point = check_point;
+    *best_dist = distance_total;
+  }
+
+  if(itteration < max_itteration)
+    if(distance_total > distance_S*0.9)
+    {
+      if(distance_total < distance_S)
+        distance_total = distance_S;
+      //ROS_INFO("check point %d %d -- %d %d",startpoint,check_point - startpoint + 1,check_point,startpoint+length - check_point);
+      search_longest(startpoint,end_point, startpoint, check_point - startpoint + 1, distance_total, itteration, max_itteration, best_point, best_dist);
+      search_longest(startpoint,end_point, check_point, startpoint+length - check_point, distance_total, itteration, max_itteration, best_point, best_dist);
+      
+
+
+
+    }
+
+
+  /*
+  int i,j;
+  float distance_1, distance_2, distance_total;
+
+  int check_point = startpoint + ceil(float(length)/2)-1;
+  int max_itteration = ceil(log2(float(length)));
+  float distance_start =  sqrt(pow(xy_positions[startpoint][1] - xy_positions[startpoint + length - 1][1],2) + pow(xy_positions[startpoint][2] - xy_positions[startpoint + length - 1][2],2));
+
+  distance_1 =  sqrt(pow(xy_positions[startpoint][1] - xy_positions[check_point][1],2) + pow(xy_positions[startpoint][2] - xy_positions[check_point][2],2));
+  distance_2 =  sqrt(pow(xy_positions[check_point][1] - xy_positions[startpoint + length - 1][1],2) + pow(xy_positions[check_point][2] - xy_positions[startpoint + length - 1][2],2));
+  distance_total = distance_1 + distance_2;
+
+  for(i=2; i < max_itteration; i++)
+  {
+    
+
+
+    if(distance_start*polygon_tolerance < distance_total)
+    {
+      j = floor(float(length)/pow(2,i));
+
+
+
+    }else{
+      return check_point;
+    }
+
+  }*/
+
+
+
+  
+
+
+
+
+
+}
 
 /*
 static geometry_msgs::TransformStamped transform_frames;
