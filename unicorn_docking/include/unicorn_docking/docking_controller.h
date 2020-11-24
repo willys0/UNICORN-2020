@@ -22,15 +22,12 @@
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
 
-#include <dynamic_reconfigure/server.h>
-#include <unicorn_docking/DockingControllerConfig.h>
-
 
 class DockingController {
 
     public:
         typedef enum DockState { IDLE, DOCKING } DockState;
-        DockingController();
+        DockingController(int nr_for_pitch_average);
 
         void reset();
 
@@ -60,16 +57,12 @@ class DockingController {
     protected:
         void apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg);
 
-        void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, uint32_t level);
-
     private:
         ros::NodeHandle nh_;
 
         ros::Subscriber apriltag_sub_;
 
         ros::Publisher  detection_pub_;
-
-        dynamic_reconfigure::Server<unicorn_docking::DockingControllerConfig> reconfig_server_;
 
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;
@@ -86,16 +79,9 @@ class DockingController {
         int nr_for_pitch_average_;   
 
         bool tag_visible_;
-        bool retrying_;
-        int max_retries_;
-        int nr_retries_;
-        double retry_offset_;
         int error_times_;
         
         int retry_error_times_;
-        double thresh_x_;
-        double thresh_y_;
-        double thresh_th_;
 
         double err_x_;
         double err_y_;
