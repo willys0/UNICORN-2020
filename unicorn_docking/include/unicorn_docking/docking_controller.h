@@ -78,6 +78,7 @@ class DockingController {
         std::vector<double> tag_pitch_mean_vec_;
         int nr_for_pitch_average_;   
 
+        bool tag_visible_;
         int error_times_;
         
         int retry_error_times_;

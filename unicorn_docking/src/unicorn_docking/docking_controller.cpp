@@ -149,6 +149,8 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
 
             detection_pub_.publish(pose_msg);
 
+            tag_visible_ = true;
+
             // Save tag pose to tag_pose_
             // For tag_pose_.position:
             // z is depth of tag in camera frame. Higher value equals further away.
@@ -170,6 +172,12 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
     double des_rot;
 
+    if(tag_visible_ == false) {
+        msg_out.linear.x = 0.0;
+        msg_out.angular.z = 0.0;
+        return false;
+    }
+
     if(state_ == DOCKING) {
         ros::Time current_time = ros::Time::now();
 
@@ -178,7 +186,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
         err_y_ = desired_offset_.y - getLateralComponent();
         err_th_ = desired_offset_.z - getPitchComponent();
 
-        msg_out.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistanceToTag(), current_time - last_time_);
+        msg_out.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistAlongTagNorm(), current_time - last_time_);
         msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
 
         last_time_ = current_time;
