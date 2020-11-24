@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>unicorn_navigation</name>
+  <name>unicorn_simulator</name>
   <version>0.0.0</version>
-  <description>The unicorn_navigation package</description>
+  <description>The unicorn_simulator package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/unicorn_navigation</url> -->
+  <!-- <url type="website">http://wiki.ros.org/unicorn_simulator</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -49,11 +49,12 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>move_base</build_depend>
-  <build_export_depend>move_base</build_export_depend>
-  <exec_depend>move_base</exec_depend>
-  <exec_depend>teb_local_planner</exec_depend>
-  <exec_depend>global_planner</exec_depend>
+  <build_depend>gazebo_ros</build_depend>
+  <build_depend>husky_gazebo</build_depend>
+  <build_export_depend>gazebo_ros</build_export_depend>
+  <build_export_depend>husky_gazebo</build_export_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>husky_gazebo</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

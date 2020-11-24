@@ -1,31 +1,20 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(unicorn)
+cmake_minimum_required(VERSION 3.0.2)
+project(unicorn_simulator)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-add_compile_options(-std=c++11)
+# add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  roscpp
-  rospy
-  std_msgs
-  nav_msgs
-  actionlib
-  actionlib_msgs
-  tf
-  tf2
-  geometry_msgs
-  message_generation 
-  genmsg
-  move_base_msgs
+  gazebo_ros
+  husky_gazebo
 )
 
 ## System dependencies are found with CMake's conventions
-#find_package(Boost REQUIRED)
-#find_package(rostest REQUIRED)
-#find_package(GTest REQUIRED)
+# find_package(Boost REQUIRED COMPONENTS system)
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -42,10 +31,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
 ## * In the file package.xml:
 ##   * add a build_depend tag for "message_generation"
-##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
+##   * add a build_depend and a exec_depend tag for each package in MSG_DEP_SET
 ##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
 ##     but can be declared for certainty nonetheless:
-##     * add a run_depend tag for "message_runtime"
+##     * add a exec_depend tag for "message_runtime"
 ## * In this file (CMakeLists.txt):
 ##   * add "message_generation" and every package in MSG_DEP_SET to
 ##     find_package(catkin REQUIRED COMPONENTS ...)
@@ -63,19 +52,12 @@ find_package(catkin REQUIRED COMPONENTS
 #   Message2.msg
 # )
 
-add_message_files(
-  FILES
-  command.msg
-  masterMessage.msg
-)
-
 ## Generate services in the 'srv' folder
-  add_service_files(
-  	DIRECTORY
-  	srv
-    FILES
-    CharlieCmd.srv
- )
+# add_service_files(
+#   FILES
+#   Service1.srv
+#   Service2.srv
+# )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -85,11 +67,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-  generate_messages(
-   DEPENDENCIES
-   std_msgs
-   geometry_msgs
- )
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs  # Or other packages containing msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -98,7 +79,7 @@ add_message_files(
 ## To declare and build dynamic reconfigure parameters within this
 ## package, follow these steps:
 ## * In the file package.xml:
-##   * add a build_depend and a run_depend tag for "dynamic_reconfigure"
+##   * add a build_depend and a exec_depend tag for "dynamic_reconfigure"
 ## * In this file (CMakeLists.txt):
 ##   * add "dynamic_reconfigure" to
 ##     find_package(catkin REQUIRED COMPONENTS ...)
@@ -116,14 +97,14 @@ add_message_files(
 ###################################
 ## The catkin_package macro generates cmake config files for your package
 ## Declare things to be passed to dependent projects
-## INCLUDE_DIRS: uncomment this if you package contains header files
+## INCLUDE_DIRS: uncomment this if your package contains header files
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include
-# LIBRARIES unicorn
- CATKIN_DEPENDS roscpp rospy std_msgs nav_msgs actionlib actionlib_msgs tf geometry_msgs message_runtime move_base_msgs
+#  INCLUDE_DIRS include
+#  LIBRARIES unicorn_simulator
+#  CATKIN_DEPENDS gazebo_ros husky_gazebo
 #  DEPENDS system_lib
 )
 
@@ -134,48 +115,14 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 include_directories(
-  include
+# include
   ${catkin_INCLUDE_DIRS}
-  ${GTEST_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/unicorn.cpp
+#   src/${PROJECT_NAME}/unicorn_simulator.cpp
 # )
-
-#add_executable(laser_scan_filter src/laser_scan_filter.cpp)
-#target_link_libraries(laser_scan_filter ${catkin_LIBRARIES})
-
-add_executable(am_unicorn_interface src/am_unicorn_interface.cpp)
-target_link_libraries(am_unicorn_interface ${catkin_LIBRARIES})
-add_dependencies(am_unicorn_interface ${PROJECT_NAME}_generate_messages_cpp)
-
-#add_executable(unicorn_statemachine src/unicorn_statemachine.cpp)
-#add_dependencies(unicorn_statemachine ${catkin_EXPORTED_TARGETS})
-#add_library(unicorn_statemachine_lib src/unicorn_statemachine.cpp)
-#target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES})
-
-#add_executable(range_sensor_driver src/range_sensor_driver.cpp)
-#target_link_libraries(range_sensor_driver ${catkin_LIBRARIES})
-
-add_library(state_lib
-  include/unicorn/aligning_state.h src/aligning_state.cpp
-  include/unicorn/reversing_state.h src/reversing_state.cpp
-  include/unicorn/idle_state.h src/idle_state.cpp
-  include/unicorn/navigating_state.h src/navigating_state.cpp
-  include/unicorn/lifting_state.h src/lifting_state.cpp
-  include/unicorn/state_factory.h src/state_factory.cpp
-  include/unicorn/state_structures.h
-  include/unicorn/state_machine.h
-  )
-add_dependencies(state_lib ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_generate_messages_cpp)
-
-add_library(pid_controller_lib src/pid_controller.cpp)
-
-add_executable(unicorn_statemachine src/state_machine.cpp)
-add_dependencies(unicorn_statemachine unicorn_generate_messages_cpp ${catkin_EXPORTED_TARGETS})
-target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES} pid_controller_lib state_lib)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -185,7 +132,7 @@ target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES} pid_controller_li
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/unicorn_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/unicorn_simulator_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -211,16 +158,23 @@ target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES} pid_controller_li
 
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
-# install(PROGRAMS
+# catkin_install_python(PROGRAMS
 #   scripts/my_python_script
 #   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
 
-## Mark executables and/or libraries for installation
-# install(TARGETS ${PROJECT_NAME} ${PROJECT_NAME}_node
+## Mark executables for installation
+## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_executables.html
+# install(TARGETS ${PROJECT_NAME}_node
+#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
+
+## Mark libraries for installation
+## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
+# install(TARGETS ${PROJECT_NAME}
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
-#   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}
 # )
 
 ## Mark cpp header files for installation
@@ -239,25 +193,13 @@ target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES} pid_controller_li
 
 #############
 ## Testing ##
-##############
-#catkin_add_gtest(unicorn-test test/test_unicorn.cpp)
-#target_link_libraries(unicorn-test ${catkin_LIBRARIES})
+#############
 
-#add_executable(unicorn-test test/test_unicorn.cpp)
-#target_link_libraries(unicorn-test ${GTEST_LIBRARIES} pthread)
-#add_rostest_gtest(unicorn-tests test/test_unicorn.test test/test_unicorn.cpp)
-#target_link_libraries(unicorn-test ${catkin_LIBRARIES} ${GTEST_LIBRARIES} unicorn_statemachine_lib)
-#add_dependencies(unicorn-test unicorn_statemachine ${catkin_EXPORTED_TARGETS})
 ## Add gtest based cpp test target and link libraries
-#add_dependencies(unicorn-test ${catkin_EXPORTED_TARGETS})
-#target_link_libraries(Unicorn-test unicorn_statemachine)
-#if(TARGET ${PROJECT_NAME}-test)
-#  target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME}_statemachine)
-#endif()
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_unicorn_simulator.cpp)
+# if(TARGET ${PROJECT_NAME}-test)
+#   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
+# endif()
 
-#target_link_libraries(unicorn-test ${catkin_LIBRARIES})
-# catkin_add_gtest(utest test/utest.cpp)
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-
-
