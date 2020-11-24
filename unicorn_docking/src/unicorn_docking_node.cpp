@@ -34,7 +34,7 @@ void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, u
     thresh_th = config.th_error_thresh;
 }
 
-DockStatus dock(DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
+DockStatus getDockingVelocity(DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
     controller->computeVelocity(out_velocity);
 
     if(fabs(controller->xError()) <= thresholds.x) {
@@ -47,18 +47,32 @@ DockStatus dock(DockingController* controller, DockActionServer* as, geometry_ms
     }
 
     return DockStatus::RUNNING;
+
 }
 
-void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionServer* as, DockingController* controller, ros::NodeHandle nh) {
+void getDockingResultMsg(DockingController* controller, bool success, unicorn_docking::DockResult& msg) {
+    msg.forward_error = controller->xError();
+    msg.lateral_error = controller->yError();
+    msg.angular_error = controller->thError();
+    msg.success = success;
+}
+
+void getDockingFeedbackMsg(DockingController* controller, unicorn_docking::DockFeedback& msg ) {
+    msg.forward_error = controller->xError();
+    msg.lateral_error = controller->yError();
+    msg.angular_error = controller->thError();
+}
+
+void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* as) {
     ros::Publisher vel_pub;
     geometry_msgs::Twist move_msg;
-
-    unicorn_docking::DockFeedback fbk;
-    unicorn_docking::DockResult rslt;
 
     int remaining_retries = 10;
 
     DockStatus dock_status;
+
+    unicorn_docking::DockResult rslt;
+    unicorn_docking::DockFeedback fbk;
 
     vel_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
 
@@ -80,32 +94,26 @@ void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionSer
 
     while(true) {
         if(as->isPreemptRequested()) {
-            rslt.forward_error = controller->xError();
-            rslt.lateral_error = controller->yError();
-            rslt.angular_error = controller->thError();
-            rslt.success = false;
-
+            getDockingResultMsg(controller, false, rslt);
             as->setPreempted(rslt);
 
             ROS_INFO("[Docking Controller] Dock action preempted with errors x: %f, y: %f, th: %f!", controller->xError(), controller->yError(), controller->thError());
             break;
         }
 
-        dock_status = dock(controller, as, thresh, move_msg);
+        // Call the docking controller to get velocity
+        dock_status = getDockingVelocity(controller, as, thresh, move_msg);
 
         if(dock_status == DockStatus::SUCCESS) {
-            controller->setState(DockingController::DockState::IDLE);
-
-            rslt.forward_error = controller->xError();
-            rslt.lateral_error = controller->yError();
-            rslt.angular_error = controller->thError();
-            rslt.success = true;
+            getDockingResultMsg(controller, true, rslt);
             as->setSucceeded(rslt);
 
             ROS_INFO("[Docking Controller] Dock action finished with errors x: %f, y: %f, th: %f!", controller->xError(), controller->yError(), controller->thError());
             break;
         }
         else if(dock_status == DockStatus::FAILED && error_times++ > max_error_times) {
+
+            // Keep trying to dock some number of times (undock and go back in)
             if(remaining_retries > 0) {
                 if(docking) {
                     offset.x = retry_offset;
@@ -124,10 +132,8 @@ void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionSer
                 error_times = 0;
             }
             else {
-                rslt.forward_error = controller->xError();
-                rslt.lateral_error = controller->yError();
-                rslt.angular_error = controller->thError();
-                rslt.success = false;
+                // All retries failed, not good!
+                getDockingResultMsg(controller, false, rslt);
                 as->setPreempted(rslt);
 
                 ROS_INFO("[Docking Controller] Dock action failed after %d retries with errors x: %f, y: %f, th: %f!", max_retries, controller->xError(), controller->yError(), controller->thError());
@@ -138,9 +144,7 @@ void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionSer
 
         vel_pub.publish(move_msg);
 
-        fbk.forward_error = controller->xError();
-        fbk.lateral_error = controller->yError();
-        fbk.angular_error = controller->thError();
+        getDockingFeedbackMsg(controller, fbk);
         as->publishFeedback(fbk);
 
         ros::Duration(1.0/100.0).sleep();
@@ -154,7 +158,89 @@ void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionSer
     controller->setState(DockingController::DockState::IDLE);
     ros::Duration(0.1).sleep();
     vel_pub.shutdown();
+}
 
+void undock(ros::NodeHandle nh, DockingController* controller, DockActionServer* as) {
+    ros::Publisher vel_pub;
+    geometry_msgs::Twist move_msg;
+
+    unicorn_docking::DockFeedback fbk;
+    unicorn_docking::DockResult rslt;
+
+    DockStatus dock_status;
+
+    vel_pub = nh.advertise<geometry_msgs::Twist>("/cmd_vel", 1);
+
+    geometry_msgs::Point offset = desired_offset;
+    offset.x = retry_offset;
+
+    geometry_msgs::Point thresh;
+    thresh.x = thresh_x * 4.0f;
+    thresh.y = thresh_y;
+    thresh.z = thresh_th;
+
+    controller->reset();
+    controller->setDesiredOffset(offset);
+    controller->setState(DockingController::DockState::DOCKING);
+
+    ROS_INFO("[Docking Controller] Executing undock action...");
+
+    while(true) {
+        if(as->isPreemptRequested()) {
+            getDockingResultMsg(controller, false, rslt);
+            as->setPreempted(rslt);
+
+            ROS_INFO("[Docking Controller] Dock action preempted with errors x: %f, y: %f, th: %f!", controller->xError(), controller->yError(), controller->thError());
+            break;
+        }
+
+        // Call the docking controller to get velocity
+        dock_status = getDockingVelocity(controller, as, thresh, move_msg);
+
+        if(dock_status == DockStatus::SUCCESS) {
+            getDockingResultMsg(controller, true, rslt);
+            as->setSucceeded(rslt);
+
+            ROS_INFO("[Docking Controller] Dock action finished with errors x: %f, y: %f, th: %f!", controller->xError(), controller->yError(), controller->thError());
+            break;
+        }
+        else if(dock_status == DockStatus::FAILED) {
+            getDockingResultMsg(controller, false, rslt);
+            as->setPreempted(rslt);
+
+            ROS_INFO("[Docking Controller] Undock action failed with errors x: %f, y: %f, th: %f!", controller->xError(), controller->yError(), controller->thError());
+
+            break;
+        }
+
+        vel_pub.publish(move_msg);
+
+        getDockingFeedbackMsg(controller, fbk);
+        as->publishFeedback(fbk);
+
+        ros::Duration(1.0/100.0).sleep();
+    }
+
+    move_msg.linear.x = 0.0;
+    move_msg.angular.z = 0.0;
+    vel_pub.publish(move_msg);
+    // TODO: Handle errors in some nice way
+
+    controller->setState(DockingController::DockState::IDLE);
+    ros::Duration(0.1).sleep();
+    vel_pub.shutdown();
+}
+
+
+void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionServer* as, DockingController* controller, ros::NodeHandle nh) {
+
+    if(goal->undock) {
+        undock(nh, controller, as);
+    }
+    else {
+        dock(nh, controller, as);
+
+    }
 }
 
 int main(int argc, char **argv) {
