@@ -20,7 +20,10 @@
 standalone_tags:
   [
       {id: 0, size: 0.035, name: ZERO},
-      {id: 1, size: 0.035, name: ONE }
+      {id: 1, size: 0.035, name: ONE },
+      {id: 2, size: 0.035, name: TWO },
+      {id: 3, size: 0.035, name: THREE },
+      {id: 4, size: 0.035, name: FOUR }
   ]
 # ## Tag bundle definitions
 # ### Remarks
@@ -45,4 +48,15 @@ standalone_tags:
 #   ]
 tag_bundles:
   [
+    {
+      name: 'DOCK_BUNDLE',
+      layout:
+        [
+          {id: 0, size: 0.035, x: 0.0000, y: 0.0000, z: 0.0, qw: 1.0, qx: 0.0, qy: 0.0, qz: 0.0},
+          {id: 4, size: 0.035, x: 0.035, y: -0.035, z: 0.0, qw: 1.0, qx: 0.0, qy: 0.0, qz: 0.0},
+          {id: 3, size: 0.035, x: -0.035, y: -0.035, z: 0.0, qw: 1.0, qx: 0.0, qy: 0.0, qz: 0.0},
+          {id: 2, size: 0.035, x: 0.035, y: 0.035, z: 0.0, qw: 1.0, qx: 0.0, qy: 0.0, qz: 0.0},
+          {id: 1, size: 0.035, x: -0.035, y: 0.035, z: 0.0, qw: 1.0, qx: 0.0, qy: 0.0, qz: 0.0}
+        ]
+    }
   ]
