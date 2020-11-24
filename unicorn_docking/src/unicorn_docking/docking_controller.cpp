@@ -1,6 +1,6 @@
 #include <unicorn_docking/docking_controller.h>
 
-DockingController::DockingController(int nr_for_pitch_average) : nh_("~"), nr_for_pitch_average_(nr_for_pitch_average), state_(DockingController::DockState::IDLE), tf_listener_(tf_buffer_) {
+DockingController::DockingController(int nr_for_pitch_average) : nh_("~"), state_(DockingController::DockState::IDLE), tf_listener_(tf_buffer_) {
 
     apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
     detection_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("detected_tag", 1);
@@ -14,8 +14,6 @@ DockingController::DockingController(int nr_for_pitch_average) : nh_("~"), nr_fo
     pid_x_.initParam("~/pid/x");
     pid_th_.initParam("~/pid/th");
 
-
-    tag_pitch_mean_vec_.resize(nr_for_pitch_average_, 0.0);
 
     // Get transform from camera frame to chassi frame
     geometry_msgs::TransformStamped wheel_base_transform;

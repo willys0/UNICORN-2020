@@ -18,7 +18,6 @@
 // #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2/utils.h>
-//#include <tf2/LinearMath/Vector3.h>
 
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
@@ -86,9 +85,6 @@ class DockingController {
 
         tf2_ros::Buffer tf_buffer_;
         tf2_ros::TransformListener tf_listener_;
-
-        std::vector<double> tag_pitch_mean_vec_;
-        int nr_for_pitch_average_;   
 
         bool tag_visible_;
         int error_times_;
