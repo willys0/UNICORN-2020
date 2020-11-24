@@ -66,6 +66,11 @@ public:
   Eigen::VectorXd state() { return x_hat; };
   double time() { return t; };
 
+  /**
+  * Return estimate error covariance
+  */
+  Eigen::VectorXd covariance() {return p}
+
 private:
 
   // Matrices for computation
