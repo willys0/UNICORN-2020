@@ -55,9 +55,13 @@
   <xacro:arg name="zed_meshfile" default="package://unicorn_description/meshes/zed_link.STL" />
 
   <!-- Real Sense -->
-  <xacro:arg name="real_rgb_xyz" default="-0.4065 -0.03882 0.33658" />
-  <xacro:arg name="real_depth_xyz" default="-0.4065 -0.00518 0.33658" />
+  <xacro:arg name="real_base" default="-0.4065 ${-0.03882+0.015} 0.33658" />
+  <xacro:arg name="real_rgb_xyz" default="0 0.015 0" />
+  <xacro:arg name="real_depth_xyz" default="0 0 0" /> 
+
   <xacro:arg name="real_rpy" default="0 0 ${M_PI}" />
+  <xacro:arg name="real_optical_rpy" default="${-M_PI2} 0 ${-M_PI2}" />
+  <xacro:arg name="real_depth_rpy" default="${-M_PI2} 0 ${-M_PI2}" />
   <xacro:arg name="realsense_meshfile" default="package://unicorn_description/meshes/real_sense.STL" />
   
 
@@ -202,48 +206,6 @@
     <child link="base_link" />
   <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
   </joint>
-<!--
-  <link
-    name="wheel_link">
-    <inertial>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <mass
-        value="0.01" />
-      <box_inertia  m="${5*0.01}" x="${base_x_size}" y="${base_y_size}" z="${base_z_size}"/>
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <box size="0.01 0.01 0.01"/>
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.79216 0.81961 0.93333 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-          <box size="0.01 0.01 0.01"/>
-      </geometry>
-    </collision>
-  </link>
-  <gazebo reference="base_link_gazebo">
-    <material>Gazebo/Green</material>
-    <turnGravityOff>false</turnGravityOff>
-  </gazebo>
-  <joint name="base_chassis_joint" type="fixed">
-    <parent link="base_link"/> 
-    <child link="wheel_link" />
-  <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
-  </joint>-->
 
 
   <!-- driving wheels 
@@ -298,18 +260,67 @@
   <!-- realsense Camera -->
 
 
-    <stereo_camera frame_rgb="realsense_camera" frame_depth="realsense_depth_joint" cameraName="realsense" simulation="$(arg sim)" filename="$(arg realsense_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+    <stereo_camera frame_rgb="realsense_color_frame" frame_depth="realsense_depth_frame" cameraName="realsense" simulation="$(arg sim)" filename="$(arg realsense_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+  
+
+  <link
+    name="realsense_link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.01" />
+      <box_inertia  m="${5*0.01}" x="${base_x_size}" y="${base_y_size}" z="${base_z_size}"/>
+    </inertial>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+          <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+  </link>
+
+
+  <link
+    name="realsense_depth_optical_frame">
+  </link>
+
+  <link
+    name="realsense_color_optical_frame">
+  </link>
+
+
+    <joint name="realsense_joint" type="fixed"> 
+      <origin xyz="$(arg real_base)" rpy="$(arg real_rpy)"/>
+      <parent link="chassis_link"/>  
+      <child link="realsense_link"/>
+    </joint>
 
     <joint name="realsense_gb_joint" type="fixed"> 
-      <origin xyz="$(arg real_rgb_xyz)" rpy="$(arg real_rpy)"/>
-      <parent link="base_link"/>  
-      <child link="realsense_camera"/>
+      <origin xyz="$(arg real_rgb_xyz)" rpy="0 0 0"/>
+      <parent link="realsense_link"/>  
+      <child link="realsense_color_frame"/>
     </joint>
 
     <joint name="realsense_depth_joint" type="fixed">
-      <origin xyz="$(arg real_depth_xyz)" rpy="${-pi/2} 0 ${-pi/2}"/>
-      <parent link="realsense_camera"/>
-      <child link="realsense_depth_joint"/>
+      <origin xyz="$(arg real_depth_xyz)" rpy="0 0 0"/>
+      <parent link="realsense_link"/>
+      <child link="realsense_depth_frame"/>
+    </joint>
+
+    <joint name="realsense_optical_color_joint" type="fixed"> 
+      <origin xyz="0 0 0" rpy="$(arg real_optical_rpy)"/>
+      <parent link="realsense_color_frame"/>  
+      <child link="realsense_color_optical_frame"/>
+    </joint>
+
+    <joint name="realsense_optical_depth_joint" type="fixed">
+      <origin xyz="0 0 0" rpy="$(arg real_depth_rpy)"/>
+      <parent link="realsense_depth_frame"/>
+      <child link="realsense_depth_optical_frame"/>
     </joint>
 
 
