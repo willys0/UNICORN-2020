@@ -189,6 +189,12 @@ void DockingController::dynamicReconfigCallback(unicorn_docking::DockingControll
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
     double des_rot;
 
+    if(tag_visible_ == false) {
+        msg_out.linear.x = 0.0;
+        msg_out.angular.z = 0.0;
+        return false;
+    }
+
     if(state_ == DOCKING) {
         ros::Time current_time = ros::Time::now();
 
@@ -207,7 +213,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
             else{
                 // TODO: MAKE BACKING UPP BETTER
                 // ################################################################
-                msg_out.linear.x = pid_x_.computeCommand(retry_offset_ - getDistanceToTag(), current_time - last_time_);
+                msg_out.linear.x = pid_x_.computeCommand(retry_offset_ - getDistAlongTagNorm(), current_time - last_time_);
                 msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
 
                 last_time_ = current_time;
@@ -241,7 +247,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
                 }
                 else {
                     // Move towards desired position
-                    msg_out.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistanceToTag(), current_time - last_time_);
+                    msg_out.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistAlongTagNorm(), current_time - last_time_);
                     msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
 
                     last_time_ = current_time;
