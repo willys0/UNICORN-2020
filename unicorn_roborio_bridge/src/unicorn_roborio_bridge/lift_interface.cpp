@@ -29,6 +29,12 @@ void LiftInterface::stopLift() {
     waitForMsgPublish();
 }
 
+void LiftInterface::cancelLift() {
+    run_msg_.data = RioLiftAction::CANCEL;
+    run_lift_pub_.publish(run_msg_);
+    waitForMsgPublish();
+}
+
 LiftInterface::LiftState LiftInterface::getCurrentState() {
     switch(lift_state_.data) {
         case 0:

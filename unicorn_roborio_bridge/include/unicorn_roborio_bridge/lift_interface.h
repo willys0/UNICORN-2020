@@ -29,7 +29,7 @@ class LiftInterface {
 
 
     protected:
-        enum RioLiftAction { STOP = 0, PICKUP = 1, DROPOFF = 2 };
+        enum RioLiftAction { STOP = 0, PICKUP = 1, DROPOFF = 2, CANCEL = 3 };
 
         void initLiftMsg();
 

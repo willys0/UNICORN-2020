@@ -64,9 +64,9 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
     while(ros::ok()) {
         if(as->isPreemptRequested()) {
 
-            ROS_INFO("[Roborio Bridge] Lift preemption requested, stopping lift...");
+            ROS_INFO("[Roborio Bridge] Lift preemption requested, stopping and resetting lift...");
 
-            lift_interface->stopLift();
+            lift_interface->cancelLift();
 
             ROS_INFO("[Roborio Bridge] Lift action preempted.");
             as->setPreempted();
