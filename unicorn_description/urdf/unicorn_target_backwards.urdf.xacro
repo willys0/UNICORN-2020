@@ -234,6 +234,25 @@
     <child link="realsense_link"/>
   </joint>
 
+<xacro:if value="$(arg sim)">
+  <link
+    name="realsense_model_dummy_link">
+    <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+            <mesh filename="$(arg realsense_meshfile)" />
+        </geometry>
+      </visual>
+  </link>
+
+
+  <joint name="realsense_model_joint" type="fixed"> 
+    <origin xyz="$(arg real_rgb_xyz)" rpy="0 0 0"/>
+    <parent link="realsense_link"/>  
+    <child link="realsense_model_dummy_link"/>
+  </joint>
+</xacro:if> 
+
   <!-- Links only needed in simulation, created by realsense software otherwise-->
 <xacro:if value="$(arg sim)">
   <stereo_camera frame_rgb="realsense_color_frame" frame_depth="realsense_depth_frame" cameraName="realsense" simulation="$(arg sim)" filename="$(arg realsense_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
