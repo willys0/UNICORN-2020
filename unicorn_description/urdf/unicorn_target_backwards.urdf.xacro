@@ -10,7 +10,7 @@
   <xacro:include filename="$(find unicorn_description)/urdf/swivel_wheel.urdf.xacro" />
 
     <!-- Wheel -->
-  <xacro:include filename="$(find am_description)/urdf/wheel.urdf.xacro" />
+  <xacro:include filename="$(find unicorn_description)/urdf/wheel.urdf.xacro" />
 
     <!-- camera pack-->
   <xacro:include filename="$(find unicorn_description)/urdf/stereo_camera_gazebo.urdf.xacro" />
@@ -55,9 +55,13 @@
   <xacro:arg name="zed_meshfile" default="package://unicorn_description/meshes/zed_link.STL" />
 
   <!-- Real Sense -->
-  <xacro:arg name="real_rgb_xyz" default="-0.4065 -0.03882 0.33658" />
-  <xacro:arg name="real_depth_xyz" default="-0.4065 -0.00518 0.33658" />
+  <xacro:arg name="real_base" default="-0.4065 ${-0.03882+0.015} 0.33658" />
+  <xacro:arg name="real_rgb_xyz" default="0 0.015 0" />
+  <xacro:arg name="real_depth_xyz" default="0 0 0" /> 
+
   <xacro:arg name="real_rpy" default="0 0 ${M_PI}" />
+  <xacro:arg name="real_optical_rpy" default="${-M_PI2} 0 ${-M_PI2}" />
+  <xacro:arg name="real_depth_rpy" default="${-M_PI2} 0 ${-M_PI2}" />
   <xacro:arg name="realsense_meshfile" default="package://unicorn_description/meshes/real_sense.STL" />
   
 
@@ -69,7 +73,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="10" />
+        value="15" />
       <inertia
         ixx="1"
         ixy="0"
@@ -161,21 +165,21 @@
       link="lift_link" />
     <axis
       xyz="0 0 0" />
-    <joint_properties damping="0.0" friction="0.0" />
+    <joint_properties damping="1" friction="0.5" />
   </joint>
 
 
   <!-- driving wheels 
-  <wheel fb="back" lr="left" parent="base_link" rotationZ="3.14159" translateY="0.23" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
-  <wheel fb="back" lr="right" parent="base_link" rotationZ="0" translateY="-0.23" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="left" parent="chassis_link" rotationZ="3.14159" translateY="0.23" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
+  <wheel fb="back" lr="right" parent="chassis_link" rotationZ="0" translateY="-0.23" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   -->
   <wheel fb="back" lr="left" parent="lift_link"  translateY="0.24" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   <wheel fb="back" lr="right" parent="lift_link" translateY="-0.24" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   
 
   <!-- others wheels -->
-  <swivel_wheel fb="front" lr="left" parent="base_link" translateY="0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
-  <swivel_wheel fb="front" lr="right" parent="base_link" translateY="-0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
+  <swivel_wheel fb="front" lr="left" parent="chassis_link" translateY="0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
+  <swivel_wheel fb="front" lr="right" parent="chassis_link" translateY="-0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
 
 
 
@@ -184,8 +188,9 @@
 
   <joint name="laser_mount_joint" type="fixed">
     <origin xyz="$(arg laser_xyz)" rpy="$(arg laser_rpy)" />
-    <parent link="base_link" />
+    <parent link="chassis_link" />
     <child link="base_laser" />
+    <joint_properties damping="1" friction="0.5" />
   </joint>
   
 
@@ -194,43 +199,98 @@
 
   <joint name="rear_laser_mount_joint" type="fixed">
     <origin xyz="$(arg rear_laser_xyz)" rpy="$(arg rear_laser_rpy)" />
-    <parent link="base_link" />
+    <parent link="chassis_link" />
     <child link="rear_laser" />
+    <joint_properties damping="1" friction="0.5" />
   </joint>
 
   <!-- Zed Camera -->
-    <stereo_camera frame_rgb="zed_camera" frame_depth="zed_depth_joint" cameraName="zed" simulation="$(arg sim)" filename="$(arg zed_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+    <stereo_camera frame_rgb="zed_camera" frame_depth="zed_depth" cameraName="zed" simulation="$(arg sim)" filename="$(arg zed_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
 
     <joint name="zed_camera_rgb_joint" type="fixed"> 
       <origin xyz="$(arg zed_xyz)" rpy="$(arg zed_rpy)"/>
-      <parent link="base_link"/>  
+      <parent link="chassis_link"/>  
       <child link="zed_camera"/>
+      <joint_properties damping="1" friction="0.5" />
     </joint>
 
     <joint name="zed_camera_depth_joint" type="fixed">
       <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
       <parent link="zed_camera"/>
-      <child link="zed_depth_joint"/>
+      <child link="zed_depth"/>
+      <joint_properties damping="1" friction="0.5" />
     </joint>
 
 
   <!-- realsense Camera -->
 
+  <link
+    name="realsense_link">
+  </link>
 
-    <stereo_camera frame_rgb="realsense_camera" frame_depth="realsense_depth_joint" cameraName="realsense" simulation="$(arg sim)" filename="$(arg realsense_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+  <joint name="realsense_joint" type="fixed"> 
+    <origin xyz="$(arg real_base)" rpy="$(arg real_rpy)"/>
+    <parent link="chassis_link"/>  
+    <child link="realsense_link"/>
+  </joint>
 
-    <joint name="realsense_gb_joint" type="fixed"> 
-      <origin xyz="$(arg real_rgb_xyz)" rpy="$(arg real_rpy)"/>
-      <parent link="base_link"/>  
-      <child link="realsense_camera"/>
-    </joint>
+<xacro:if value="$(arg sim)">
+  <link
+    name="realsense_model_dummy_link">
+    <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+            <mesh filename="$(arg realsense_meshfile)" />
+        </geometry>
+      </visual>
+  </link>
 
-    <joint name="realsense_depth_joint" type="fixed">
-      <origin xyz="$(arg real_depth_xyz)" rpy="${-pi/2} 0 ${-pi/2}"/>
-      <parent link="realsense_camera"/>
-      <child link="realsense_depth_joint"/>
-    </joint>
 
+  <joint name="realsense_model_joint" type="fixed"> 
+    <origin xyz="$(arg real_rgb_xyz)" rpy="0 0 0"/>
+    <parent link="realsense_link"/>  
+    <child link="realsense_model_dummy_link"/>
+  </joint>
+</xacro:if> 
+
+  <!-- Links only needed in simulation, created by realsense software otherwise-->
+<xacro:if value="$(arg sim)">
+  <stereo_camera frame_rgb="realsense_color_frame" frame_depth="realsense_depth_frame" cameraName="realsense" simulation="$(arg sim)" filename="$(arg realsense_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+  
+
+  <link
+    name="realsense_depth_optical_frame">
+  </link>
+
+  <link
+    name="realsense_color_optical_frame">
+  </link>
+
+
+  <joint name="realsense_gb_joint" type="fixed"> 
+    <origin xyz="$(arg real_rgb_xyz)" rpy="0 0 0"/>
+    <parent link="realsense_link"/>  
+    <child link="realsense_color_frame"/>
+  </joint>
+
+  <joint name="realsense_depth_joint" type="fixed">
+    <origin xyz="$(arg real_depth_xyz)" rpy="0 0 0"/>
+    <parent link="realsense_link"/>
+    <child link="realsense_depth_frame"/>
+  </joint>
+
+  <joint name="realsense_optical_color_joint" type="fixed"> 
+    <origin xyz="0 0 0" rpy="$(arg real_optical_rpy)"/>
+    <parent link="realsense_color_frame"/>  
+    <child link="realsense_color_optical_frame"/>
+  </joint>
+
+  <joint name="realsense_optical_depth_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="$(arg real_depth_rpy)"/>
+    <parent link="realsense_depth_frame"/>
+    <child link="realsense_depth_optical_frame"/>
+  </joint>
+</xacro:if> 
 
 <xacro:if value="$(arg sim)">
   <!-- GPS -->
@@ -239,7 +299,7 @@
       <alwaysOn>true</alwaysOn>
       <updateRate>5</updateRate>
       <frameId>odom_chassis</frameId>
-      <bodyName>base_link</bodyName>
+      <bodyName>chassis_link</bodyName>
       <topicName>gps</topicName>
       <velocityTopicName>gps_velocity</velocityTopicName>
       <drift>5.0 5.0 5.0</drift>
@@ -256,7 +316,7 @@
   <gazebo>
     <plugin name="automower_gazebo_controller" filename="libam_gazebo_controller_2wd.so">
       <alwaysOn>true</alwaysOn>
-      <updateRate>100.0</updateRate>
+      <updateRate>50.0</updateRate>
       <leftJoint>back_right_wheel_joint</leftJoint>
       <rightJoint>back_left_wheel_joint</rightJoint>
       <wheelSeparation>0.4645</wheelSeparation>
@@ -264,9 +324,10 @@
       <wheelTorque>100</wheelTorque>
       <commandTopic>cmd_vel</commandTopic>
       <odometryTopic>wheel_encoder/odom</odometryTopic>
-      <odometryFrame>odom_chassis_dont_use</odometryFrame>
-      <robotBaseFrame>base_link</robotBaseFrame>
+      <odometryFrame>odom_chassis</odometryFrame>
+      <robotBaseFrame>chassis_link</robotBaseFrame>
       <publishWheelTF>false</publishWheelTF>
+      <publishOdomTF>false</publishOdomTF>
       <publishWheelJointState>false</publishWheelJointState>
 
 
