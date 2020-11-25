@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>
+    <arg name="velocity_topic"          default="/cmd_vel" />
+    <arg name="unicorn_state_topic"     default="/unicorn/state" />
+    <arg name="intention_angle_topic"   default="intention_angle" />
+    <arg name="led_state_topic"         default="led_state" />
+
+    <node pkg="unicorn_intention" type="unicorn_intention_node" name="unicorn_intention_node" output="screen">
+        <remap from="/cmd_vel"          to="$(arg velocity_topic)" />
+        <remap from="/unicorn/state"    to="$(arg unicorn_state_topic)" />
+        <remap from="intention_angle"   to="$(arg intention_angle_topic)" />
+        <remap from="led_state"         to="$(arg led_state_topic)" />
+    </node>
+</launch>
