@@ -10,9 +10,12 @@
 #include <costmap_converter/ObstacleArrayMsg.h>
 #include <costmap_converter/ObstacleMsg.h>
 #include <geometry_msgs/Point32.h>
+#include <geometry_msgs/Point.h>
 #include <sensor_msgs/LaserScan.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <visualization_msgs/Marker.h>
+#include <visualization_msgs/MarkerArray.h>
 
 /* C / C++ */
 #include <iostream>
@@ -52,6 +55,7 @@ private:
 	ros::Subscriber map_sub_;
 	ros::Subscriber scan_sub_;
 	ros::Publisher object_pub_;
+	ros::Publisher marker_pub_;
 
 	float lambda;
 	int max_dist_laser;

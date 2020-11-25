@@ -18,6 +18,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf2
   geometry_msgs
   costmap_converter
+  visualization_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -114,7 +115,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  CATKIN_DEPENDS roscpp std_msgs nav_msgs sensor_msgs geometry_msgs costmap_converter
+  CATKIN_DEPENDS roscpp std_msgs nav_msgs sensor_msgs geometry_msgs costmap_converter visualization_msgs
 #  CATKIN_DEPENDS roscpp std_msgs nav_msgs actionlib actionlib_msgs tf geometry_msgs 
 #  DEPENDS system_lib
 )

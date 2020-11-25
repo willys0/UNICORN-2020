@@ -49,8 +49,8 @@ tracking_lidar::tracking_lidar()
   odometry_sub_ = n_.subscribe("/odometry/filtered", 10, &tracking_lidar::odomCallback, this);
   map_sub_ = n_.subscribe("/map", 10, &tracking_lidar::mapCallback, this);
   scan_sub_ = n_.subscribe("/frontLidar/scan", 10, &tracking_lidar::scanCallback, this);
-  object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("/obstacles",10,false);
-  
+  object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("obstacles",10,false);
+  marker_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArray",10,false);
   n_.param("lambda",lambda, 0.15f);
   n_.param("Max_Laser_dist",max_dist_laser, 10);
   n_.param("Static_map_removal_tolerance",static_remove_dist, 4);
@@ -70,6 +70,10 @@ void tracking_lidar::object_publisher()
 {
   costmap_converter::ObstacleMsg object;
   costmap_converter::ObstacleArrayMsg object_array;
+  visualization_msgs::Marker marker;
+  visualization_msgs::MarkerArray markerArray;
+  geometry_msgs::Point point;
+  
   
   std::string frameid ("/map");
   object.header.frame_id = frameid;
@@ -90,9 +94,22 @@ void tracking_lidar::object_publisher()
   object.velocities.twist.angular.y = 0;
   object.velocities.twist.angular.z = 0;
 
+  marker.header = object.header;
+  marker.ns = "Tracking";
+  marker.type = 4;
+  marker.action = 0;
+
+  marker.pose.orientation.x = 0;
+  marker.pose.orientation.y = 0;
+  marker.pose.orientation.z = 0;
+  marker.pose.orientation.w = 1;
+  marker.pose.position.x = 0;
+  marker.pose.position.y = 0;
+  marker.pose.position.z = 0;
+
   object_array.obstacles.clear();
   object_array.header = object.header;
-  int i;
+  int i,m;
   for(i=0; i < MAX_OBJECTS; i++)
   {
     if(polygon_size[i] > 0){
@@ -101,10 +118,26 @@ void tracking_lidar::object_publisher()
 
       object_array.obstacles.push_back(object);
 
+
+      marker.id = i;
+      for(m =0; m < polygon_size[i]; m++)
+      {
+      point.x = shapes[i].points[m].x;
+      point.y = shapes[i].points[m].y;
+      point.z = shapes[i].points[m].z;
+      marker.points.push_back(point);
+      }
+      markerArray.markers.push_back(marker);
+      marker.points.clear();
+      //marker.points = shapes[i].points;
+
     }
   }
   //ROS_INFO("Test pub");
   object_pub_.publish(object_array);
+  marker_pub_.publish(markerArray);
+  markerArray.markers.clear();
+  object_array.obstacles.clear();
   
 }
 
