@@ -6,7 +6,7 @@ kld_z:                0.99      # 0.99
 update_min_d:         0.2       # 0.2
 update_min_a:         0.3    # 0.5235
 resample_interval:    0.5        # 2, 1
-transform_tolerance:  0.05       # 0.1, 0.2
+transform_tolerance:  0.01       # 0.1, 0.2
 recovery_alpha_slow:  0.001     # 0.0, 0.0, 0.001
 recovery_alpha_fast:  0.1       # 0.0, 0.0, 0.1
 initial_pose_x:       0.0       # 0.0
@@ -28,7 +28,7 @@ laser_z_hit:                0.95   # 0.95, 0.5
 laser_z_short:              0.05    # 0.1,  0.05
 laser_z_max:                0.05   # 0.05
 laser_z_rand:               0.75   # 0.05, 0.5
-laser_sigma_hit:            0.5    # 0.2
+laser_sigma_hit:            0.05    # 0.2
 laser_lambda_short:         0.2    # 0.1
 laser_likelihood_max_dist:  10.0    # 2.0
 laser_model_type:           likelihood_field
