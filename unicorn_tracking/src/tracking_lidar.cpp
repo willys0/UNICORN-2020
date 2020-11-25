@@ -105,15 +105,20 @@ void tracking_lidar::object_publisher()
   marker.scale.y = 0.15;
   marker.scale.z = 0.15;
 
-  marker.color.a = 0.5f;
-  marker.color.b = 0.5f;
-  marker.color.g = 0.5f;
-  marker.color.r = 0.5f;
+  marker.color.a = 1;
+  marker.color.b = 1;
+  marker.color.g = 0;
+  marker.color.r = 0;
 
   marker.pose.orientation.x = 0;
   marker.pose.orientation.y = 0;
   marker.pose.orientation.z = 0;
   marker.pose.orientation.w = 1;
+
+
+  marker.pose.position.x = 0;
+  marker.pose.position.y = 0;
+  marker.pose.position.z = 0.1;
 
   object_array.obstacles.clear();
   object_array.header = object.header;
@@ -128,14 +133,15 @@ void tracking_lidar::object_publisher()
 
 
       marker.id = i;
-      for(m =0; m < polygon_size[i]; m++)
+      for(m =0; m < polygon_size[i]-1; m++)
       {
       point.x = shapes[i].points[m].x;
       point.y = shapes[i].points[m].y;
       point.z = shapes[i].points[m].z;
-      marker.pose.position.x = object_attributes_list[i].estimated_x;
-      marker.pose.position.y = object_attributes_list[i].estimated_y;
-      marker.pose.position.z = 0.4;
+      marker.points.push_back(point);
+      point.x = shapes[i].points[m+1].x;
+      point.y = shapes[i].points[m+1].y;
+      point.z = shapes[i].points[m+1].z;
       marker.points.push_back(point);
       }
       markerArray.markers.push_back(marker);
