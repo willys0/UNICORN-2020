@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   tf
   tf2
   geometry_msgs
+  costmap_converter
 )
 
 ## System dependencies are found with CMake's conventions
@@ -74,14 +75,14 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs
-  nav_msgs
-  sensor_msgs
-  geometry_msgs
-  actionlib_msgs
-)
+# generate_messages(
+#   DEPENDENCIES
+#   std_msgs
+#   nav_msgs
+#   sensor_msgs
+#   geometry_msgs
+#   actionlib_msgs
+# )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -113,7 +114,7 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-  CATKIN_DEPENDS roscpp std_msgs nav_msgs sensor_msgs geometry_msgs
+  CATKIN_DEPENDS roscpp std_msgs nav_msgs sensor_msgs geometry_msgs costmap_converter
 #  CATKIN_DEPENDS roscpp std_msgs nav_msgs actionlib actionlib_msgs tf geometry_msgs 
 #  DEPENDS system_lib
 )
@@ -138,7 +139,7 @@ include_directories(
 
  add_executable(tracking_lidar src/tracking_lidar.cpp)
  target_link_libraries(tracking_lidar ${catkin_LIBRARIES})
- add_dependencies(tracking_lidar tracking_lidar_generate_messages_cpp)
+ add_dependencies(tracking_lidar ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries

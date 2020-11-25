@@ -7,6 +7,8 @@
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <geometry_msgs/Polygon.h>
+#include <costmap_converter/ObstacleArrayMsg.h>
+#include <costmap_converter/ObstacleMsg.h>
 #include <geometry_msgs/Point32.h>
 #include <sensor_msgs/LaserScan.h>
 #include <tf2_ros/transform_listener.h>
@@ -36,6 +38,7 @@ public:
 	void static_map_filter();
 	void polygon_extraction();
 	void polygon_attribute_extraction();
+	void object_publisher();
 private:
 	void extract_corners(int startpoint,int endpoint, int length,int shape_nr);
 	void search_longest(int startpoint, int current_point,int end_point, int length, float distance_S, int itteration, int max_itteration, int *best_point, float *best_dist);
@@ -48,12 +51,14 @@ private:
 	ros::Subscriber odometry_sub_;
 	ros::Subscriber map_sub_;
 	ros::Subscriber scan_sub_;
+	ros::Publisher object_pub_;
 
 	float lambda;
 	int max_dist_laser;
 	int static_remove_dist;
 	float polygon_tolerance;
 	int polygon_min_points;
+	int seq;
 
 
 	float xy_positions[SCAN_SIZE][2];
@@ -78,36 +83,3 @@ private:
 };
 #endif
 
-
-/*
-#ifndef ODOMETRY_TRANSFORM_H
-#define ODOMETRY_TRANSFORM_H
-
-
-#include <ros/ros.h>
-#include <tf/tf.h>
-#include <nav_msgs/Odometry.h>
-#include <tf2_ros/transform_listener.h>
-#include <tf/transform_broadcaster.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <tf2_ros/transform_broadcaster.h>
-#include <tf2_ros/buffer_interface.h>
-
-
-#include <iostream>
-#include <termios.h>
-
-class odom_transform
-{
-public:
-	odom_transform();
-	void msgCallback(const nav_msgs::Odometry& odometry);
-	void publishmsg();
-private:
-	ros::NodeHandle n_;
-	nav_msgs::Odometry odometry_data_;
-	ros::Subscriber odometry_sub_;
-	ros::Publisher odometry_transform_pub_;
-};
-#endif
-*/

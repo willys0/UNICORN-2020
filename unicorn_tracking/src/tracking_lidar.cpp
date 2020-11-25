@@ -13,7 +13,7 @@ int main(int argc, char** argv){
 
   ROS_INFO("Started Lidar Tracking node");
   tracking_lidar tracking_lidar_interface;
-  ros::Rate r(5.0);
+  ros::Rate r(30.0);
 
 /*
 while(ros::ok)
@@ -25,11 +25,12 @@ while(ros::ok)
     //ROS_INFO(" Running ");
     
     if(map_received && odom_received && scan_received){
-      ROS_INFO(" doing shit ");
+      
       tracking_lidar_interface.adaptive_breaK_point();
       tracking_lidar_interface.static_map_filter();
       tracking_lidar_interface.polygon_extraction();
       scan_received = false;
+      tracking_lidar_interface.object_publisher();
 
     }
     
@@ -48,6 +49,7 @@ tracking_lidar::tracking_lidar()
   odometry_sub_ = n_.subscribe("/odometry/filtered", 10, &tracking_lidar::odomCallback, this);
   map_sub_ = n_.subscribe("/map", 10, &tracking_lidar::mapCallback, this);
   scan_sub_ = n_.subscribe("/frontLidar/scan", 10, &tracking_lidar::scanCallback, this);
+  object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("/obstacles",10,false);
   
   n_.param("lambda",lambda, 0.15f);
   n_.param("Max_Laser_dist",max_dist_laser, 10);
@@ -55,12 +57,55 @@ tracking_lidar::tracking_lidar()
   n_.param("polygon_tolerance",polygon_tolerance, 1.04f);
   n_.param("polygon_min_points_required",polygon_min_points, 4);
 
-
+  seq = 0;
 
   memset(polygon_size, 0, MAX_OBJECTS*sizeof(polygon_size[0])); 
 
+
+}
+
+
+
+void tracking_lidar::object_publisher()
+{
+  costmap_converter::ObstacleMsg object;
+  costmap_converter::ObstacleArrayMsg object_array;
   
-  //odometry_transform_pub_ = n_.advertise<nav_msgs::Odometry>("/wheel_encoder/odom_transformed", 10,true);
+  std::string frameid ("/map");
+  object.header.frame_id = frameid;
+  seq++;
+  object.header.seq = seq;
+  object.header.stamp = scan_data_.header.stamp;
+
+  object.orientation.x = 0;
+  object.orientation.y = 0;
+  object.orientation.z = 0;
+  object.orientation.w = 1;
+
+  object.velocities.twist.linear.x = 0;
+  object.velocities.twist.linear.y = 0;
+  object.velocities.twist.linear.z = 0;
+
+  object.velocities.twist.angular.x = 0;
+  object.velocities.twist.angular.y = 0;
+  object.velocities.twist.angular.z = 0;
+
+  object_array.obstacles.clear();
+  object_array.header = object.header;
+  int i;
+  for(i=0; i < MAX_OBJECTS; i++)
+  {
+    if(polygon_size[i] > 0){
+      object.polygon.points.clear();
+      object.polygon.points = shapes[i].points;
+
+      object_array.obstacles.push_back(object);
+
+    }
+  }
+  ROS_INFO("Test pub");
+  object_pub_.publish(object_array);
+  
 }
 
 void tracking_lidar::odomCallback(const nav_msgs::Odometry& odometry)
@@ -105,6 +150,7 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       static_map_filter();
       polygon_extraction();
       polygon_attribute_extraction();
+      object_publisher();
       scan_received = false;
 
     }
@@ -361,42 +407,3 @@ void tracking_lidar::polygon_attribute_extraction()
   }
 }
 
-/*
-static geometry_msgs::TransformStamped transform_frames;
-int main(int argc, char** argv){
-  ros::init(argc, argv, "tracking_lidar");
-  ROS_INFO("Started Lidar Tracking node");
-  odom_transform odom_transform_interface;
-  ros::Rate r(100.0);
-
-
-  tf2_ros::Buffer tf_buffer;
-  tf2_ros::TransformListener tf2_listener(tf_buffer);
-  transform_frames = tf_buffer.lookupTransform("chassis_link", "lift_link", ros::Time(0), ros::Duration(1.0) );
-
-  while(ros::ok())
-  {
-    odom_transform_interface.publishmsg();
-    ros::spinOnce();
-    r.sleep();
-  }
-}
-
-/*
-odom_transform::odom_transform()
-{
-  odometry_sub_ = n_.subscribe("/wheel_encoder/odom", 10, &odom_transform::msgCallback, this);
-  odometry_transform_pub_ = n_.advertise<nav_msgs::Odometry>("/wheel_encoder/odom_transformed", 10,true);
-}
-
-void odom_transform::msgCallback(const nav_msgs::Odometry& odometry)
-{
-  odometry_data_ = odometry;
-  tf2::doTransform((odometry.pose.pose), (odometry_data_.pose.pose), transform_frames);
-}
-
-void odom_transform::publishmsg()
-{
-  odometry_transform_pub_.publish(odometry_data_);
-}
-*/
