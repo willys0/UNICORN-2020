@@ -96,16 +96,13 @@ void tracking_lidar::object_publisher()
 
   marker.header = object.header;
   marker.ns = "Tracking";
-  marker.type = 4;
+  marker.type = 5;
   marker.action = 0;
 
   marker.pose.orientation.x = 0;
   marker.pose.orientation.y = 0;
   marker.pose.orientation.z = 0;
   marker.pose.orientation.w = 1;
-  marker.pose.position.x = 0;
-  marker.pose.position.y = 0;
-  marker.pose.position.z = 0;
 
   object_array.obstacles.clear();
   object_array.header = object.header;
@@ -125,6 +122,9 @@ void tracking_lidar::object_publisher()
       point.x = shapes[i].points[m].x;
       point.y = shapes[i].points[m].y;
       point.z = shapes[i].points[m].z;
+      marker.pose.position.x = object_attributes_list[i].estimated_x;
+      marker.pose.position.y = object_attributes_list[i].estimated_y;
+      marker.pose.position.z = 0;
       marker.points.push_back(point);
       }
       markerArray.markers.push_back(marker);
