@@ -98,6 +98,17 @@ void tracking_lidar::object_publisher()
   marker.ns = "Tracking";
   marker.type = 5;
   marker.action = 0;
+  marker.lifetime.nsec = 0;
+  marker.lifetime.sec = 1;
+
+  marker.scale.x = 0.15;
+  marker.scale.y = 0.15;
+  marker.scale.z = 0.15;
+
+  marker.color.a = 0.5f;
+  marker.color.b = 0.5f;
+  marker.color.g = 0.5f;
+  marker.color.r = 0.5f;
 
   marker.pose.orientation.x = 0;
   marker.pose.orientation.y = 0;
@@ -124,7 +135,7 @@ void tracking_lidar::object_publisher()
       point.z = shapes[i].points[m].z;
       marker.pose.position.x = object_attributes_list[i].estimated_x;
       marker.pose.position.y = object_attributes_list[i].estimated_y;
-      marker.pose.position.z = 0;
+      marker.pose.position.z = 0.4;
       marker.points.push_back(point);
       }
       markerArray.markers.push_back(marker);
