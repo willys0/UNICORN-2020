@@ -42,6 +42,15 @@ void KalmanFilter::init() {
   initialized = true;
 }
 
+
+void KalmanFilter::deactivate() {
+  x_hat.setZero();
+  P = P0;
+  t0 = 0;
+  t = t0;
+  initialized = false;
+}
+
 void KalmanFilter::update(const Eigen::VectorXd& y) {
 
   if(!initialized)
