@@ -100,7 +100,7 @@ void tracting_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
     
     
     if(map_received && odom_received && scan_received){
-      //ROS_INFO(" doing shit ");
+
       adaptive_breaK_point();
       static_map_filter();
       polygon_extraction();
@@ -119,7 +119,6 @@ void tracting_lidar::adaptive_breaK_point()
   int i,j = 0;
   float current_angle,r,p,dmax, deg2rad = PI/180;
   int max_itterations = round((scan_data_.angle_max - scan_data_.angle_min)/scan_data_.angle_increment);
-  // ROS_INFO("New scan Message %d ",max_itterations);
   for(i = 0; i < max_itterations+1; i++)
   {
     current_angle = float(i)*scan_data_.angle_increment+scan_data_.angle_min;
@@ -148,18 +147,17 @@ void tracting_lidar::adaptive_breaK_point()
   }
 }
 
+/* Filters static map from scan, requires reliable odometry and static map*/
 void tracting_lidar::static_map_filter()
 {
   int i,m,n;
   uint32_t x_map,y_map;
-  // uint8_t (*map_matrix)[4000] = reinterpret_cast<uint8_t (*)[4000]>(map.data);
 
-  // ROS_INFO("-----------------------------------------------------------");
   for(i=0; i < 800;i++){
 
     x_map = round(xy_positions[i][1]/map_data_.info.resolution) + (map_data_.info.width/2);
     y_map = round(xy_positions[i][2]/map_data_.info.resolution) + (map_data_.info.height/2);
-    /**/
+
     if(clusters[i] != -1)
     {
       for(m=-static_remove_dist; m <= static_remove_dist;m++)
@@ -174,13 +172,10 @@ void tracting_lidar::static_map_filter()
         }
 
     }
-   // ROS_INFO("New cluster %d %d %d %d",x_map,y_map,clusters[i],i);
-
   }
 }
 
-
-
+/* Extracts polygon shapes from lidar clusters*/
 void tracting_lidar::polygon_extraction(){
   /**/
   int i,j, current_cluster = clusters[0], m = 0,n,l;
@@ -215,20 +210,16 @@ void tracting_lidar::polygon_extraction(){
             polygon[end_point] = 1;
             polygon_size[m]++;
             
-            ROS_INFO(" New cluster %d new end %d  length %d cluster %d", start_point,end_point,end_point-start_point+1, m);
+
             extract_corners(start_point,end_point,end_point-start_point+1,m);
             
-
-            // shapes[m].points = new geometry_msgs::Point32 [polygon_size[m]];
-            /**/
             for(j = start_point;j <= end_point; j++)
             {
-              //ROS_INFO(" Check point %d value % d", j,polygon[j]); 
                
               if(polygon[j])
               {
                
-                ROS_INFO("New cluster %d point %d cluster %d",polygon_size[m],j,m);
+                
                 point.x = xy_positions[j][1];
                 point.y = xy_positions[j][2];
                 point.z = 0;
@@ -237,7 +228,7 @@ void tracting_lidar::polygon_extraction(){
                 
               }
             }
-
+            ROS_INFO("New cluster %d cluster %d",polygon_size[m],m);
             m++;
           }
       }
@@ -248,69 +239,42 @@ void tracting_lidar::polygon_extraction(){
   }
 }
 
-
-
-
-
-
+/*  Finds all corners in a scan between two points*/
 void tracting_lidar::extract_corners(int startpoint,int endpoint, int length,int shape_nr)
 {
   if(length < polygon_min_points)
     return;
   
-
   int max_itteration = ceil(log2(float(length)));
   float distance_start =  sqrt(pow(xy_positions[startpoint][1] - xy_positions[startpoint + length - 1][1],2) + pow(xy_positions[startpoint][2] - xy_positions[startpoint + length - 1][2],2));
-  
-  
   int bestpoint = startpoint;
   float bestdist = distance_start;
-
   int *best_point = &bestpoint;
   float *best_dist = &bestdist;
   int j = floor(float(length)/(2));
-  //ROS_INFO("Test: %f %d",  distance_start, startpoint+j-1);
-
   search_longest(startpoint, startpoint+length-1,startpoint+j-1, length, distance_start, 1, max_itteration, best_point, best_dist);
-  //ROS_INFO("Test: %f %f",  distance_start, *best_dist);
   if((*best_dist) > distance_start*polygon_tolerance)
   { 
-
-    //ROS_INFO("Test: %d %d", polygon[*best_point], *best_point);
     if(polygon[*best_point] == 0)
-    {
-      
+    {   
       polygon[*best_point] = 1;
       polygon_size[shape_nr]++;
-      //ROS_INFO(" new start %d new end %d length %d  ", startpoint,*best_point,*best_point-startpoint+1);
-      //ROS_INFO(" new start %d new end %d  length %d ", *best_point,endpoint,endpoint-*best_point+1);  
-      
-      //ROS_INFO(" new start %d new end %d length %d  ", startpoint,*best_point,*best
       extract_corners(startpoint,*best_point,*best_point-startpoint+1,shape_nr);
       extract_corners(*best_point,endpoint,endpoint-*best_point+1,shape_nr);
-
-      //ROS_INFO("Search %d - s %d e %d - s %f e %f",*best_point,startpoint,endpoint,distance_start,*best_dist);
     }
-
   }
-  //ROS_INFO("halfway points %d",point_check);
-
-
-
 }
 
+/* Searches for a point that would maximize the distance between the start and end point*/ 
 void tracting_lidar::search_longest(int startpoint,int end_point, int current_point, int length, float distance_S, int itteration, int max_itteration, int *best_point, float *best_dist)
 {
 
   if(length < 1 || (startpoint+length)>799)
     return;
-  /* 
-  if(current_point <= startpoint || current_point >= end_point)
+  if(current_point < startpoint || current_point > end_point)
     return; 
-    
-  if(itteration >= max_itteration)
-    return;
-  */
+
+
 
 
   float distance_1, distance_2, distance_total;
