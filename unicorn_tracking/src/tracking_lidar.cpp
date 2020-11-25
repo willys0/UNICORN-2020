@@ -12,7 +12,7 @@ int main(int argc, char** argv){
 
 
   ROS_INFO("Started Lidar Tracking node");
-  tracting_lidar tracting_lidar_interface;
+  tracking_lidar tracking_lidar_interface;
   ros::Rate r(5.0);
 
 /*
@@ -26,9 +26,9 @@ while(ros::ok)
     
     if(map_received && odom_received && scan_received){
       ROS_INFO(" doing shit ");
-      tracting_lidar_interface.adaptive_breaK_point();
-      tracting_lidar_interface.static_map_filter();
-      tracting_lidar_interface.polygon_extraction();
+      tracking_lidar_interface.adaptive_breaK_point();
+      tracking_lidar_interface.static_map_filter();
+      tracking_lidar_interface.polygon_extraction();
       scan_received = false;
 
     }
@@ -41,13 +41,13 @@ while(ros::ok)
 }
 
 
-tracting_lidar::tracting_lidar()
+tracking_lidar::tracking_lidar()
 : n_("~")
 {
 
-  odometry_sub_ = n_.subscribe("/odometry/filtered", 10, &tracting_lidar::odomCallback, this);
-  map_sub_ = n_.subscribe("/map", 10, &tracting_lidar::mapCallback, this);
-  scan_sub_ = n_.subscribe("/frontLidar/scan", 10, &tracting_lidar::scanCallback, this);
+  odometry_sub_ = n_.subscribe("/odometry/filtered", 10, &tracking_lidar::odomCallback, this);
+  map_sub_ = n_.subscribe("/map", 10, &tracking_lidar::mapCallback, this);
+  scan_sub_ = n_.subscribe("/frontLidar/scan", 10, &tracking_lidar::scanCallback, this);
   
   n_.param("lambda",lambda, 0.15f);
   n_.param("Max_Laser_dist",max_dist_laser, 10);
@@ -63,7 +63,7 @@ tracting_lidar::tracting_lidar()
   //odometry_transform_pub_ = n_.advertise<nav_msgs::Odometry>("/wheel_encoder/odom_transformed", 10,true);
 }
 
-void tracting_lidar::odomCallback(const nav_msgs::Odometry& odometry)
+void tracking_lidar::odomCallback(const nav_msgs::Odometry& odometry)
 {
     //ROS_INFO("New odom Message!");
     odometry_data_ = odometry;
@@ -83,7 +83,7 @@ void tracting_lidar::odomCallback(const nav_msgs::Odometry& odometry)
 
 }
 
-void tracting_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
+void tracking_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
 {
     //ROS_INFO("New map Message!");
     map_data_ = map;
@@ -92,7 +92,7 @@ void tracting_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
     mapy = map_data_.info.width;
 }
 
-void tracting_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
+void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 {
     //ROS_INFO("New scan Message!");
     scan_data_ = scan;
@@ -104,6 +104,7 @@ void tracting_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       adaptive_breaK_point();
       static_map_filter();
       polygon_extraction();
+      polygon_attribute_extraction();
       scan_received = false;
 
     }
@@ -113,7 +114,7 @@ void tracting_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 
 
 
-void tracting_lidar::adaptive_breaK_point()
+void tracking_lidar::adaptive_breaK_point()
 {
 
   int i,j = 0;
@@ -148,7 +149,7 @@ void tracting_lidar::adaptive_breaK_point()
 }
 
 /* Filters static map from scan, requires reliable odometry and static map*/
-void tracting_lidar::static_map_filter()
+void tracking_lidar::static_map_filter()
 {
   int i,m,n;
   uint32_t x_map,y_map;
@@ -176,7 +177,7 @@ void tracting_lidar::static_map_filter()
 }
 
 /* Extracts polygon shapes from lidar clusters*/
-void tracting_lidar::polygon_extraction(){
+void tracking_lidar::polygon_extraction(){
   /**/
   int i,j, current_cluster = clusters[0], m = 0,n,l;
   int start_point = 0, end_point;
@@ -188,7 +189,7 @@ void tracting_lidar::polygon_extraction(){
   {
     if(polygon_size[i] > 0)
     {
-      ROS_INFO("clear cluster %d size %d",i,polygon_size[i]);
+      // ROS_INFO("clear cluster %d size %d",i,polygon_size[i]);
       /**/
       shapes[i].points.clear();
       polygon_size[i] = 0;
@@ -228,7 +229,7 @@ void tracting_lidar::polygon_extraction(){
                 
               }
             }
-            ROS_INFO("New cluster %d cluster %d",polygon_size[m],m);
+            // ROS_INFO("New cluster %d cluster %d",polygon_size[m],m);
             m++;
           }
       }
@@ -240,7 +241,7 @@ void tracting_lidar::polygon_extraction(){
 }
 
 /*  Finds all corners in a scan between two points*/
-void tracting_lidar::extract_corners(int startpoint,int endpoint, int length,int shape_nr)
+void tracking_lidar::extract_corners(int startpoint,int endpoint, int length,int shape_nr)
 {
   if(length < polygon_min_points)
     return;
@@ -266,7 +267,7 @@ void tracting_lidar::extract_corners(int startpoint,int endpoint, int length,int
 }
 
 /* Searches for a point that would maximize the distance between the start and end point*/ 
-void tracting_lidar::search_longest(int startpoint,int end_point, int current_point, int length, float distance_S, int itteration, int max_itteration, int *best_point, float *best_dist)
+void tracking_lidar::search_longest(int startpoint,int end_point, int current_point, int length, float distance_S, int itteration, int max_itteration, int *best_point, float *best_dist)
 {
 
   if(length < 1 || (startpoint+length)>799)
@@ -281,14 +282,9 @@ void tracting_lidar::search_longest(int startpoint,int end_point, int current_po
   
   int j;
   itteration++;
-
-
   distance_1 =  sqrt(pow(xy_positions[startpoint][1] - xy_positions[current_point][1],2) + pow(xy_positions[startpoint][2] - xy_positions[current_point][2],2));
   distance_2 =  sqrt(pow(xy_positions[current_point][1] - xy_positions[end_point][1],2) + pow(xy_positions[current_point][2] - xy_positions[end_point][2],2));
   distance_total = distance_1 + distance_2;
-
-
-  //ROS_INFO("check point %d %d %f %f",current_point, length,distance_S, distance_total);
   if(distance_total > *best_dist){
     *best_point = current_point;
     *best_dist = distance_total;
@@ -301,20 +297,68 @@ void tracting_lidar::search_longest(int startpoint,int end_point, int current_po
         distance_total = distance_S;
 
       j = floor(float(length)/pow(2,itteration));
-      //ROS_INFO("check point %d %d -- %d %d",startpoint,check_point - startpoint + 1,check_point,startpoint+length - check_point);
       if(j > 0)
       {
         search_longest(startpoint,end_point, current_point+j, length, distance_total, itteration, max_itteration, best_point, best_dist);
         search_longest(startpoint,end_point, current_point-1, length, distance_total, itteration, max_itteration, best_point, best_dist);
       }
+    }
+}
 
-      
+/* Collects information polygon attributes for a simularity comparison*/
+void tracking_lidar::polygon_attribute_extraction()
+{
+  int i,j;
+  geometry_msgs::Point32 point1,point2,point3;
+  float length1,length2,length3;
+  for(i=0; i < MAX_OBJECTS; i++){
+    object_attributes_list[i].longest_size = 0;
+    object_attributes_list[i].sides_amount = 0;
+    object_attributes_list[i].estimated_x = 0;
+    object_attributes_list[i].estimated_y = 0;
+    object_attributes_list[i].average_angle = 0;
+    if(polygon_size[i] > 0){
 
 
+      /* Get angle average, length average*/
+      for(j=0;j < polygon_size[i]-1;j++)
+      {
+        point1 = shapes[i].points[j];
+        point2 = shapes[i].points[j+1];
+
+        length1 = sqrt(pow(point1.x - point2.x,2) + pow(point1.y - point2.y,2));
+        if(length1 >object_attributes_list[i].longest_size)
+         object_attributes_list[i].longest_size = length1;
+
+        object_attributes_list[i].sides_amount++;
+
+        object_attributes_list[i].estimated_x += point1.x;
+        object_attributes_list[i].estimated_y += point1.y;
+
+        if(polygon_size[i]-j > 2)
+        {
+          point3 = shapes[i].points[j+2];
+          length2 = sqrt(pow(point3.x - point2.x,2) + pow(point3.y - point2.y,2));
+          length3 = sqrt(pow(point3.x - point1.x,2) + pow(point3.y - point1.y,2));
+
+
+          object_attributes_list[i].average_angle += acos((pow(length1,2) + pow(length2,2) - pow(length3,2))/(2*length1*length2));
+
+        }
+
+      }
+      object_attributes_list[i].estimated_x += point2.x;
+      object_attributes_list[i].estimated_y += point2.y;
+
+      object_attributes_list[i].estimated_x /= polygon_size[i];
+      object_attributes_list[i].estimated_y /= polygon_size[i];
+      if(polygon_size[i]-2 > 0)
+        object_attributes_list[i].average_angle /= polygon_size[i]-2;
+
+      ROS_INFO("Polygon: Sides: %d, Longest Side %f, Average angle %f, x %f, y %f",object_attributes_list[i].sides_amount,object_attributes_list[i].longest_size,object_attributes_list[i].average_angle,object_attributes_list[i].estimated_x ,object_attributes_list[i].estimated_y);
 
     }
-
-
+  }
 }
 
 /*

@@ -22,11 +22,12 @@
 
 #define PI 3.14159265
 #define MAX_OBJECTS 100
+#define SCAN_SIZE 800
 
-class tracting_lidar
+class tracking_lidar
 {
 public:
-	tracting_lidar();
+	tracking_lidar();
 	void odomCallback(const nav_msgs::Odometry& odometry);
 	void mapCallback(const nav_msgs::OccupancyGrid& map);
 	void scanCallback(const sensor_msgs::LaserScan& scan);
@@ -34,6 +35,7 @@ public:
 	void adaptive_breaK_point();
 	void static_map_filter();
 	void polygon_extraction();
+	void polygon_attribute_extraction();
 private:
 	void extract_corners(int startpoint,int endpoint, int length,int shape_nr);
 	void search_longest(int startpoint, int current_point,int end_point, int length, float distance_S, int itteration, int max_itteration, int *best_point, float *best_dist);
@@ -54,17 +56,25 @@ private:
 	int polygon_min_points;
 
 
-	float xy_positions[800][2];
-	float xy_map_positions[800][2];
-  	int clusters[800];
-	int polygon[800];
+	float xy_positions[SCAN_SIZE][2];
+	float xy_map_positions[SCAN_SIZE][2];
+  	int clusters[SCAN_SIZE];
+	int polygon[SCAN_SIZE];
 	int polygon_size[MAX_OBJECTS];
 	  
 	double roll, pitch, yaw;
 	double x,y,z;
 	uint32_t mapx,mapy;
 
-
+	struct object_attributes{
+		int sides_amount;
+		float longest_size;
+		float average_angle;
+		float estimated_x;
+		float estimated_y;
+	}typedef object_attributes;
+	object_attributes object_attributes_list[MAX_OBJECTS];
+	
 };
 #endif
 
