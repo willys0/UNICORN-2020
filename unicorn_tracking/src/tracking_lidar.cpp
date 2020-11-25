@@ -97,13 +97,13 @@ void tracking_lidar::object_publisher()
   {
     if(polygon_size[i] > 0){
       object.polygon.points.clear();
-      object.polygon.points = shapes[i].points;
+      object.polygon = shapes[i];
 
       object_array.obstacles.push_back(object);
 
     }
   }
-  ROS_INFO("Test pub");
+  //ROS_INFO("Test pub");
   object_pub_.publish(object_array);
   
 }
