@@ -8,9 +8,14 @@ StateMachine::StateMachine() {
    
 }
 
+void StateMachine::setGoals(const std::vector<struct Goal> &goals) {
+    goals_ = goals;
+}
+
 void StateMachine::start() {
     ros::NodeHandle nh;
 
+    State::setGoals(goals_);
 
     State* currentState = new IdleState(nh);
     State* newState;

@@ -130,6 +130,7 @@ include_directories(
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
   src/${PROJECT_NAME}/state_machine.cpp
+  src/${PROJECT_NAME}/state.cpp
   src/${PROJECT_NAME}/error_state.cpp
   src/${PROJECT_NAME}/idle_state.cpp
   src/${PROJECT_NAME}/navigating_state.cpp
