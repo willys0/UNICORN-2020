@@ -7,6 +7,9 @@
 * @author: Hayk Martirosyan
 * @date: 2014.11.15
 */
+#ifndef _kalmanFilter_H_
+#define _kalmanFilter_H_
+
 
 #include <Eigen/Dense>
 
@@ -48,6 +51,7 @@ public:
   */
   void init(double t0, const Eigen::VectorXd& x0);
 
+  void deactivate();
   /**
   * Update the estimated state based on measured values. The
   * time step is assumed to remain constant.
@@ -69,28 +73,36 @@ public:
   /**
   * Return estimate error covariance
   */
-  Eigen::VectorXd covariance() {return p}
+  Eigen::VectorXd covariance() {return P;};
 
+  Eigen::MatrixXd A, C, Q, R, P, K, P0;
+
+  Eigen::VectorXd x_hat, x_hat_new;
+
+  double t0, t;
+
+  double dt;
+
+  Eigen::MatrixXd I;
 private:
 
   // Matrices for computation
-  Eigen::MatrixXd A, C, Q, R, P, K, P0;
 
   // System dimensions
   int m, n;
 
   // Initial and current time
-  double t0, t;
 
   // Discrete time step
-  double dt;
+
 
   // Is the filter initialized?
   bool initialized;
 
   // n-size identity
-  Eigen::MatrixXd I;
+  
 
   // Estimated states
-  Eigen::VectorXd x_hat, x_hat_new;
+
 };
+#endif
