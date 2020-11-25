@@ -58,6 +58,14 @@
 
 	</group>
 
+	<!--include unless="$(arg sim)" file="$(find unicorn_intention)/launch/intention.launch"-->
+	<include file="$(find unicorn_intention)/launch/intention.launch" >
+		<arg name="unicorn_state_topic" 	value="/unicorn/state" />
+		<arg name="intention_angle_topic" 	value="/TX2_localplanner_intention" />
+		<arg name="led_state_topic" 		value="/TX2_unicorn_state" />
+
+	</include>
+
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />

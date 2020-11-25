@@ -27,7 +27,6 @@ void velocityCallback(const geometry_msgs::TwistConstPtr& msg, int* intention_an
     *intention_avg += intention_angles[0];
 
     *intention_avg /= N;
-    ROS_INFO("Intention angle: %d", *intention_avg);
 }
 
 void stateCallback(const std_msgs::Int32ConstPtr& msg, ros::Publisher led_state_pub) {
