@@ -19,7 +19,7 @@ DockingController::DockingController(int nr_for_pitch_average) : nh_("~"), state
     geometry_msgs::TransformStamped wheel_base_transform;
     try
     {
-        wheel_base_transform = tf_buffer_.lookupTransform("chassis_link","realsense_camera",ros::Time(0),ros::Duration(1));
+        wheel_base_transform = tf_buffer_.lookupTransform("chassis_link","realsense_color_optical_frame",ros::Time(0),ros::Duration(1));
     }
     catch(tf2::TransformException &ex)
     {
@@ -34,13 +34,13 @@ DockingController::DockingController(int nr_for_pitch_average) : nh_("~"), state
     // y is (-0.04)
 
     // Get left/right distance relative to wheel base
-    camera_to_wheelbase_transform.x = wheel_base_transform.transform.translation.y;
+    camera_to_wheelbase_transform_.x = wheel_base_transform.transform.translation.y;
 
     // Height of tag isn't used, no need to transform
-    camera_to_wheelbase_transform.y = 0;
+    camera_to_wheelbase_transform_.y = 0;
 
     // Get the tag distance in relation to wheel base
-    camera_to_wheelbase_transform.z = -wheel_base_transform.transform.translation.x;
+    camera_to_wheelbase_transform_.z = -wheel_base_transform.transform.translation.x;
 
 
     reset();
@@ -53,24 +53,37 @@ void DockingController::reset() {
     error_times_ = 0;
 }
 
-double DockingController::getDistanceToTag() {
-    // Returns the distance to the tag in the z direction. i.e the distance straight forward in the camera frame.
-    return tag_pose_.position.z;
-}
+// double DockingController::getDistanceToTag() {
+//     // Returns the distance to the tag in the z direction. i.e the distance straight forward in the camera frame.
+//     return tag_pose_.position.z;
+// }
 
 double DockingController::getPitchComponent() {
     
     // Get the pitch of the tag
     double tag_roll, tag_pitch, tag_yaw;
-    // tf::Quaternion quat_tf;
-    // tf::quaternionMsgToTF(tag_pose_.orientation, quat_tf);
-    // tf::Matrix3x3(quat_tf).getRPY(tag_roll, tag_pitch, tag_yaw);
 
-    // tf2::getEulerYPR(tag_pose_.orientation,tag_yaw,tag_pitch,tag_roll);
-    geometry_msgs::TransformStamped tag_camera_transform;
-    tag_camera_transform = tf_buffer_.lookupTransform("realsense_camera","DOCK_BUNDLE",ros::Time(0));
+    //tf2::getEulerYPR(tag_pose_.orientation,tag_yaw,tag_pitch,tag_roll);
 
-    tf2::getEulerYPR(tag_camera_transform.transform.rotation, tag_yaw, tag_pitch, tag_roll);
+    // Gets the pitch of the tag 
+    // geometry_msgs::TransformStamped tag_camera_transform;
+    // double tf_yaw, tf_pitch, tf_roll;
+
+    // tag_camera_transform = tf_buffer_.lookupTransform("chassis_link","DOCK_BUNDLE",ros::Time(0));
+
+    // tf2::getEulerYPR(tag_camera_transform.transform.rotation, tf_yaw, tf_pitch, tf_roll);
+
+
+    // Gets the pitch of the tag
+    tf2::getEulerYPR(wheelbase_to_tag_tf_.transform.rotation, tag_yaw, tag_pitch, tag_roll);
+
+    // Account for rotation in transform from chassis_link to DOCK_BUNDLE frame 
+    tag_pitch += 1.57079632679;
+    
+    // Set the correct sign of the pitch
+    if(tag_roll < 0){
+        tag_pitch = -tag_pitch;
+    }
 
     return tag_pitch;
 }
@@ -78,26 +91,12 @@ double DockingController::getPitchComponent() {
 double DockingController::getLateralComponent() {
     // Gets the distance perpendicular from the tag normal to the robot.
     
-    double d, pitch, dist_to_tag;
-
-    pitch = getPitchComponent();
-
-    dist_to_tag = sqrt(tag_point_rel_wheel_base_.z*tag_point_rel_wheel_base_.z + tag_point_rel_wheel_base_.x*tag_point_rel_wheel_base_.x);
-    d = dist_to_tag*sin(getRotationToTag()+pitch);
-    
-    return d;
-    
+    return wheelbase_to_tag_tf_.transform.translation.x;
 }
 
 double DockingController::getDistAlongTagNorm() {
-    double d, pitch, dist_to_tag;
-
-    pitch = getPitchComponent();
-
-    dist_to_tag = sqrt(tag_pose_.position.z*tag_pose_.position.z + tag_point_rel_wheel_base_.x*tag_point_rel_wheel_base_.x);
-    d = dist_to_tag*cos(getRotationToTag()+pitch);
     
-    return d;
+    return wheelbase_to_tag_tf_.transform.translation.z;
 }
 
 double DockingController::getDesiredRotation() {
@@ -119,7 +118,9 @@ double DockingController::getDesiredRotation() {
 }
 
 
-
+// ==============================================================
+// TODO: DO NOT WORK RIGHT
+// ==============================================================
 double DockingController::getRotationToTag() {
     double rot_to_tag;
     // rotation from camera to tag
@@ -140,34 +141,42 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             geometry_msgs::PoseStamped pose_msg;
             visualization_msgs::Marker d_pose_msg, n_pose_msg;
             pose_msg.pose = tag.pose.pose.pose;
-            pose_msg.header.frame_id = tag.pose.header.frame_id;
+            pose_msg.header.frame_id = "realsense_color_optical_frame";
             pose_msg.header.stamp = ros::Time::now();
             pose_msg.header.seq = seq++;
 
             detection_pub_.publish(pose_msg);
 
+
+            double yaw,rot_to_tag;
+
+            rot_to_tag = atan2(getLateralComponent(),getDistAlongTagNorm());
+
+            // ROS_INFO("x: %+.2f, z: %+.2f, rToTag: %.2f, tragFrame: %.2f, pitch: %.2f, tr: %.2f, tp: %.2f, ty: %.2f", 
+            // getLateralComponent(),getDistAlongTagNorm(),getRotationToTag(),rot_to_tag,getPitchComponent(),pitch,roll,yaw);
+
             // =============================================================
             // Visualisation markers for debug
             // =============================================================
-            geometry_msgs::Quaternion quat_msg = tf::createQuaternionMsgFromRollPitchYaw(0.0,-getPitchComponent(),0.0);
-            d_pose_msg.header.frame_id = tag.pose.header.frame_id;
+            geometry_msgs::Quaternion quat_msg = tf::createQuaternionMsgFromRollPitchYaw(0.0,0.0,0.0);
+            d_pose_msg.header.frame_id = "DOCK_BUNDLE";
             d_pose_msg.header.stamp = ros::Time::now();
             // Set the namespace and id for this marker.  This serves to create a unique ID
             // Any marker sent with the same namespace and id will overwrite the old one
-            d_pose_msg.ns = "d_distance";
+            d_pose_msg.ns = "n_distance";
             d_pose_msg.id = 0;
             // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
             d_pose_msg.type = visualization_msgs::Marker::ARROW;
             // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
             d_pose_msg.action = visualization_msgs::Marker::ADD;
             // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
-            d_pose_msg.pose.position.x = -camera_to_wheelbase_transform.x;
-            d_pose_msg.pose.position.y = 0;
-            d_pose_msg.pose.position.z = -camera_to_wheelbase_transform.z;
+            d_pose_msg.pose.position.x = 0.0;
+            d_pose_msg.pose.position.y = 0.0;
+            d_pose_msg.pose.position.z = wheelbase_to_tag_tf_.transform.translation.z;
             d_pose_msg.pose.orientation = quat_msg;
             
             // Set the scale of the marker -- 1x1x1 here means 1m on a side
-            d_pose_msg.scale.x = getLateralComponent();
+            d_pose_msg.scale.x = wheelbase_to_tag_tf_.transform.translation.x;
             d_pose_msg.scale.y = 0.1;
             d_pose_msg.scale.z = 0.1;
             // Set the color -- be sure to set alpha to something non-zero!
@@ -179,25 +188,25 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
 
             d_pub_.publish(d_pose_msg);
 
-            quat_msg = tf::createQuaternionMsgFromRollPitchYaw(0.0, 3.1415, getPitchComponent());
-            n_pose_msg.header.frame_id = "chassis_link";
+            quat_msg = tf::createQuaternionMsgFromRollPitchYaw(0.0, -1.57079632679, 0.0);
+            n_pose_msg.header.frame_id = "DOCK_BUNDLE";
             n_pose_msg.header.stamp = ros::Time::now();
             // Set the namespace and id for this marker.  This serves to create a unique ID
             // Any marker sent with the same namespace and id will overwrite the old one
-            n_pose_msg.ns = "d_distance";
+            n_pose_msg.ns = "n_distance";
             n_pose_msg.id = 0;
             // Set the marker type.  Initially this is CUBE, and cycles between that and SPHERE, ARROW, and CYLINDER
             n_pose_msg.type = visualization_msgs::Marker::ARROW;
             // Set the marker action.  Options are ADD, DELETE, and new in ROS Indigo: 3 (DELETEALL)
             n_pose_msg.action = visualization_msgs::Marker::ADD;
             // Set the pose of the marker.  This is a full 6DOF pose relative to the frame/time specified in the header
-            n_pose_msg.pose.position.x = -camera_to_wheelbase_transform.z;
-            n_pose_msg.pose.position.y = getLateralComponent();
-            n_pose_msg.pose.position.z = 0;
+            n_pose_msg.pose.position.x = 0.0;
+            n_pose_msg.pose.position.y = 0.0;
+            n_pose_msg.pose.position.z = 0.0;
             n_pose_msg.pose.orientation = quat_msg;
 
             // Set the scale of the marker -- 1x1x1 here means 1m on a side
-            n_pose_msg.scale.x = getDistAlongTagNorm();
+            n_pose_msg.scale.x = wheelbase_to_tag_tf_.transform.translation.z;
             n_pose_msg.scale.y = 0.1;
             n_pose_msg.scale.z = 0.1;
             // Set the color -- be sure to set alpha to something non-zero!
@@ -231,30 +240,20 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             // y is position of tag  upp and down.
             tag_pose_ = tag.pose.pose.pose;
 
-            tag_point_rel_wheel_base_.x = tag_pose_.position.x + camera_to_wheelbase_transform.x;
-            tag_point_rel_wheel_base_.y = tag_pose_.position.y + camera_to_wheelbase_transform.y;
-            tag_point_rel_wheel_base_.z = tag_pose_.position.z + camera_to_wheelbase_transform.z;
+            tag_point_rel_wheel_base_.x = tag_pose_.position.x + camera_to_wheelbase_transform_.x;
+            tag_point_rel_wheel_base_.y = tag_pose_.position.y + camera_to_wheelbase_transform_.y;
+            tag_point_rel_wheel_base_.z = tag_pose_.position.z + camera_to_wheelbase_transform_.z;
 
-
-
-            geometry_msgs::TransformStamped tag_camera_transform;
-            tf2::Vector3 vec_to_tag, cam_norm;
-            double ang;
-            tag_camera_transform = tf_buffer_.lookupTransform("chassis_link","DOCK_BUNDLE",ros::Time(0));
-            vec_to_tag.setValue(tag_camera_transform.transform.translation.x,tag_camera_transform.transform.translation.y,tag_camera_transform.transform.translation.z);
-            cam_norm = {0.0, 0.0, 1.0};
-            ang = tf2::tf2Angle(cam_norm,vec_to_tag);
-
-
-            ROS_INFO("pitch: %+.2f, rot_to_tag: %+.2f, ang: %+.2f, z: %+.2f, x: %+.2f d: %.2f, nz: %.2f", 
-            getPitchComponent(), getRotationToTag(), ang, tag_pose_.position.z, tag_pose_.position.x, getLateralComponent(), getDistAlongTagNorm());
+            // ROS_INFO("pitch: %+.2f, rot_to_tag: %+.2f, ang: %+.2f, z: %+.2f, x: %+.2f d: %.2f, nz: %.2f", 
+            // getPitchComponent(), getRotationToTag(), ang, tag_pose_.position.z, tag_pose_.position.x, getLateralComponent(), getDistAlongTagNorm());
 
             break;
         }
     }
 }
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
-    double des_rot;
+
+    wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", "chassis_link", ros::Time(0));
 
     if(tag_visible_ == false) {
         msg_out.linear.x = 0.0;

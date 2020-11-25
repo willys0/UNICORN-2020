@@ -38,7 +38,7 @@ class DockingController {
 
         bool computeVelocity(geometry_msgs::Twist& msg_out);
 
-        double getDistanceToTag();
+        // double getDistanceToTag();
 
         double getPitchComponent();
 
@@ -81,7 +81,8 @@ class DockingController {
         geometry_msgs::Pose  tag_pose_;
         geometry_msgs::Point desired_offset_;
         geometry_msgs::Vector3 tag_point_rel_wheel_base_;
-        geometry_msgs::Vector3 camera_to_wheelbase_transform;
+        geometry_msgs::Vector3 camera_to_wheelbase_transform_;
+        geometry_msgs::TransformStamped wheelbase_to_tag_tf_;
 
         tf2_ros::Buffer tf_buffer_;
         tf2_ros::TransformListener tf_listener_;
