@@ -40,6 +40,8 @@ void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, u
 DockStatus getDockingVelocity(DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
     controller->computeVelocity(out_velocity);
 
+    // TODO: publish errors
+
     if(fabs(controller->xError()) <= thresholds.x) {
         if(fabs(controller->yError()) > thresholds.y || fabs(controller->thError()) > thresholds.z) {
             return DockStatus::FAILED;

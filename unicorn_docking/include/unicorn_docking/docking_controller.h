@@ -88,9 +88,9 @@ class DockingController {
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;
 
-        geometry_msgs::Pose  tag_pose_;
+        // geometry_msgs::Pose  tag_pose_;
         geometry_msgs::Point desired_offset_;
-        geometry_msgs::Vector3 tag_point_rel_wheel_base_;
+        // geometry_msgs::Vector3 tag_point_rel_wheel_base_;
         geometry_msgs::Vector3 camera_to_wheelbase_transform_;
         geometry_msgs::TransformStamped wheelbase_to_tag_tf_;
 
