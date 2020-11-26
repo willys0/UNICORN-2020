@@ -1,0 +1,7 @@
+<launch>
+    <include file="$(find unicorn_docking)/launch/docking.launch">
+        <arg name="docking_config" value="$(find unicorn_docking)/config/docking_sim.yaml" />
+        <arg name="pid_config" value="$(find unicorn_docking)/config/pid_gains_sim.yaml" />
+    </include>
+
+</launch>
