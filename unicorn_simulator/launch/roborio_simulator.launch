@@ -1,0 +1,3 @@
+<launch>
+  <node pkg="unicorn_simulator" type="unicorn_roborio_simulator_node" name="unicorn_roborio_simulator_node" />
+</launch>
