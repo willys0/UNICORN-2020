@@ -69,7 +69,7 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
     ros::Publisher vel_pub;
     geometry_msgs::Twist move_msg;
 
-    int remaining_retries = 10;
+    int remaining_retries = max_retries;
 
     DockStatus dock_status;
 
