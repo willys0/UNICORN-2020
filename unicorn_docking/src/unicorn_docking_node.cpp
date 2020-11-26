@@ -34,10 +34,13 @@ void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, u
     thresh_th = config.th_error_thresh;
 
     controller->setDesiredRotationFunctionParameters(config.a, config.b, config.c);
+    controller->setSpeedLimit(config.max_docking_speed);
 }
 
 DockStatus getDockingVelocity(DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
     controller->computeVelocity(out_velocity);
+
+    // TODO: publish errors
 
     if(fabs(controller->xError()) <= thresholds.x) {
         if(fabs(controller->yError()) > thresholds.y || fabs(controller->thError()) > thresholds.z) {
@@ -69,7 +72,7 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
     ros::Publisher vel_pub;
     geometry_msgs::Twist move_msg;
 
-    int remaining_retries = 10;
+    int remaining_retries = max_retries;
 
     DockStatus dock_status;
 

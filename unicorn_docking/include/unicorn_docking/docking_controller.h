@@ -61,6 +61,10 @@ class DockingController {
                 rotational_c_ = c;
         }
 
+        void setSpeedLimit(double max_speed) {
+            max_docking_speed_ = max_speed;
+        }
+
         double xError() { return err_x_; }
         double yError() { return err_y_; }
         double thError() { return err_th_; }
@@ -84,16 +88,17 @@ class DockingController {
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;
 
-        geometry_msgs::Pose  tag_pose_;
+        // geometry_msgs::Pose  tag_pose_;
         geometry_msgs::Point desired_offset_;
-        geometry_msgs::Vector3 tag_point_rel_wheel_base_;
+        // geometry_msgs::Vector3 tag_point_rel_wheel_base_;
         geometry_msgs::Vector3 camera_to_wheelbase_transform_;
         geometry_msgs::TransformStamped wheelbase_to_tag_tf_;
 
         tf2_ros::Buffer tf_buffer_;
         tf2_ros::TransformListener tf_listener_;
 
-        bool tag_visible_;
+        std::string base_link_frame_;
+
         int error_times_;
         
         int retry_error_times_;
@@ -106,7 +111,10 @@ class DockingController {
         double rotational_b_;
         double rotational_c_;
 
+        double max_docking_speed_;
+
         ros::Time last_time_;
+        ros::Time tag_last_seen_;
 
         DockState state_;
 
