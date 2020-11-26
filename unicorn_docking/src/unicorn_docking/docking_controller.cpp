@@ -101,7 +101,8 @@ double DockingController::getDesiredRotation() {
     double d, des_rot;
     d = getLateralComponent();
     
-    des_rot = exp(6*abs(d)+0.02);
+    //des_rot = exp(6*abs(d)+0.02);
+    des_rot = rotational_a_ + exp(rotational_b_ * fabs(d) + rotational_c_);
 
     // Cap totation at max pi/2
     if(des_rot > 0.4){

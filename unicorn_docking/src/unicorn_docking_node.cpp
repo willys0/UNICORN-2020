@@ -28,10 +28,12 @@ double thresh_y;
 double thresh_th;
 
 
-void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, uint32_t level) {
+void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, uint32_t level, DockingController* controller) {
     thresh_x = config.x_error_thresh;
     thresh_y = config.y_error_thresh;
     thresh_th = config.th_error_thresh;
+
+    controller->setDesiredRotationFunctionParameters(config.a, config.b, config.c);
 }
 
 DockStatus getDockingVelocity(DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
@@ -267,9 +269,10 @@ int main(int argc, char **argv) {
 
     dynamic_reconfigure::Server<unicorn_docking::DockingControllerConfig> reconfig_server;
 
-    reconfig_server.setCallback(boost::bind(&dynamicReconfigCallback, _1, _2));
 
     DockingController controller(n_pitch_avg);
+
+    reconfig_server.setCallback(boost::bind(&dynamicReconfigCallback, _1, _2, &controller));
 
     DockActionServer server(nh, "dock_action", boost::bind(&execute_action, _1, &server, &controller, nh), false);
 
