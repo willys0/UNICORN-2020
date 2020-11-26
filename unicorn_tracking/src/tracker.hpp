@@ -32,8 +32,6 @@ public:
   void OutputTracker(int trackID, Eigen::VectorXd& y, int i);
 
 
-
-
 private:
 
 

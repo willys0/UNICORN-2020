@@ -61,6 +61,8 @@ tracking_lidar::tracking_lidar()
 
   memset(polygon_size, 0, MAX_OBJECTS*sizeof(polygon_size[0])); 
 
+  initiate_Trackers();
+
 
 }
 
@@ -146,8 +148,6 @@ void tracking_lidar::object_publisher()
       }
       markerArray.markers.push_back(marker);
       marker.points.clear();
-      //marker.points = shapes[i].points;
-
     }
   }
   //ROS_INFO("Test pub");
@@ -200,12 +200,88 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       static_map_filter();
       polygon_extraction();
       polygon_attribute_extraction();
+      //association();
       object_publisher();
       scan_received = false;
 
     }
     
     // Do stuff here 
+}
+
+void tracking_lidar::association()
+{
+/* 
+    //int numberOfTracks = multitracker.activeTracks;
+    int i,j,m;
+    double time = scan_data_.header.stamp.sec + scan_data_.header.stamp.nsec*pow(10, -9);
+
+    memset(object_match,0,sizeof(object_match[0])*MAX_OBJECTS);
+
+    Eigen::VectorXd estimatedPosition(3), outputposition(3); 
+
+    float similarity = 0;
+    for(i=0; i<MAX_OBJECTS; i++)
+    {
+      //multitracker.KFT[i].attributes.age++;
+
+      //if(x_hat )
+
+      trackers[i].attributes.age++;
+      // Check against all objects
+      for(j=0; j<MAX_OBJECTS; j++)
+      {
+        if(polygon_size[i] > 0){
+
+
+
+
+
+
+
+
+
+        }
+      }
+
+
+
+
+    }
+
+*/
+          /*
+          object_attributes_list[j].estimated_x
+          object_attributes_list[j].estimated_y
+          */
+
+}
+
+
+void tracking_lidar::initiate_Trackers(){
+
+/*
+  double dt = 1.0/30;
+
+  // Construct the filter
+  //KalmanFilter kf;
+  KalmanFilter kf;
+  kf.A << 1, dt, 0, 0, 1, dt, 0, 0, 1;
+  kf.B << 0, 0, 0;
+  kf.C << 1, 0, 0;
+  kf.Q << .05, .05, .0, .05, .05, .0, .0, .0, .0;
+  kf.R << 5;
+  kf.P << .1, .1, .1, .1, 10000, 10, .1, 10, 100;
+  
+
+  int i;
+  for(i=0; i<MAXTRACKS; i++)
+  {
+      trackers[i].tracker = kf;
+  }
+  
+  std::cout << trackers[1].tracker.A << std::endl;
+  */
 }
 
 
@@ -451,7 +527,7 @@ void tracking_lidar::polygon_attribute_extraction()
       if(polygon_size[i]-2 > 0)
         object_attributes_list[i].average_angle /= polygon_size[i]-2;
 
-      ROS_INFO("Polygon: Sides: %d, Longest Side %f, Average angle %f, x %f, y %f",object_attributes_list[i].sides_amount,object_attributes_list[i].longest_size,object_attributes_list[i].average_angle,object_attributes_list[i].estimated_x ,object_attributes_list[i].estimated_y);
+      //ROS_INFO("Polygon: Sides: %d, Longest Side %f, Average angle %f, x %f, y %f",object_attributes_list[i].sides_amount,object_attributes_list[i].longest_size,object_attributes_list[i].average_angle,object_attributes_list[i].estimated_x ,object_attributes_list[i].estimated_y);
 
     }
   }

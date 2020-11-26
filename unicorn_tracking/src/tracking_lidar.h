@@ -26,11 +26,13 @@
 #include <new>
 
 /* Kalman */
-//#include "kalman.hpp"
+#include "kalman.hpp"
 
 #define PI 3.14159265
 #define MAX_OBJECTS 100
 #define SCAN_SIZE 800
+#define MAXTRACKS 100
+
 
 class tracking_lidar
 {
@@ -45,9 +47,11 @@ public:
 	void polygon_extraction();
 	void polygon_attribute_extraction();
 	void object_publisher();
+	void association();
 private:
 	void extract_corners(int startpoint,int endpoint, int length,int shape_nr);
 	void search_longest(int startpoint, int current_point,int end_point, int length, float distance_S, int itteration, int max_itteration, int *best_point, float *best_dist);
+	void initiate_Trackers();
 
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
@@ -73,6 +77,7 @@ private:
   	int clusters[SCAN_SIZE];
 	int polygon[SCAN_SIZE];
 	int polygon_size[MAX_OBJECTS];
+	
 	  
 	double roll, pitch, yaw;
 	double x,y,z;
@@ -86,6 +91,25 @@ private:
 		float estimated_y;
 	}typedef object_attributes;
 	object_attributes object_attributes_list[MAX_OBJECTS];
+
+	int object_match[MAX_OBJECTS];
+	float object_match_ratio[MAX_OBJECTS][MAXTRACKS];
+
+	//tracker multitracker;
+	/*
+	struct tracker_attributes{
+		int confirmed;
+		int age;
+		int last_seen;
+		int sides_amount;
+		float longest_size;
+		float average_angle;
+		KalmanFilter tracker;
+  	}typedef tracker_attributes;
+  	tracker_attributes trackers[MAXTRACKS];
+	*/
+
+
 	
 };
 #endif

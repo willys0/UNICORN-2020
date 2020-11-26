@@ -1,121 +1,108 @@
 /**
-* Kalman filter implementation using Eigen. Based on the following
-* introductory paper:
+* Kalman filter header file.
 *
-*     http://www.cs.unc.edu/~welch/media/pdf/kalman_intro.pdf
-*
-* @author: Hayk Martirosyan
-* @date: 2014.11.15
+* @author: Dhruv Shah, Hayk Martirosyan
+* @date: 07/03/2018
 */
-#ifndef _kalmanFilter_H_
-#define _kalmanFilter_H_
-
 
 #include <Eigen/Dense>
 
-#pragma once
+
+#define STATES 3 // Number of states
+#define MEAS_AMOUNT 2 // Number of measurements
+#define CONTROL_INPUTS 0 // Number of control inputs
 
 class KalmanFilter {
 
 public:
 
-  /**
-  * Create a Kalman filter with the specified matrices.
-  *   A - System dynamics matrix
-  *   C - Output matrix
-  *   Q - Process noise covariance
-  *   R - Measurement noise covariance
-  *   P - Estimate error covariance
-  */
-  KalmanFilter(
-      double dt,
-      const Eigen::MatrixXd& A,
-      const Eigen::MatrixXd& C,
-      const Eigen::MatrixXd& Q,
-      const Eigen::MatrixXd& R,
-      const Eigen::MatrixXd& P
-  );
+	/**
+	* Create a Kalman filter with the specified matrices.
+	*   A - System dynamics matrix
+	*   B - Input matrix
+	*   C - Output matrix
+	*   Q - Process noise covariance
+	*   R - Measurement noise covariance
+	*   P - Estimate error covariance
+	*/  
 
-  /**
-  * Create a blank estimator.
-  */
-  KalmanFilter();
+  /*
+	KalmanFilter();*/
 
-  /**
-  * Initialize the filter with initial states as zero.
-  */
-  void init();
+	/**
+	* Initialize the filter with initial states as zero.
+	*/
+	void init();
 
-  /**
-  * Initialize the filter with a guess for initial states.
-  */
-  void init(double t0, const Eigen::VectorXd& x0);
+	/**
+	* Initialize the filter with a guess for initial states.
+	*/
+	void init(const Eigen::VectorXd& x0);
 
-  void deactivate();
-  /**
-  * Update the estimated state based on measured values. The
-  * time step is assumed to remain constant.
-  */
-  void update(const Eigen::VectorXd& y);
+	/**
+	* Update the prediction based on control input.
+	*/
+	void predict(const Eigen::VectorXd& u);
 
-  /**
-  * Update the estimated state based on measured values,
-  * using the given time step and dynamics matrix.
-  */
-  void update(const Eigen::VectorXd& y, double dt, const Eigen::MatrixXd A);
+	/**
+	* Update the estimated state based on measured values.
+	*/
+	void update(const Eigen::VectorXd& y);
 
-  /**
-  * Return the current state and time.
-  */
-  Eigen::VectorXd state() { return x_hat; };
-  double time() { return t; };
+	/**
+	* Update the dynamics matrix.
+	*/
+	void update_dynamics(const Eigen::MatrixXd A);
 
-  /**
-  * Return estimate error covariance
-  */
-  Eigen::VectorXd covariance() {return P;};
+	/**
+	* Update the output matrix.
+	*/
+	void update_output(const Eigen::MatrixXd C);
 
-  Eigen::MatrixXd A, C, Q, R, P, K, P0;
-
-  Eigen::VectorXd x_hat, x_hat_new;
-
-  double t0, t;
-
-  double dt;
-
-  Eigen::MatrixXd I;
+	/**
+	* Return the current state.
+	*/
+	//Eigen::VectorXd state() { return x_hat; };
 
 
-  struct tracker_attributes{
-    int confirmed;
-    int age;
-    int last_seen;
-    int sides_amount;
-    float longest_size;
-    float average_angle;
-  }typedef tracker_attributes;
+	Eigen::MatrixXd A{STATES, STATES}; // System dynamics matrix
+	//Eigen::MatrixXd B{STATES, CONTROL_INPUTS};  // Input control matrix
+	Eigen::MatrixXd C{MEAS_AMOUNT, STATES}; // Output matrix
+	Eigen::MatrixXd Q{STATES, STATES}; // Process noise covariance
+	Eigen::MatrixXd R{MEAS_AMOUNT, MEAS_AMOUNT}; // Measurement noise covariance
+	Eigen::MatrixXd P{STATES, STATES}; // Estimate error covariance
+	Eigen::MatrixXd P0{STATES, STATES}; // initial error covariance
+	Eigen::MatrixXd I{STATES, STATES};  // n-size identity
+	Eigen::VectorXd x_hat{STATES};	// Estimated states
+  // Matrices for computation
+	//Eigen::MatrixXd A, B, C, Q, R, P, K, P0;
+	Eigen::MatrixXd P_new{STATES, STATES}; // Estimate error covariance
+	Eigen::VectorXd x_hat_new{STATES};	// Estimated states
 
-  tracker_attributes attributes;
+
+	Eigen::MatrixXd K;
+
+
+	struct tracker_attributes{
+		int confirmed;
+		int age;
+		int last_seen;
+		int sides_amount;
+		float longest_size;
+		float average_angle;
+  	}typedef tracker_attributes;
+ 
+	tracker_attributes attributes;
 
 private:
 
-  // Matrices for computation
 
-  // System dimensions
-  int m, n;
+	// System dimensions
+	//int m, n, c;
 
-  // Initial and current time
-
-  // Discrete time step
+	// Is the filter initialized?
+	bool initialized = false;
 
 
-  // Is the filter initialized?
-  bool initialized;
-
-  // n-size identity
-
-
-  // Estimated states
-
+	
 };
-#endif

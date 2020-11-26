@@ -18,7 +18,7 @@ void tracker::createTrack( double t0, const Eigen::VectorXd& x0){
   if (activeTracks < MAXTRACKS) {
     double dt = 1.0/30; // Time step
     int n = 3; // Number of states
-    int m = 1; // Number of measurements
+    int m = 3; // Number of measurements
 
     Eigen::MatrixXd A(n, n); // System dynamics matrix
     Eigen::MatrixXd C(m, n); // Output matrix
@@ -42,7 +42,7 @@ void tracker::createTrack( double t0, const Eigen::VectorXd& x0){
     std::cout << "P: \n" << P << std::endl;
 
     // Construct the filter
-    KalmanFilter kf(dt,A, C, Q, R, P);
+    KalmanFilter kf(A, C, Q, R, P);
     kf.init(t0, x0);
     KFT.push_back(kf);
     activeTracks++;
