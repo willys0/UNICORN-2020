@@ -1,6 +1,6 @@
 #include <unicorn_docking/docking_controller.h>
 
-DockingController::DockingController(int nr_for_pitch_average) : nh_("~"), state_(DockingController::DockState::IDLE), tf_listener_(tf_buffer_) {
+DockingController::DockingController() : nh_("~"), state_(DockingController::DockState::IDLE), tf_listener_(tf_buffer_) {
 
     apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
     d_pub_ = nh_.advertise<visualization_msgs::Marker>("d_tag", 1);
@@ -104,7 +104,8 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             // Visualisation markers for debug
             // =============================================================
             visualization_msgs::Marker d_pose_msg, n_pose_msg;
-            geometry_msgs::Quaternion quat_msg = tf::createQuaternionMsgFromRollPitchYaw(0.0,0.0,0.0);
+            geometry_msgs::Quaternion quat_msg;
+            quat_msg = tf::createQuaternionMsgFromRollPitchYaw(0.0,0.0,0.0);
             d_pose_msg.header.frame_id = "DOCK_BUNDLE";
             d_pose_msg.header.stamp = ros::Time::now();
             // Set the namespace and id for this marker.  This serves to create a unique ID
