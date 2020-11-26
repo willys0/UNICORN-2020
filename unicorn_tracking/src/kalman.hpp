@@ -84,6 +84,19 @@ public:
   double dt;
 
   Eigen::MatrixXd I;
+
+
+  struct tracker_attributes{
+    int confirmed;
+    int age;
+    int last_seen;
+    int sides_amount;
+    float longest_size;
+    float average_angle;
+  }typedef tracker_attributes;
+
+  tracker_attributes attributes;
+
 private:
 
   // Matrices for computation
