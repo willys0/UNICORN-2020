@@ -104,7 +104,8 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             // Visualisation markers for debug
             // =============================================================
             visualization_msgs::Marker d_pose_msg, n_pose_msg;
-            geometry_msgs::Quaternion quat_msg = tf::createQuaternionMsgFromRollPitchYaw(0.0,0.0,0.0);
+            geometry_msgs::Quaternion quat_msg;
+            quat_msg = tf::createQuaternionMsgFromRollPitchYaw(0.0,0.0,0.0);
             d_pose_msg.header.frame_id = "DOCK_BUNDLE";
             d_pose_msg.header.stamp = ros::Time::now();
             // Set the namespace and id for this marker.  This serves to create a unique ID
