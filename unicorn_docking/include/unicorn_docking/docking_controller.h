@@ -49,11 +49,17 @@ class DockingController {
         double getDesiredRotation();
 
         double getRotationToTag();
-        
+
         DockState getState() { return state_; }
         void setState(DockState state) { state_ = state; }
 
         void setDesiredOffset(geometry_msgs::Point offset) { desired_offset_ = offset; }
+
+        void setDesiredRotationFunctionParameters(double a, double b, double c) {
+                rotational_a_ = a;
+                rotational_b_ = b;
+                rotational_c_ = c;
+        }
 
         double xError() { return err_x_; }
         double yError() { return err_y_; }
@@ -95,6 +101,10 @@ class DockingController {
         double err_x_;
         double err_y_;
         double err_th_;
+
+        double rotational_a_;
+        double rotational_b_;
+        double rotational_c_;
 
         ros::Time last_time_;
 
