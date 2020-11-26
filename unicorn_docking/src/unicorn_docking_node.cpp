@@ -37,10 +37,17 @@ void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, u
     controller->setSpeedLimit(config.max_docking_speed);
 }
 
-DockStatus getDockingVelocity(DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
+DockStatus getDockingVelocity(ros::NodeHandle nh, DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
     controller->computeVelocity(out_velocity);
 
-    // TODO: publish errors
+    ros::Publisher err_pub;
+    geometry_msgs::Vector3 pid_errors;
+    err_pub = nh.advertise<geometry_msgs::Vector3>("/dock_errors",1);
+
+    pid_errors.x = fabs(controller->xError());
+    pid_errors.y = fabs(controller->yError());
+    pid_errors.z = fabs(controller->thError());
+    err_pub.publish(pid_errors);
 
     if(fabs(controller->xError()) <= thresholds.x) {
         if(fabs(controller->yError()) > thresholds.y || fabs(controller->thError()) > thresholds.z) {
@@ -107,7 +114,7 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
         }
 
         // Call the docking controller to get velocity
-        dock_status = getDockingVelocity(controller, as, thresh, move_msg);
+        dock_status = getDockingVelocity(nh, controller, as, thresh, move_msg);
 
         if(dock_status == DockStatus::SUCCESS) {
             getDockingResultMsg(controller, true, rslt);
@@ -200,7 +207,7 @@ void undock(ros::NodeHandle nh, DockingController* controller, DockActionServer*
         }
 
         // Call the docking controller to get velocity
-        dock_status = getDockingVelocity(controller, as, thresh, move_msg);
+        dock_status = getDockingVelocity(nh, controller, as, thresh, move_msg);
 
         if(dock_status == DockStatus::SUCCESS) {
             getDockingResultMsg(controller, true, rslt);
