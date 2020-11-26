@@ -1,7 +1,7 @@
 <launch>
   <arg name="camera_name" default="realsense/color" />
   <arg name="image_topic" default="image_raw" />
-  <arg name="camera_frame" value="realsense_camera" />
+  <arg name="camera_frame" value="realsense_color_optical_frame" />
 
   <node pkg="unicorn_docking" type="unicorn_docking_node" name="unicorn_docking_node" output="screen">
     <remap from="/cmd_vel" to="/unicorn/cmd_vel" />

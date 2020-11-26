@@ -30,6 +30,14 @@
         </geometry>
         <material name="Black" />
       </visual>
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.4</mu>
+            <mu2>0.4</mu2>
+          </ode>
+        </friction>
+      </surface>
       <collision>
         <origin xyz="0 0 0" rpy="${flip*M_PI/2} 0 0" />
         <geometry>
