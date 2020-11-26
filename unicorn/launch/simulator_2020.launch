@@ -12,4 +12,10 @@
         <arg name="use_object_tracking" value="$(arg use_object_tracking)" />
         <arg name="map_file" value="$(arg map_file)" />
     </include>
+
+    <include file="$(find unicorn_roborio_bridge)/launch/bridge.launch">
+        <arg name="rear_lidar_scan_topic" value="/rearLidar/empty_sim_scan" />
+    </include>
+
+    <include file="$(find unicorn_simulator)/launch/roborio_simulator.launch"/>
 </launch>
