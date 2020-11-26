@@ -1,6 +1,6 @@
 #include <unicorn_docking/docking_controller.h>
 
-DockingController::DockingController(int nr_for_pitch_average) : nh_("~"), state_(DockingController::DockState::IDLE), tf_listener_(tf_buffer_) {
+DockingController::DockingController() : nh_("~"), state_(DockingController::DockState::IDLE), tf_listener_(tf_buffer_) {
 
     apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
     d_pub_ = nh_.advertise<visualization_msgs::Marker>("d_tag", 1);

@@ -15,7 +15,6 @@
 #include <geometry_msgs/Quaternion.h>
 #include <cmath>
 
-// #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <tf2/utils.h>
 
@@ -32,13 +31,11 @@ class DockingController {
 
     public:
         typedef enum DockState { IDLE, DOCKING } DockState;
-        DockingController(int nr_for_pitch_average);
+        DockingController();
 
         void reset();
 
         bool computeVelocity(geometry_msgs::Twist& msg_out);
-
-        // double getDistanceToTag();
 
         double getPitchComponent();
 
@@ -77,8 +74,6 @@ class DockingController {
 
         ros::Subscriber apriltag_sub_;
 
-        ros::Publisher  detection_pub_;
-
         ros::Publisher  d_pub_;
         ros::Publisher  n_pub_;
         ros::Publisher  desired_rot_pub_;
@@ -88,10 +83,7 @@ class DockingController {
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;
 
-        // geometry_msgs::Pose  tag_pose_;
         geometry_msgs::Point desired_offset_;
-        // geometry_msgs::Vector3 tag_point_rel_wheel_base_;
-        geometry_msgs::Vector3 camera_to_wheelbase_transform_;
         geometry_msgs::TransformStamped wheelbase_to_tag_tf_;
 
         tf2_ros::Buffer tf_buffer_;
@@ -99,9 +91,6 @@ class DockingController {
 
         std::string base_link_frame_;
 
-        int error_times_;
-        
-        int retry_error_times_;
 
         double err_x_;
         double err_y_;

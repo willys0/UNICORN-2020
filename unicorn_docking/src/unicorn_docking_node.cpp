@@ -255,9 +255,7 @@ int main(int argc, char **argv) {
 
     ros::NodeHandle nh("~");
 
-    int n_pitch_avg;
     // load settings
-    nh.param("nr_for_pitch_average", n_pitch_avg , 15);
     nh.param("retry_error_times", max_error_times, 50);
     nh.param("max_retries", max_retries, 3);
     nh.param("thresh_x", thresh_x, 0.01);
@@ -273,7 +271,7 @@ int main(int argc, char **argv) {
     dynamic_reconfigure::Server<unicorn_docking::DockingControllerConfig> reconfig_server;
 
 
-    DockingController controller(n_pitch_avg);
+    DockingController controller();
 
     reconfig_server.setCallback(boost::bind(&dynamicReconfigCallback, _1, _2, &controller));
 
