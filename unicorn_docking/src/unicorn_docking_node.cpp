@@ -19,6 +19,7 @@ enum DockStatus { RUNNING, SUCCESS, FAILED };
 
 double retry_offset;
 
+ros::Publisher err_pub;
 geometry_msgs::Point desired_offset;
 
 int max_retries;
@@ -40,17 +41,15 @@ void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, u
 DockStatus getDockingVelocity(ros::NodeHandle nh, DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
     controller->computeVelocity(out_velocity);
 
-    ros::Publisher err_pub;
     geometry_msgs::Vector3 pid_errors;
-    err_pub = nh.advertise<geometry_msgs::Vector3>("/dock_errors", 1);
 
     pid_errors.x = fabs(controller->xError());
     pid_errors.y = fabs(controller->yError());
     pid_errors.z = fabs(controller->thError());
     err_pub.publish(pid_errors);
 
-    if(fabs(controller->xError()) <= thresholds.x) {
-        if(fabs(controller->yError()) > thresholds.y || fabs(controller->thError()) > thresholds.z) {
+    if(pid_errors.x <= thresholds.x) {
+        if(pid_errors.y > thresholds.y || pid_errors.z > thresholds.z) {
             return DockStatus::FAILED;
         }
         else {
@@ -274,6 +273,8 @@ int main(int argc, char **argv) {
     nh.param("offset/y",desired_offset.y, 0.0);
     nh.param("offset/th",desired_offset.z, 0.0);
     ROS_INFO("Setting dock offset to x: %.2f, y: %.2f, th: %.2f", desired_offset.x, desired_offset.y, desired_offset.z);
+
+    err_pub = nh.advertise<geometry_msgs::Vector3>("errors", 1);
 
     dynamic_reconfigure::Server<unicorn_docking::DockingControllerConfig> reconfig_server;
 
