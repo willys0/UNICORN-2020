@@ -42,7 +42,7 @@ DockStatus getDockingVelocity(ros::NodeHandle nh, DockingController* controller,
 
     ros::Publisher err_pub;
     geometry_msgs::Vector3 pid_errors;
-    err_pub = nh.advertise<geometry_msgs::Vector3>("/dock_errors",1);
+    err_pub = nh.advertise<geometry_msgs::Vector3>("/dock_errors", 1);
 
     pid_errors.x = fabs(controller->xError());
     pid_errors.y = fabs(controller->yError());
@@ -278,7 +278,7 @@ int main(int argc, char **argv) {
     dynamic_reconfigure::Server<unicorn_docking::DockingControllerConfig> reconfig_server;
 
 
-    DockingController controller();
+    DockingController controller;
 
     reconfig_server.setCallback(boost::bind(&dynamicReconfigCallback, _1, _2, &controller));
 
