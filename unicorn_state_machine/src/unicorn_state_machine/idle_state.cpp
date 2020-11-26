@@ -16,8 +16,13 @@ State* IdleState::run() {
 
     ROS_INFO("[IdleState]");
 
-    struct Goal goal = goals_[0];
-    goals_.erase(goals_.begin());
+    while(ros::ok() && goals_.empty()) {
+        ROS_INFO("[IdleState] No goals, sleeping for a while...");
+        ros::Duration(2.0).sleep();
+    }
+
+    struct Goal goal = *(goals_.end() - 1);
+    goals_.pop_back();
 
     return new NavigatingState(goal.pose, goal.lift_cmd, nh_);
 }

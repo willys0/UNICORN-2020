@@ -19,7 +19,7 @@ void parseGoalYaml(ros::NodeHandle& nh, std::vector<struct Goal>& goals) {
 
     struct Goal goal;
 
-    for(int i = 0; i < v.size(); i++) {
+    for(int i = v.size()-1; i > -1; i--) {
         inner = v[i];
 
         if(inner["x"].valid() && inner["y"].valid() && inner["th"].valid() && inner["lift"].valid()) {
