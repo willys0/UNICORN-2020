@@ -64,7 +64,8 @@ void tracker::deleteTrack(int position){
 
 
 void tracker::updateTracks(int trackID, Eigen::VectorXd y){
-    std::cout<<KFT[trackID].x_hat<< std::endl; // error output
+  //  Eigen::MatrixXd Plocal = 0,0,0,0,0,0,0,0,0;
+    //std::cout<<KFT[trackID].x_hat<< std::endl; // error output
     //KFT[trackID].update(y);
 
 
@@ -73,29 +74,31 @@ void tracker::updateTracks(int trackID, Eigen::VectorXd y){
 
 
     KFT[trackID].x_hat_new = KFT[trackID].A * KFT[trackID].x_hat;
-    std::cout<<"X_hat_new:"<<KFT[trackID].x_hat_new<< std::endl; // error output
+    //std::cout<<"X_hat_new:"<<KFT[trackID].x_hat_new<< std::endl; // error output
 
     KFT[trackID].P = KFT[trackID].A*KFT[trackID].P*KFT[trackID].A.transpose() + KFT[trackID].Q;
-    std::cout<<"P:"<<KFT[trackID].P<< std::endl; // error output
+    //std::cout<<"P:"<<KFT[trackID].P<< std::endl; // error output
 
     KFT[trackID].K = KFT[trackID].P*KFT[trackID].C.transpose()*(KFT[trackID].C*KFT[trackID].P*KFT[trackID].C.transpose() + KFT[trackID].R).inverse();
-    std::cout<<"K:"<<KFT[trackID].K<< std::endl; // error output
+    //std::cout<<"K:"<<KFT[trackID].K<< std::endl; // error output
 
     KFT[trackID].x_hat_new += KFT[trackID].K * (y - KFT[trackID].C*KFT[trackID].x_hat_new);
-    std::cout<<"X_hat_new:"<<KFT[trackID].x_hat_new<< std::endl; // error output
+    //std::cout<<"X_hat_new:"<<KFT[trackID].x_hat_new<< std::endl; // error output
 
-
-
-    
 //Problem starts here, assigning new value to old varibles in vector
+//std::cout << "P: \n" << KFT[trackID].P << std::endl;
+//std::cout << "I: \n" << KFT[trackID].I << std::endl;
+//std::cout << "K: \n" << KFT[trackID].K << std::endl;
+//std::cout << "C: \n" << KFT[trackID].C << std::endl;
+
     KFT[trackID].P = (KFT[trackID].I - KFT[trackID].K*KFT[trackID].C)*KFT[trackID].P;
-    std::cout<<"P:"<<KFT[trackID].P<< std::endl; // error output
+    //std::cout<<"P:"<<KFT[trackID].P<< std::endl; // error output
 
     KFT[trackID].x_hat = KFT[trackID].x_hat_new;
-    std::cout<<"x_hat:"<<KFT[trackID].x_hat<< std::endl; // error output
+    //std::cout<<"x_hat:"<<KFT[trackID].x_hat<< std::endl; // error output
 
     KFT[trackID].t += KFT[trackID].dt;
-    std::cout<<"t:"<<KFT[trackID].t<< std::endl; // error output
+    //std::cout<<"t:"<<KFT[trackID].t<< std::endl; // error output
 
 
 

@@ -100,7 +100,7 @@ private:
   bool initialized;
 
   // n-size identity
-  
+
 
   // Estimated states
 
