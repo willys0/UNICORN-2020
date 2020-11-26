@@ -17,12 +17,10 @@ DockingController::DockingController(int nr_for_pitch_average) : nh_("~"), state
 
     // Get transform from camera frame to chassi frame
     geometry_msgs::TransformStamped wheel_base_transform;
-    try
-    {
+    try {
         wheel_base_transform = tf_buffer_.lookupTransform("chassis_link","realsense_color_optical_frame",ros::Time(0),ros::Duration(1));
     }
-    catch(tf2::TransformException &ex)
-    {
+    catch(tf2::TransformException &ex) {
         ROS_WARN("%s",ex.what());
         //return 0;
     }
@@ -124,12 +122,25 @@ double DockingController::getDesiredRotation() {
 double DockingController::getRotationToTag() {
     double rot_to_tag;
     // rotation from camera to tag
-    if (tag_point_rel_wheel_base_.z == 0.0) {
-        rot_to_tag = 0.0;
+    // if (tag_point_rel_wheel_base_.z == 0.0) {
+    //     rot_to_tag = 0.0;
+    // }
+    // else {
+    //     rot_to_tag = atan2(tag_point_rel_wheel_base_.x,tag_point_rel_wheel_base_.z);
+    // }
+
+    geometry_msgs::TransformStamped dock_chassi_tf;
+    try {
+        dock_chassi_tf = tf_buffer_.lookupTransform("chassis_link", ros::Time::now(), "DOCK_BUNDLE", tag_last_seen_, "map", ros::Duration(5.0));
     }
-    else {
-        rot_to_tag = atan2(tag_point_rel_wheel_base_.x,tag_point_rel_wheel_base_.z);
+    catch(tf2::TransformException &ex) {
+        // If no transform could be found, set linear and angular velocities to zero
+        ROS_WARN("in getRotationToTag(): %s",ex.what());
+        return -100;
     }
+    // Rotation from chassis_ling frame to DOCK_BUNDLE frame
+    rot_to_tag = atan2(dock_chassi_tf.transform.translation.y, -dock_chassi_tf.transform.translation.x);
+
     return rot_to_tag;
 }
 
@@ -138,26 +149,20 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
     static int seq = 0;
     for(auto& tag : msg->detections) {
         if(tag.id[0] == 0 && tag.id[1] == 4 && tag.id[2] == 3 && tag.id[3] == 2 && tag.id[4] == 1) {
+            // publish apriltag pose
             geometry_msgs::PoseStamped pose_msg;
-            visualization_msgs::Marker d_pose_msg, n_pose_msg;
             pose_msg.pose = tag.pose.pose.pose;
             pose_msg.header.frame_id = "realsense_color_optical_frame";
             pose_msg.header.stamp = ros::Time::now();
             pose_msg.header.seq = seq++;
 
             detection_pub_.publish(pose_msg);
-
-
-            double yaw,rot_to_tag;
-
-            rot_to_tag = atan2(getLateralComponent(),getDistAlongTagNorm());
-
-            // ROS_INFO("x: %+.2f, z: %+.2f, rToTag: %.2f, tragFrame: %.2f, pitch: %.2f, tr: %.2f, tp: %.2f, ty: %.2f", 
-            // getLateralComponent(),getDistAlongTagNorm(),getRotationToTag(),rot_to_tag,getPitchComponent(),pitch,roll,yaw);
-
+            // END: publish apriltag pose
+            
             // =============================================================
             // Visualisation markers for debug
             // =============================================================
+            visualization_msgs::Marker d_pose_msg, n_pose_msg;
             geometry_msgs::Quaternion quat_msg = tf::createQuaternionMsgFromRollPitchYaw(0.0,0.0,0.0);
             d_pose_msg.header.frame_id = "DOCK_BUNDLE";
             d_pose_msg.header.stamp = ros::Time::now();
@@ -217,8 +222,11 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             n_pose_msg.lifetime = ros::Duration();
 
             n_pub_.publish(n_pose_msg);
+            //======================================================================================
 
-
+            //======================================================================================
+            // Publish desired rotation, rotation to tag and tag pitch
+            //======================================================================================
             std_msgs::Float64 f;
             f.data = getDesiredRotation();
             desired_rot_pub_.publish(f);
@@ -230,8 +238,9 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             tag_pitch_pub_.publish(f);
             //======================================================================================
 
+            // Set time at witch the tag was last seen
+            tag_last_seen_ = tag.pose.header.stamp;
 
-            tag_visible_ = true;
 
             // Save tag pose to tag_pose_
             // For tag_pose_.position:
@@ -251,18 +260,28 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
         }
     }
 }
+
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
 
-    wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", "chassis_link", ros::Time(0));
+    ros::Time current_time = ros::Time::now();
 
-    if(tag_visible_ == false) {
+    
+    // Try to timetravel!
+    // Try to find transform between DOCK_BUNDLE frame at tag_last_seen_ time and chassis_link at current_time
+    try {
+        wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", tag_last_seen_, "chassis_link", current_time, "map", ros::Duration(5.0));
+    }
+    catch(tf2::TransformException &ex) {
+        // If no transform could be found, set linear and angular velocities to zero
+        ROS_WARN("in computeVelocity(): %s",ex.what());
         msg_out.linear.x = 0.0;
         msg_out.angular.z = 0.0;
         return false;
     }
+    
 
     if(state_ == DOCKING) {
-        ros::Time current_time = ros::Time::now();
+        
 
         // Calculate x, y and theta errors
         err_x_ = desired_offset_.x - getDistAlongTagNorm();

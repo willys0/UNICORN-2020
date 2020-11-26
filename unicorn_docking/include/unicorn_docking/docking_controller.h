@@ -97,6 +97,7 @@ class DockingController {
         double err_th_;
 
         ros::Time last_time_;
+        ros::Time tag_last_seen_;
 
         DockState state_;
 
