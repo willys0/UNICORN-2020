@@ -55,15 +55,20 @@
   <xacro:arg name="zed_meshfile" default="package://unicorn_description/meshes/zed_link.STL" />
 
   <!-- Real Sense -->
-  <xacro:arg name="real_rgb_xyz" default="-0.4065 -0.03882 0.33658" />
-  <xacro:arg name="real_depth_xyz" default="-0.4065 -0.00518 0.33658" />
+  <xacro:arg name="real_base" default="-0.4065 ${-0.03882+0.015} 0.33658" />
+  <xacro:arg name="real_rgb_xyz" default="0 0.015 0" />
+  <xacro:arg name="real_depth_xyz" default="0 0 0" /> 
+
   <xacro:arg name="real_rpy" default="0 0 ${M_PI}" />
+  <xacro:arg name="real_optical_rpy" default="${-M_PI2} 0 ${-M_PI2}" />
+  <xacro:arg name="real_depth_rpy" default="${-M_PI2} 0 ${-M_PI2}" />
   <xacro:arg name="realsense_meshfile" default="package://unicorn_description/meshes/real_sense.STL" />
   
 
  <!-- Main Body-base -->
   <link
     name="chassis_link">
+    <!--  
     <inertial>
       <origin
         xyz="0 0 0"
@@ -77,7 +82,7 @@
         iyy="3"
         iyz="3"
         izz="1" />
-    </inertial>
+    </inertial>-->
     <visual>
       <origin
         xyz="0 0 0"
@@ -92,6 +97,7 @@
           rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
       </material>
     </visual>
+    <!-- 
     <collision>
       <origin
         xyz="0 0 0"
@@ -105,7 +111,8 @@
          </friction>
       </surface>
       </geometry>
-    </collision>
+    </collision>-->
+    
   </link>
 
 <!-- Lift -->
@@ -124,7 +131,7 @@
         iyy="3"
         iyz="3"
         izz="1" />
-    </inertial>
+    </inertial>-
     <visual>
       <origin
         xyz="0 0 0"
@@ -149,6 +156,7 @@
       </geometry>
     </collision>
   </link>
+  
   <joint
     name="lift_joint"
     type="fixed">
@@ -164,54 +172,7 @@
     <joint_properties damping="1" friction="0.5" />
   </joint>
 
-<!--
-  <link
-    name="wheel_link">
-    <inertial>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <mass
-        value="0.01" />
-      <box_inertia  m="${5*0.01}" x="${base_x_size}" y="${base_y_size}" z="${base_z_size}"/>
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <box size="0.01 0.01 0.01"/>
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.79216 0.81961 0.93333 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-          <box size="0.01 0.01 0.01"/>
-      </geometry>
-    </collision>
-  </link>
-  <gazebo reference="base_link_gazebo">
-    <material>Gazebo/Green</material>
-    <turnGravityOff>false</turnGravityOff>
-  </gazebo>
-  <joint name="base_chassis_joint" type="fixed">
-    <parent link="chassis_link"/> 
-    <child link="wheel_link" />
-  <origin xyz="0 0.0 0" rpy="0 0 ${M_PI}" />
-  </joint>-->
 
-
-  <!-- driving wheels 
-  <wheel fb="back" lr="left" parent="chassis_link" rotationZ="3.14159" translateY="0.23" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
-  <wheel fb="back" lr="right" parent="chassis_link" rotationZ="0" translateY="-0.23" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
-  -->
   <wheel fb="back" lr="left" parent="lift_link"  translateY="0.24" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   <wheel fb="back" lr="right" parent="lift_link" translateY="-0.24" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   
@@ -229,7 +190,6 @@
     <origin xyz="$(arg laser_xyz)" rpy="$(arg laser_rpy)" />
     <parent link="chassis_link" />
     <child link="base_laser" />
-    <joint_properties damping="1" friction="0.5" />
   </joint>
   
 
@@ -240,45 +200,100 @@
     <origin xyz="$(arg rear_laser_xyz)" rpy="$(arg rear_laser_rpy)" />
     <parent link="chassis_link" />
     <child link="rear_laser" />
-    <joint_properties damping="1" friction="0.5" />
   </joint>
 
   <!-- Zed Camera -->
-    <stereo_camera frame_rgb="zed_camera" frame_depth="zed_depth_joint" cameraName="zed" simulation="$(arg sim)" filename="$(arg zed_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+    <stereo_camera frame_rgb="zed_camera" frame_depth="zed_depth" cameraName="zed" simulation="$(arg sim)" filename="$(arg zed_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
 
     <joint name="zed_camera_rgb_joint" type="fixed"> 
       <origin xyz="$(arg zed_xyz)" rpy="$(arg zed_rpy)"/>
       <parent link="chassis_link"/>  
       <child link="zed_camera"/>
-      <joint_properties damping="1" friction="0.5" />
     </joint>
 
     <joint name="zed_camera_depth_joint" type="fixed">
       <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
       <parent link="zed_camera"/>
-      <child link="zed_depth_joint"/>
-      <joint_properties damping="1" friction="0.5" />
+      <child link="zed_depth"/>
     </joint>
+
+
 
 
   <!-- realsense Camera -->
 
 
-    <stereo_camera frame_rgb="realsense_camera" frame_depth="realsense_depth_joint" cameraName="realsense" simulation="$(arg sim)" filename="$(arg realsense_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
 
-    <joint name="realsense_gb_joint" type="fixed"> 
-      <origin xyz="$(arg real_rgb_xyz)" rpy="$(arg real_rpy)"/>
-      <parent link="chassis_link"/>  
-      <child link="realsense_camera"/>
-      <joint_properties damping="1" friction="0.5" />
-    </joint>
+<!-- Links only needed in simulation, created by realsense software otherwise-->
 
-    <joint name="realsense_depth_joint" type="fixed">
-      <origin xyz="$(arg real_depth_xyz)" rpy="${-pi/2} 0 ${-pi/2}"/>
-      <parent link="realsense_camera"/>
-      <child link="realsense_depth_joint"/>
-      <joint_properties damping="1" friction="0.5" />
-    </joint>
+  <link
+    name="realsense_link">
+  </link>
+
+  <joint name="realsense_joint" type="fixed"> 
+    <origin xyz="$(arg real_base)" rpy="$(arg real_rpy)"/>
+    <parent link="chassis_link"/>  
+    <child link="realsense_link"/>
+  </joint>
+
+
+<xacro:if value="$(arg sim)">
+  <link
+    name="realsense_model_dummy_link">
+    <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+            <mesh filename="$(arg realsense_meshfile)" />
+        </geometry>
+      </visual>
+  </link>
+
+
+  <joint name="realsense_model_joint" type="fixed"> 
+    <origin xyz="$(arg real_rgb_xyz)" rpy="0 0 0"/>
+    <parent link="realsense_link"/>  
+    <child link="realsense_model_dummy_link"/>
+  </joint>
+</xacro:if> 
+  
+<xacro:if value="$(arg sim)">
+  <stereo_camera frame_rgb="realsense_color_frame" frame_depth="realsense_depth_frame" cameraName="realsense" simulation="$(arg sim)" filename="$(arg realsense_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+  
+
+  <link
+    name="realsense_depth_optical_frame">
+  </link>
+
+  <link
+    name="realsense_color_optical_frame">
+  </link>
+
+
+  <joint name="realsense_gb_joint" type="fixed"> 
+    <origin xyz="$(arg real_rgb_xyz)" rpy="0 0 0"/>
+    <parent link="realsense_link"/>  
+    <child link="realsense_color_frame"/>
+  </joint>
+
+  <joint name="realsense_depth_joint" type="fixed">
+    <origin xyz="$(arg real_depth_xyz)" rpy="0 0 0"/>
+    <parent link="realsense_link"/>
+    <child link="realsense_depth_frame"/>
+  </joint>
+
+  <joint name="realsense_optical_color_joint" type="fixed"> 
+    <origin xyz="0 0 0" rpy="$(arg real_optical_rpy)"/>
+    <parent link="realsense_color_frame"/>  
+    <child link="realsense_color_optical_frame"/>
+  </joint>
+
+  <joint name="realsense_optical_depth_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="$(arg real_depth_rpy)"/>
+    <parent link="realsense_depth_frame"/>
+    <child link="realsense_depth_optical_frame"/>
+  </joint>
+</xacro:if> 
+
 
 
 <xacro:if value="$(arg sim)">
