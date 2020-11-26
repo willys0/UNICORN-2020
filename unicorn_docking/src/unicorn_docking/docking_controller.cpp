@@ -294,6 +294,14 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
         msg_out.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistAlongTagNorm(), current_time - last_time_);
         msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
 
+        if(msg_out.linear.x > max_docking_speed_) {
+            msg_out.linear.x = max_docking_speed_;
+        }
+        else if(msg_out.linear.x < -max_docking_speed_) {
+            msg_out.linear.x = -max_docking_speed_;
+        }
+
+
         last_time_ = current_time;
         //ROS_INFO("err_x_: %.2f, err_y_: %.2f, err_th_: %.2f, des_rot: %.2f, norm_x: %.2f", err_x_, err_y_, err_th_, getDesiredRotation(), getDistAlongTagNorm());
     }

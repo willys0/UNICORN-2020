@@ -61,6 +61,10 @@ class DockingController {
                 rotational_c_ = c;
         }
 
+        void setSpeedLimit(double max_speed) {
+            max_docking_speed_ = max_speed;
+        }
+
         double xError() { return err_x_; }
         double yError() { return err_y_; }
         double thError() { return err_th_; }
@@ -95,7 +99,6 @@ class DockingController {
 
         std::string base_link_frame_;
 
-        bool tag_visible_;
         int error_times_;
         
         int retry_error_times_;
@@ -107,6 +110,8 @@ class DockingController {
         double rotational_a_;
         double rotational_b_;
         double rotational_c_;
+
+        double max_docking_speed_;
 
         ros::Time last_time_;
         ros::Time tag_last_seen_;

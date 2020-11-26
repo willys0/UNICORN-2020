@@ -34,6 +34,7 @@ void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, u
     thresh_th = config.th_error_thresh;
 
     controller->setDesiredRotationFunctionParameters(config.a, config.b, config.c);
+    controller->setSpeedLimit(config.max_docking_speed);
 }
 
 DockStatus getDockingVelocity(DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
