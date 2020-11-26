@@ -8,6 +8,8 @@
 
     <rosparam command="load" file="$(find unicorn_docking)/config/pid_gains.yaml" ns="pid" />
     <rosparam command="load" file="$(find unicorn_docking)/config/docking.yaml" />
+
+    <param value="base_link_frame" value="chassis_link" />
   </node>
 
   <include file="$(find unicorn_docking)/launch/apriltag.launch">

@@ -14,11 +14,13 @@ DockingController::DockingController(int nr_for_pitch_average) : nh_("~"), state
     pid_x_.initParam("~/pid/x");
     pid_th_.initParam("~/pid/th");
 
+    nh_.param("base_link_frame", base_link_frame_, std::string("chassis_link"));
+
 
     // Get transform from camera frame to chassi frame
     geometry_msgs::TransformStamped wheel_base_transform;
     try {
-        wheel_base_transform = tf_buffer_.lookupTransform("chassis_link","realsense_color_optical_frame",ros::Time(0),ros::Duration(1));
+        wheel_base_transform = tf_buffer_.lookupTransform(base_link_frame_,"realsense_color_optical_frame",ros::Time(0),ros::Duration(1));
     }
     catch(tf2::TransformException &ex) {
         ROS_WARN("%s",ex.what());
@@ -132,7 +134,7 @@ double DockingController::getRotationToTag() {
 
     geometry_msgs::TransformStamped dock_chassi_tf;
     try {
-        dock_chassi_tf = tf_buffer_.lookupTransform("chassis_link", ros::Time::now(), "DOCK_BUNDLE", tag_last_seen_, "map", ros::Duration(5.0));
+        dock_chassi_tf = tf_buffer_.lookupTransform(base_link_frame_, ros::Time::now(), "DOCK_BUNDLE", tag_last_seen_, "map", ros::Duration(5.0));
     }
     catch(tf2::TransformException &ex) {
         // If no transform could be found, set linear and angular velocities to zero
@@ -270,7 +272,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
     // Try to timetravel!
     // Try to find transform between DOCK_BUNDLE frame at tag_last_seen_ time and chassis_link at current_time
     try {
-        wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", tag_last_seen_, "chassis_link", current_time, "map", ros::Duration(5.0));
+        wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", tag_last_seen_, base_link_frame_, current_time, "map", ros::Duration(5.0));
     }
     catch(tf2::TransformException &ex) {
         // If no transform could be found, set linear and angular velocities to zero

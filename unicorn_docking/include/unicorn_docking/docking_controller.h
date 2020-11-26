@@ -93,6 +93,8 @@ class DockingController {
         tf2_ros::Buffer tf_buffer_;
         tf2_ros::TransformListener tf_listener_;
 
+        std::string base_link_frame_;
+
         bool tag_visible_;
         int error_times_;
         
