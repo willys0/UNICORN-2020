@@ -215,7 +215,15 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
         err_th_ = desired_offset_.z - getPitchComponent();
 
         msg_out.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistAlongTagNorm(), current_time - last_time_);
-        msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
+
+        // If linear.x is positive the rotation needs to be the other way as it is moving away from the tag and not towards it.
+        if(msg_out.linear.x >= 0) {
+            msg_out.angular.z = pid_th_.computeCommand(-getDesiredRotation() - getRotationToTag(), current_time - last_time_);
+        }
+        else {
+            msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
+        }
+        
 
         if(msg_out.linear.x > max_docking_speed_) {
             msg_out.linear.x = max_docking_speed_;
