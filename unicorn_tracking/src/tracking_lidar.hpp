@@ -24,14 +24,18 @@
 #include <stdio.h>
 #include <cstdint>
 #include <new>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>       /* time */
 
 /* Kalman */
 #include "kalman.hpp"
+#include "Hungarian.h"
 
 #define PI 3.14159265
 #define MAX_OBJECTS 20
 #define SCAN_SIZE 800
 #define MAXTRACKS 20
+#define TRACKER_LIFE 1000
 
 
 class tracking_lidar
@@ -104,6 +108,8 @@ private:
 		float longest_size;
 		float average_angle;
 		double time;
+		float color[4];
+		geometry_msgs::Polygon points;
 		KalmanFilter tracker;
   	}typedef tracker_attributes;
 //KalmanFilter tracker;

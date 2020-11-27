@@ -22,15 +22,13 @@ while(ros::ok)
 
     ros::spinOnce();
     r.sleep();
-    //ROS_INFO(" Running ");
+    
     
     if(map_received && odom_received && scan_received){
-      
-      tracking_lidar_interface.adaptive_breaK_point();
-      tracking_lidar_interface.static_map_filter();
-      tracking_lidar_interface.polygon_extraction();
-      scan_received = false;
+      //ROS_INFO(" Running ");
+      tracking_lidar_interface.association();
       tracking_lidar_interface.object_publisher();
+      scan_received = false;
 
     }
     
@@ -125,29 +123,39 @@ void tracking_lidar::object_publisher()
   object_array.obstacles.clear();
   object_array.header = object.header;
   int i,m;
-  for(i=0; i < MAX_OBJECTS; i++)
+  for(i=0; i < MAXTRACKS; i++)
   {
-    if(polygon_size[i] > 0){
+    if(trackers[i].age > 0){
+
+      //ROS_INFO("PRINTING tracker: %d",i);
+
       object.polygon.points.clear();
-      object.polygon = shapes[i];
+      object.polygon = trackers[i].points;
+/**/
+      marker.color.a = 10*trackers[i].color[0]/((trackers[i].last_seen+1));
+      marker.color.b = trackers[i].color[1];
+      marker.color.g = trackers[i].color[2];
+      marker.color.r = trackers[i].color[3];
 
       object_array.obstacles.push_back(object);
+      
 
 
       marker.id = i;
-      for(m =0; m < polygon_size[i]-1; m++)
+      marker.points.clear();
+      for(m =0; m < trackers[i].sides_amount; m++)
       {
-      point.x = shapes[i].points[m].x;
-      point.y = shapes[i].points[m].y;
-      point.z = shapes[i].points[m].z;
+      point.x = trackers[i].points.points[m].x;
+      point.y = trackers[i].points.points[m].y;
+      point.z = trackers[i].points.points[m].z;
       marker.points.push_back(point);
-      point.x = shapes[i].points[m+1].x;
-      point.y = shapes[i].points[m+1].y;
-      point.z = shapes[i].points[m+1].z;
+      point.x = trackers[i].points.points[m+1].x;
+      point.y = trackers[i].points.points[m+1].y;
+      point.z = trackers[i].points.points[m+1].z;
       marker.points.push_back(point);
       }
       markerArray.markers.push_back(marker);
-      marker.points.clear();
+     
     }
   }
   //ROS_INFO("Test pub");
@@ -201,8 +209,13 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       polygon_extraction();
       polygon_attribute_extraction();
       association();
+      //update_tracker; 
+
+
+      //predict_postions
       object_publisher();
       scan_received = false;
+      
 
     }
     
@@ -219,14 +232,14 @@ void tracking_lidar::association()
     memset(object_match,0,sizeof(object_match[0])*MAX_OBJECTS);
 
     Eigen::VectorXd estimatedPosition(3), outputposition(3); 
-    Eigen::MatrixXd object_match_ratio(MAX_OBJECTS,MAXTRACKS);
+    vector<vector<double>> object_match_ratio(MAX_OBJECTS,vector<double>(MAXTRACKS));
 
-    object_match_ratio.fill(100);
-  /*
+    //object_match_ratio.fill(100);
+  /**/
     for(i=0; i<MAX_OBJECTS; i++)
       for(j=0; j<MAXTRACKS; j++)
-          object_match_ratio(i,j) = 100;
-  */
+          object_match_ratio[i][j] = 100;
+  
 
     float similarity = 0,similarity_best = 0;
 
@@ -236,15 +249,16 @@ void tracking_lidar::association()
     
     /**/
     // Check object against current trackers
-    ROS_INFO("---------------------------------");
+
     for(i=0; i<MAXTRACKS; i++)
     {
       if(trackers[i].age > 0){
-        ROS_INFO("Tracker %d - pos %lf %lf",i,trackers[i].tracker.x_hat(0),trackers[i].tracker.x_hat(1));
+        //ROS_INFO("Tracker %d last seen %d - pos %lf %lf ",i, trackers[i].last_seen ,trackers[i].tracker.x_hat(0),trackers[i].tracker.x_hat(1));
         m = -1;
         similarity_best = 0;
         /* */
         trackers[i].age++;
+        trackers[i].last_seen++;
         dt = time - trackers[i].time;
         //trackers[i].tracker.A << 1, 0, 0, 0, 1, 0, 0, 0, 1;
 
@@ -258,56 +272,113 @@ void tracking_lidar::association()
         for(j=0; j<MAX_OBJECTS; j++)
         {
           if(polygon_size[j] > 0){
-
-            similarity = abs(float(trackers[i].average_angle) - float(object_attributes_list[j].average_angle));
             /**/
-            similarity += abs(float(trackers[i].longest_size) - float(object_attributes_list[j].longest_size));
-            similarity += abs(float(trackers[i].sides_amount) - float(object_attributes_list[j].sides_amount)); 
+            similarity = abs((trackers[i].average_angle) - (object_attributes_list[j].average_angle));
             
-            similarity += abs(float(trackers[i].tracker.x_hat(0)) - float(object_attributes_list[j].estimated_x));
-            similarity += abs(float(trackers[i].tracker.x_hat(1)) - float(object_attributes_list[j].estimated_y));
+            similarity += abs((trackers[i].longest_size) - (object_attributes_list[j].longest_size));
+            similarity += abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount)); 
+            
+            similarity += abs((trackers[i].tracker.x_hat(0)) - (object_attributes_list[j].estimated_x));
+            similarity += abs((trackers[i].tracker.x_hat(1)) - (object_attributes_list[j].estimated_y));
             
             similarity /= 5;
-            ROS_INFO("object match %f",similarity);
- 
-            object_match_ratio(j,i) = similarity;  
 
-            object_match[j] = 1;      
+            if(!isnan(similarity))
+              object_match_ratio[i][j] = double(similarity); 
+            //ROS_INFO("object match %f",similarity);
+ 
+             
+
+                
           }
         }  
         //y << object_attributes_list[j].estimated_x, object_attributes_list[j].estimated_y;
         //trackers[i].tracker.update(y);
-        //trackers[i].time = time;
+
       }
     }
 
+    /* Hungarian algorithm to find the lowest cost combination of trackers */
+    HungarianAlgorithm HungAlgo;
+	  vector<int> assignment;
+	  double cost = HungAlgo.Solve(object_match_ratio, assignment);
 
-    std::cout << object_match_ratio << std::endl;
+    /*
+    for(i=0; i<MAX_OBJECTS; i++)
+    {
+      for(j=0; j<MAXTRACKS; j++)
+      {
+        std::cout << std::setprecision(3) << object_match_ratio[i][j] << "    ";
+      }
+      std::cout << std::endl;
+    }*/
+
+	  for (m = 0; m < object_match_ratio.size(); m++)
+    {
+      //std::cout << m << "," << assignment[m] << "-" << object_match_ratio[m][assignment[m]] << "\t";
+      if(object_match_ratio[m][assignment[m]] < 1.5)
+      {
+        object_match[assignment[m]] = 1; 
+        trackers[m].last_seen = 0; // update last seen
+        j = assignment[m];
+
+        trackers[m].average_angle = object_attributes_list[j].average_angle;
+        trackers[m].longest_size = object_attributes_list[j].longest_size;
+        trackers[m].sides_amount = object_attributes_list[j].sides_amount;
+        trackers[m].tracker.x_hat << object_attributes_list[j].estimated_x, object_attributes_list[j].estimated_y, 0; // should actually be y
+        trackers[m].points.points.clear();
+        trackers[m].points = shapes[j];
+        trackers[m].time = time;
+
+      }else{
+        trackers[m].last_seen++;
+
+      }
+       
+    }
+		  
+    // Remove old trackers
+    for(i=0; i<MAXTRACKS; i++)
+      if(trackers[i].age > 0)
+        if(trackers[i].last_seen > TRACKER_LIFE)
+        {
+          trackers[i].tracker.initialized = false;
+          trackers[i].age = 0;
+        }
    
-   // Add new trackers
+   // Add new trackers 
     for(j=0; j<MAX_OBJECTS; j++)
     {
       if(polygon_size[j] > 0 && object_match[j] == 0)
       {
-        ROS_INFO("tracker poly, object %d object %d",polygon_size[j], object_match[j]);
+        //ROS_INFO("tracker poly, object %d object %d",polygon_size[j], object_match[j]);
         for(i=0; i<MAXTRACKS; i++)
         {
+          //ROS_INFO("New Tracker %d",i);
           if(trackers[i].age == 0)
           {
-            trackers[i].age++;
+            trackers[i].age = 1;
             trackers[i].average_angle = object_attributes_list[j].average_angle;
             trackers[i].longest_size = object_attributes_list[j].longest_size;
             trackers[i].sides_amount = object_attributes_list[j].sides_amount;
             trackers[i].time = time;
+            trackers[i].last_seen = 0;
             trackers[i].tracker.init();
             trackers[i].tracker.x_hat << object_attributes_list[j].estimated_x, object_attributes_list[j].estimated_y, 0;
-            std::cout << trackers[i].tracker.x_hat << std::endl;
-            ROS_INFO("tracker added %d object %d",i, j);
+            trackers[i].color[0] = 1;
+            trackers[i].color[1] = float(rand() % 80 + 20)/100;
+            trackers[i].color[2] = float(rand() % 80 + 20)/100;
+            trackers[i].color[3] = float(rand() % 80 + 20)/100;
+            trackers[i].points.points.clear();
+            trackers[i].points = shapes[j];
+
             break;
           }
         }
       }
     }
+
+
 }
 
 

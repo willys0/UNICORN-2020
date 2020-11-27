@@ -82,16 +82,14 @@ public:
 
 	Eigen::MatrixXd K;
  
-
+	// Is the filter initialized?
+	bool initialized = false;
 
 private:
 
 
 	// System dimensions
 	//int m, n, c;
-
-	// Is the filter initialized?
-	bool initialized = false;
 
 
 	

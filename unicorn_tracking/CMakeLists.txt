@@ -138,7 +138,7 @@ include_directories(
 # )
 
 
- add_executable(tracking_lidar src/tracking_lidar.cpp src/kalman.cpp)
+ add_executable(tracking_lidar src/tracking_lidar.cpp src/kalman.cpp src/Hungarian.cpp)
  target_link_libraries(tracking_lidar ${catkin_LIBRARIES})
  add_dependencies(tracking_lidar ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
