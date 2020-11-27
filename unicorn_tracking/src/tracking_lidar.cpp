@@ -221,10 +221,12 @@ void tracking_lidar::association()
     Eigen::VectorXd estimatedPosition(3), outputposition(3); 
     Eigen::MatrixXd object_match_ratio(MAX_OBJECTS,MAXTRACKS);
 
+    object_match_ratio.fill(100);
+  /*
     for(i=0; i<MAX_OBJECTS; i++)
       for(j=0; j<MAXTRACKS; j++)
           object_match_ratio(i,j) = 100;
-
+  */
 
     float similarity = 0,similarity_best = 0;
 
