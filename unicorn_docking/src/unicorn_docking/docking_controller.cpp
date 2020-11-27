@@ -22,7 +22,7 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
 void DockingController::reset() {
     last_time_ = ros::Time::now();
 
-    // error_times_ = 0;
+    tag_last_seen_ = ros::Time::now();
 }
 
 
@@ -82,7 +82,7 @@ double DockingController::getRotationToTag() {
 
     // Try to get transform from DOCK_BUNDLE to base_link_frame_
     try {
-        dock_chassi_tf = tf_buffer_.lookupTransform(base_link_frame_, ros::Time::now(), "DOCK_BUNDLE", tag_last_seen_, "map", ros::Duration(5.0));
+        dock_chassi_tf = tf_buffer_.lookupTransform(base_link_frame_, ros::Time::now(), "DOCK_BUNDLE", tag_last_seen_, "map", ros::Duration(max_tf_lookup_time_));
     }
     catch(tf2::TransformException &ex) {
         ROS_WARN("in getRotationToTag(): %s",ex.what());
@@ -196,7 +196,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
     // Try to timetravel!
     // Try to find transform between DOCK_BUNDLE frame at tag_last_seen_ time and chassis_link at current_time
     try {
-        wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", tag_last_seen_, base_link_frame_, current_time, "map", ros::Duration(5.0));
+        wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", tag_last_seen_, base_link_frame_, current_time, "map", ros::Duration(max_tf_lookup_time_));
     }
     catch(tf2::TransformException &ex) {
         // If no transform could be found, set linear and angular velocities to zero

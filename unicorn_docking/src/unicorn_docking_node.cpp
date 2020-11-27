@@ -36,6 +36,7 @@ void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, u
 
     controller->setDesiredRotationFunctionParameters(config.a, config.b, config.c);
     controller->setSpeedLimit(config.max_docking_speed);
+    controller->setMaxTfLookupTime(config.max_tf_lookup_time);
 }
 
 DockStatus getDockingVelocity(ros::NodeHandle nh, DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
