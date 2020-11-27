@@ -29,9 +29,9 @@
 #include "kalman.hpp"
 
 #define PI 3.14159265
-#define MAX_OBJECTS 100
+#define MAX_OBJECTS 20
 #define SCAN_SIZE 800
-#define MAXTRACKS 100
+#define MAXTRACKS 20
 
 
 class tracking_lidar
@@ -93,10 +93,9 @@ private:
 	object_attributes object_attributes_list[MAX_OBJECTS];
 
 	int object_match[MAX_OBJECTS];
-	float object_match_ratio[MAX_OBJECTS][MAXTRACKS];
+	//float object_match_ratio[MAX_OBJECTS][MAXTRACKS];
 
-	//tracker multitracker;
-	/*
+	//tracker multitracker;/*
 	struct tracker_attributes{
 		int confirmed;
 		int age;
@@ -104,10 +103,12 @@ private:
 		int sides_amount;
 		float longest_size;
 		float average_angle;
+		double time;
 		KalmanFilter tracker;
   	}typedef tracker_attributes;
+//KalmanFilter tracker;
   	tracker_attributes trackers[MAXTRACKS];
-	*/
+
 
 
 	

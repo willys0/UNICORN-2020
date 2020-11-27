@@ -36,13 +36,13 @@ public:
 
 	/**
 	* Initialize the filter with a guess for initial states.
-	*/
+	
 	void init(const Eigen::VectorXd& x0);
-
+	*/
 	/**
 	* Update the prediction based on control input.
 	*/
-	void predict(const Eigen::VectorXd& u);
+	void predict();
 
 	/**
 	* Update the estimated state based on measured values.
@@ -81,18 +81,8 @@ public:
 
 
 	Eigen::MatrixXd K;
-
-
-	struct tracker_attributes{
-		int confirmed;
-		int age;
-		int last_seen;
-		int sides_amount;
-		float longest_size;
-		float average_angle;
-  	}typedef tracker_attributes;
  
-	tracker_attributes attributes;
+
 
 private:
 

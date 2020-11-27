@@ -10,13 +10,14 @@
 
 #include "kalman.hpp"
 
-
+/*
 void KalmanFilter::init(const Eigen::VectorXd& x0) {
 
+	I.setIdentity();
 	x_hat = x0;
 	P = P0;
 	initialized = true;
-}
+}*/
 
 void KalmanFilter::init() {
 
@@ -26,7 +27,7 @@ void KalmanFilter::init() {
 	initialized = true;
 }
 
-void KalmanFilter::predict(const Eigen::VectorXd& u) {
+void KalmanFilter::predict() {
 
 	if(!initialized) {
 		std::cout << "Filter is not initialized! Initializing with trivial state.";
