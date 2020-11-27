@@ -31,10 +31,6 @@ while(ros::ok)
       scan_received = false;
 
     }
-    
-
-
-
     }*/
     ros::spin();
 }
@@ -74,8 +70,8 @@ void tracking_lidar::object_publisher()
   visualization_msgs::MarkerArray markerArray;
   geometry_msgs::Point point;
   
-  
   std::string frameid ("/map");
+
   object.header.frame_id = frameid;
   seq++;
   object.header.seq = seq;
@@ -114,7 +110,6 @@ void tracking_lidar::object_publisher()
   marker.pose.orientation.y = 0;
   marker.pose.orientation.z = 0;
   marker.pose.orientation.w = 1;
-
 
   marker.pose.position.x = 0;
   marker.pose.position.y = 0;
@@ -210,7 +205,7 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       polygon_attribute_extraction();
       association();
       //update_tracker; 
-
+      // https://www.intechopen.com/books/kalman-filters-theory-for-advanced-applications/kalman-filter-for-moving-object-tracking-performance-analysis-and-filter-design good read
 
       //predict_postions
       object_publisher();

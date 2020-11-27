@@ -32,9 +32,9 @@
 #include "Hungarian.h"
 
 #define PI 3.14159265
-#define MAX_OBJECTS 20
+#define MAX_OBJECTS 100
 #define SCAN_SIZE 800
-#define MAXTRACKS 20
+#define MAXTRACKS 100
 #define TRACKER_LIFE 1000
 
 
