@@ -194,7 +194,7 @@
   
 
    <!-- Back Lidar -->
-  <lidar_gazebo frame="rear_laser" topic="rearLidar/scan" simulation="$(arg sim)" sample_size="11" min_angle="-0.767944871" max_angle="0.767944871" robot_namespace="$(arg robot_namespace)" filename="$(arg rearlidar_meshfile)"/>
+  <lidar_gazebo frame="rear_laser" topic="rearLidar/scan" simulation="$(arg sim)" sample_size="11" min_angle="-0.698131701" max_angle="0.698131701" robot_namespace="$(arg robot_namespace)" filename="$(arg rearlidar_meshfile)"/>
 
   <joint name="rear_laser_mount_joint" type="fixed">
     <origin xyz="$(arg rear_laser_xyz)" rpy="$(arg rear_laser_rpy)" />
