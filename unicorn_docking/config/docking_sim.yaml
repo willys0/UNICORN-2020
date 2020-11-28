@@ -1,6 +1,8 @@
 # The frame which will be used to compare distance and rotation to
 base_link_frame: "chassis_link"
 
+use_lidar: true
+
 # The offset of the tag from the base frame
 offset:
   x: 0.64

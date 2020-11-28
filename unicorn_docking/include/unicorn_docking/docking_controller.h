@@ -9,6 +9,7 @@
 #include <control_toolbox/pid.h>
 
 #include <apriltag_ros/AprilTagDetectionArray.h>
+#include <sensor_msgs/LaserScan.h>
 #include <std_msgs/Int32.h>
 
 #include <tf/transform_datatypes.h>
@@ -47,6 +48,10 @@ class DockingController {
 
         double getRotationToTag();
 
+        double fuseDistances(double apriltag_dist, double lidar_dist);
+
+        double fuseAngles(double apriltag_angle, double lidar_angle, double apriltag_dist);
+
         DockState getState() { return state_; }
         void setState(DockState state) { state_ = state; }
 
@@ -73,10 +78,13 @@ class DockingController {
     protected:
         void apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg);
 
+        void lidarCb(const sensor_msgs::LaserScanConstPtr& msg);
+
     private:
         ros::NodeHandle nh_;
 
         ros::Subscriber apriltag_sub_;
+        ros::Subscriber lidar_sub_;
 
         ros::Publisher  d_pub_;
         ros::Publisher  n_pub_;
@@ -94,7 +102,12 @@ class DockingController {
         tf2_ros::TransformListener tf_listener_;
 
         std::string base_link_frame_;
+        std::string lidar_frame_;
 
+        bool use_lidar_;
+        double lidar_offset_x_;
+        double lidar_dist_;
+        double lidar_angle_;
 
         double err_x_;
         double err_y_;
