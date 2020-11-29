@@ -242,7 +242,19 @@
   </joint>
 
   <!-- Zed Camera -->
-    <stereo_camera frame_rgb="zed_camera" frame_depth="zed_depth_joint" cameraName="zed" simulation="$(arg sim)" filename="$(arg zed_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+    <stereo_camera frame_rgb="zed_camera" frame_depth="zed_depth" cameraName="zed"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+
+  <link name="zed_camera"> 
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <mesh filename="$(arg zed_meshfile)"/>
+      </geometry>
+    </visual>
+  </link>
+
+  <link name="zed_depth"></link>
+
 
     <joint name="zed_camera_rgb_joint" type="fixed"> 
       <origin xyz="$(arg zed_xyz)" rpy="$(arg zed_rpy)"/>
@@ -253,14 +265,26 @@
     <joint name="zed_camera_depth_joint" type="fixed">
       <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
       <parent link="zed_camera"/>
-      <child link="zed_depth_joint"/>
+      <child link="zed_depth"/>
     </joint>
+
+
 
 
   <!-- realsense Camera -->
 
+
+
+<!-- Links only needed in simulation, created by realsense software otherwise-->
+
   <link
     name="realsense_link">
+      <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <mesh filename="$(arg realsense_meshfile)" />
+      </geometry>
+    </visual>
   </link>
 
   <joint name="realsense_joint" type="fixed"> 
@@ -270,29 +294,13 @@
   </joint>
 
 
-<xacro:if value="$(arg sim)">
-  <link
-    name="realsense_model_dummy_link">
-    <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="$(arg realsense_meshfile)" />
-        </geometry>
-      </visual>
-  </link>
-
-
-  <joint name="realsense_model_joint" type="fixed"> 
-    <origin xyz="$(arg real_rgb_xyz)" rpy="0 0 0"/>
-    <parent link="realsense_link"/>  
-    <child link="realsense_model_dummy_link"/>
-  </joint>
-</xacro:if> 
-
-  <!-- Links only needed in simulation, created by realsense software otherwise-->
-<xacro:if value="$(arg sim)">
-  <stereo_camera frame_rgb="realsense_color_frame" frame_depth="realsense_depth_frame" cameraName="realsense" simulation="$(arg sim)" filename="$(arg realsense_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
   
+<xacro:if value="$(arg sim)">
+  <stereo_camera frame_rgb="realsense_color_frame" frame_depth="realsense_depth_frame" cameraName="realsense" topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+  
+  <link name="realsense_color_frame"> </link>
+
+  <link name="realsense_depth_frame"></link>
 
   <link
     name="realsense_depth_optical_frame">
