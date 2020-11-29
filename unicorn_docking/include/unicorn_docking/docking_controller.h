@@ -48,7 +48,7 @@ class DockingController {
 
         double getRotationToTag();
 
-        double fuseDistances(double apriltag_dist, double lidar_dist);
+        double fuseDistances(double apriltag_dist, double lidar_dist, double lidar_angle);
 
         double fuseAngles(double apriltag_angle, double lidar_angle, double apriltag_dist);
 

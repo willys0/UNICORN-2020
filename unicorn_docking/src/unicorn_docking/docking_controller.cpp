@@ -76,7 +76,7 @@ double DockingController::getLateralComponent() {
 double DockingController::getDistAlongTagNorm() {
     // Gets the distance to the robot along the tag normal. (along tags z axis)
     //return wheelbase_to_tag_tf_.transform.translation.z;
-    return fuseDistances(wheelbase_to_tag_tf_.transform.translation.z, lidar_dist_);
+    return fuseDistances(wheelbase_to_tag_tf_.transform.translation.z, lidar_dist_, lidar_angle_);
 }
 
 double DockingController::getDesiredRotation() {
@@ -119,10 +119,10 @@ double DockingController::getRotationToTag() {
     return rot_to_tag;
 }
 
-double DockingController::fuseDistances(double apriltag_dist, double lidar_dist) {
+double DockingController::fuseDistances(double apriltag_dist, double lidar_dist, double lidar_angle) {
     // TODO: Make it possible to set min dist to activate lidar manually
-    if(use_lidar_ && apriltag_dist < 1.0f) {
-        float lidar_contrib = 1.0 / exp(17 * (apriltag_dist - desired_offset_.x));
+    if(use_lidar_ && apriltag_dist < 0.8f && lidar_angle < 0.00872) {
+        float lidar_contrib = 1.0 / exp(40 * (apriltag_dist - desired_offset_.x));
 
         if(lidar_contrib > 1.0)
             lidar_contrib = 1.0;
@@ -136,8 +136,8 @@ double DockingController::fuseDistances(double apriltag_dist, double lidar_dist)
 
 double DockingController::fuseAngles(double apriltag_angle, double lidar_angle, double apriltag_dist) {
     // TODO: Make it possible to set min dist to activate lidar manually
-    if(use_lidar_ && apriltag_dist < 1.0f) {
-        float lidar_contrib = 1.0 / exp(17 * (apriltag_dist - desired_offset_.x));
+    if(use_lidar_ && apriltag_dist < 0.8f) {
+        float lidar_contrib = 1.0 / exp(40 * (apriltag_dist - desired_offset_.x));
 
         if(lidar_contrib > 1.0)
             lidar_contrib = 1.0;
