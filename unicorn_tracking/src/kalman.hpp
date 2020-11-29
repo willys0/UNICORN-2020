@@ -8,8 +8,8 @@
 #include <Eigen/Dense>
 
 
-#define STATES 3 // Number of states
-#define MEAS_AMOUNT 2 // Number of measurements
+#define STATES 4 // Number of states
+#define MEAS_AMOUNT 4 // Number of measurements
 #define CONTROL_INPUTS 0 // Number of control inputs
 
 class KalmanFilter {
@@ -74,6 +74,7 @@ public:
 	Eigen::MatrixXd P0{STATES, STATES}; // initial error covariance
 	Eigen::MatrixXd I{STATES, STATES};  // n-size identity
 	Eigen::VectorXd x_hat{STATES};	// Estimated states
+	Eigen::VectorXd y{MEAS_AMOUNT}; //
   // Matrices for computation
 	//Eigen::MatrixXd A, B, C, Q, R, P, K, P0;
 	Eigen::MatrixXd P_new{STATES, STATES}; // Estimate error covariance

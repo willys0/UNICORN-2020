@@ -32,9 +32,9 @@
 #include "Hungarian.h"
 
 #define PI 3.14159265
-#define MAX_OBJECTS 100
+#define MAX_OBJECTS 20
 #define SCAN_SIZE 800
-#define MAXTRACKS 100
+#define MAXTRACKS MAX_OBJECTS
 #define TRACKER_LIFE 1000
 
 
@@ -56,6 +56,8 @@ private:
 	void extract_corners(int startpoint,int endpoint, int length,int shape_nr);
 	void search_longest(int startpoint, int current_point,int end_point, int length, float distance_S, int itteration, int max_itteration, int *best_point, float *best_dist);
 	void initiate_Trackers();
+	void estimate_new_position();
+	void update_position();
 
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;

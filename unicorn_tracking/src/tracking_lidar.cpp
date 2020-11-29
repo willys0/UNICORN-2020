@@ -127,7 +127,7 @@ void tracking_lidar::object_publisher()
       object.polygon.points.clear();
       object.polygon = trackers[i].points;
 /**/
-      marker.color.a = 10*trackers[i].color[0]/((trackers[i].last_seen+1));
+      marker.color.a = trackers[i].color[0]*(TRACKER_LIFE - (trackers[i].last_seen+1))/TRACKER_LIFE;
       marker.color.b = trackers[i].color[1];
       marker.color.g = trackers[i].color[2];
       marker.color.r = trackers[i].color[3];
@@ -203,8 +203,11 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       static_map_filter();
       polygon_extraction();
       polygon_attribute_extraction();
-      association();
+      //estimate_new_position();
       //update_tracker; 
+      association();
+      //update_position();
+      
       // https://www.intechopen.com/books/kalman-filters-theory-for-advanced-applications/kalman-filter-for-moving-object-tracking-performance-analysis-and-filter-design good read
 
       //predict_postions
@@ -263,6 +266,7 @@ void tracking_lidar::association()
         //std::cout << trackers[i].tracker.x_hat_new << std::endl;
         
         // Check against all objects
+        // add some kind of confirmation tracks with adjustment benefit
        
         for(j=0; j<MAX_OBJECTS; j++)
         {
@@ -273,8 +277,8 @@ void tracking_lidar::association()
             similarity += abs((trackers[i].longest_size) - (object_attributes_list[j].longest_size));
             similarity += abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount)); 
             
-            similarity += abs((trackers[i].tracker.x_hat(0)) - (object_attributes_list[j].estimated_x));
-            similarity += abs((trackers[i].tracker.x_hat(1)) - (object_attributes_list[j].estimated_y));
+            similarity += abs((trackers[i].tracker.x_hat_new(0)) - (object_attributes_list[j].estimated_x));
+            similarity += abs((trackers[i].tracker.x_hat_new(2)) - (object_attributes_list[j].estimated_y));
             
             similarity /= 5;
 
@@ -298,7 +302,7 @@ void tracking_lidar::association()
 	  vector<int> assignment;
 	  double cost = HungAlgo.Solve(object_match_ratio, assignment);
 
-    /*
+    /**/
     for(i=0; i<MAX_OBJECTS; i++)
     {
       for(j=0; j<MAXTRACKS; j++)
@@ -306,13 +310,14 @@ void tracking_lidar::association()
         std::cout << std::setprecision(3) << object_match_ratio[i][j] << "    ";
       }
       std::cout << std::endl;
-    }*/
+    }
 
-	  for (m = 0; m < object_match_ratio.size(); m++)
+	  for (m = 0; m < MAXTRACKS; m++)
     {
       //std::cout << m << "," << assignment[m] << "-" << object_match_ratio[m][assignment[m]] << "\t";
       if(object_match_ratio[m][assignment[m]] < 1.5)
       {
+        ROS_INFO("Object %d identified wiuth tracker %d",assignment[m], m);
         object_match[assignment[m]] = 1; 
         trackers[m].last_seen = 0; // update last seen
         j = assignment[m];
@@ -320,10 +325,12 @@ void tracking_lidar::association()
         trackers[m].average_angle = object_attributes_list[j].average_angle;
         trackers[m].longest_size = object_attributes_list[j].longest_size;
         trackers[m].sides_amount = object_attributes_list[j].sides_amount;
-        trackers[m].tracker.x_hat << object_attributes_list[j].estimated_x, object_attributes_list[j].estimated_y, 0; // should actually be y
+        trackers[m].tracker.y << object_attributes_list[j].estimated_x, 0, object_attributes_list[j].estimated_y, 0; // should actually be y
         trackers[m].points.points.clear();
         trackers[m].points = shapes[j];
         trackers[m].time = time;
+
+         
 
       }else{
         trackers[m].last_seen++;
@@ -331,27 +338,33 @@ void tracking_lidar::association()
       }
        
     }
-		  
+		 
     // Remove old trackers
     for(i=0; i<MAXTRACKS; i++)
       if(trackers[i].age > 0)
         if(trackers[i].last_seen > TRACKER_LIFE)
         {
+          ROS_INFO("Removing tracker %d",i);
           trackers[i].tracker.initialized = false;
           trackers[i].age = 0;
         }
    
    // Add new trackers 
+   m = 0;
     for(j=0; j<MAX_OBJECTS; j++)
     {
+      if(trackers[j].age > 0)
+        m++;
+
       if(polygon_size[j] > 0 && object_match[j] == 0)
       {
         //ROS_INFO("tracker poly, object %d object %d",polygon_size[j], object_match[j]);
         for(i=0; i<MAXTRACKS; i++)
         {
-          //ROS_INFO("New Tracker %d",i);
+          
           if(trackers[i].age == 0)
           {
+            ROS_INFO("New Tracker %d for object %d",i,j);
             trackers[i].age = 1;
             trackers[i].average_angle = object_attributes_list[j].average_angle;
             trackers[i].longest_size = object_attributes_list[j].longest_size;
@@ -359,7 +372,8 @@ void tracking_lidar::association()
             trackers[i].time = time;
             trackers[i].last_seen = 0;
             trackers[i].tracker.init();
-            trackers[i].tracker.x_hat << object_attributes_list[j].estimated_x, object_attributes_list[j].estimated_y, 0;
+            trackers[i].tracker.x_hat << object_attributes_list[j].estimated_x, 0,object_attributes_list[j].estimated_y, 0;
+            trackers[i].tracker.y << object_attributes_list[j].estimated_x, 0, object_attributes_list[j].estimated_y, 0;
             trackers[i].color[0] = 1;
             trackers[i].color[1] = float(rand() % 80 + 20)/100;
             trackers[i].color[2] = float(rand() % 80 + 20)/100;
@@ -372,6 +386,7 @@ void tracking_lidar::association()
         }
       }
     }
+    ROS_INFO("Number of active trackers %d",m);
 
 
 }
@@ -385,13 +400,13 @@ void tracking_lidar::initiate_Trackers(){
   // Construct the filter
   //KalmanFilter kf;
   KalmanFilter kf;
-  kf.A << 1, 0, 0, 0, 1, 0, 0, 0, 1;
+  kf.A << 1, dt, 0, 0, 0, 1, 0, 0, 0, 0, 1, dt, 0, 0, 0, 1;
 
   //kf.B << 0, 0, 0;
-  kf.C << 1, 0, 0, 0, 1, 0;
-  kf.Q << .05, .05, .0, .05, .05, .0, .0, .0, .0;
-  kf.R << 1, 0, 0, 1;
-  kf.P << .1, .1, .1, .1, 10000, 10, .1, 10, 100;
+  kf.C << 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1; 
+  kf.Q << 0.5, 0.5, 0, 0, 0.5, 0.5, 0, 0, 0, 0, 0.5, 0.5, 0, 0, 0.5, 0.5;
+  kf.R << 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1; // Should probably depend on attributes of measure obstacle
+  kf.P << 1, 0.5, 0, 0, 0.5, 1, 0, 0, 0, 0, 1, 0.5, 0, 0, 0.5, 1;
   
 
   int i;
@@ -408,6 +423,40 @@ void tracking_lidar::initiate_Trackers(){
   
   //std::cout << trackers[1].tracker.A << std::endl;
   
+}
+
+void tracking_lidar::estimate_new_position(){
+  int i;
+  double dt, time = scan_data_.header.stamp.sec + scan_data_.header.stamp.nsec*pow(10, -9);
+  
+ 
+  for(i=0; i<MAXTRACKS; i++)
+  {
+    if(trackers[i].age > 0)
+    {
+      dt = time - trackers[i].time;
+      trackers[i].tracker.A << 1, dt, 0, 0, 0, 1, 0, 0, 0, 0, 1, dt, 0, 0, 0, 1;
+      trackers[i].tracker.predict();
+
+      //std::cout << "Object " << i << " State predicted \n" << trackers[1].tracker.x_hat_new << std::endl;
+
+    }
+
+  }
+}
+void tracking_lidar::update_position(){
+  int i;
+  for(i=0; i<MAXTRACKS; i++)
+  {
+    if(trackers[i].age > 0)
+    {
+      trackers[i].tracker.update(trackers[i].tracker.y);
+
+      //std::cout << "Object " << i << " State estimated \n" << trackers[1].tracker.x_hat << std::endl;
+
+    }
+  }
+
 }
 
 
