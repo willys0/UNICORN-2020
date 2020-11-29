@@ -105,6 +105,7 @@ class DockingController {
         std::string lidar_frame_;
 
         bool use_lidar_;
+        std::vector<int> lidar_indices_;
         double lidar_offset_x_;
         double lidar_dist_;
         double lidar_angle_;

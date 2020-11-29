@@ -23,13 +23,15 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
 
         nh_.param("lidar_frame", lidar_frame_, std::string("rear_laser"));
 
+        lidar_sub_ = nh_.subscribe("/rearLidar/scan", 1, &DockingController::lidarCb, this);
+        nh_.param("included_lidar_measures", lidar_indices_, std::vector<int>());
+
         while(ros::ok()) {
             try {
                 geometry_msgs::TransformStamped lidar_transform = tf_buffer_.lookupTransform(base_link_frame_, lidar_frame_, ros::Time::now(), ros::Duration(max_tf_lookup_time_));
 
                 lidar_offset_x_ = fabs(lidar_transform.transform.translation.x);
 
-                lidar_sub_ = nh_.subscribe("/rearLidar/scan", 1, &DockingController::lidarCb, this);
 
                 break;
             } catch (tf2::TransformException& ex) {
@@ -245,15 +247,17 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
 }
 
 void DockingController::lidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
-    float avgX, avgY = 0.0f, num = 0.0f, denom = 0.0f;
-    for(float v : msg->ranges) {
-        avgY += v;
+    float avgX = 0.0f, avgY = 0.0f, num = 0.0f, denom = 0.0f;
+    for(int i : lidar_indices_) {
+        avgY += msg->ranges[i];
+        avgX += msg->angle_min + i * msg->angle_increment;
     }
-    avgY /= msg->ranges.size();
-    avgX = (msg->angle_min + msg->angle_max) / 2;
+
+    avgY /= lidar_indices_.size();
+    avgX /= lidar_indices_.size();
 
     float x, y;
-    for(int i = 0; i < msg->ranges.size(); i++) {
+    for(int i : lidar_indices_) {
         x = i * msg->angle_increment + msg->angle_min;
         y = msg->ranges[i] * cos(x);
         num += (x - avgX) * (y - avgY);

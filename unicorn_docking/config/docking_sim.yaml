@@ -3,6 +3,9 @@ base_link_frame: "chassis_link"
 
 use_lidar: true
 
+#included_lidar_measures: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+included_lidar_measures: [ 3, 4, 5, 6, 7 ]
+
 # The offset of the tag from the base frame
 offset:
   x: 0.64
