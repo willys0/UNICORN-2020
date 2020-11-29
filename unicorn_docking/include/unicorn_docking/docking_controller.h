@@ -119,7 +119,7 @@ class DockingController {
 
         double max_docking_speed_;
         double max_docking_rotation_speed_;
-        double max_tf_lookup_time_;
+        double max_tf_lookup_time_ = 5.0;
 
         ros::Time last_time_;
         ros::Time tag_last_seen_;
