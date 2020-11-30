@@ -32,6 +32,8 @@ class State {
 
         static void setGoals(std::vector<struct Goal> goals) { goals_ = goals; }
 
+        static std::vector<struct Goal> getGoals() { return goals_;}
+
 
     protected:
         ros::NodeHandle nh_;

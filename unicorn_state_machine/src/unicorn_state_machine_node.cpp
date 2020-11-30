@@ -58,6 +58,9 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh("~");
 
     std::vector<struct Goal> goals;
+    bool publish_poses;
+    ros::Publisher pose_pub;
+    nh.param("publish_poses", publish_poses, false);
 
     parseGoalYaml(nh, goals);
 
@@ -72,7 +75,7 @@ int main(int argc, char** argv) {
     StateMachine state_machine;
 
     state_machine.setGoals(goals);
-    state_machine.start();
+    state_machine.start(nh, publish_poses);
 
     ros::spin();
 
