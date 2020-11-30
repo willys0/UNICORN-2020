@@ -58,10 +58,6 @@ class DockingController {
                 rotational_c_ = c;
         }
 
-        void setSpeedLimit(double max_speed) {
-            max_docking_speed_ = max_speed;
-        }
-
         void setMaxTfLookupTime(double max_tf_time) {
             max_tf_lookup_time_ = max_tf_time;
         }
@@ -104,8 +100,6 @@ class DockingController {
         double rotational_b_;
         double rotational_c_;
 
-        double max_docking_speed_;
-        double max_docking_rotation_speed_;
         double max_tf_lookup_time_;
 
         ros::Time last_time_;

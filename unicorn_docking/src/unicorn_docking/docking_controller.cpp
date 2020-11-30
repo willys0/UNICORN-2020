@@ -224,15 +224,6 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
             msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
         }
         
-
-        if(msg_out.linear.x > max_docking_speed_) {
-            msg_out.linear.x = max_docking_speed_;
-        }
-        else if(msg_out.linear.x < -max_docking_speed_) {
-            msg_out.linear.x = -max_docking_speed_;
-        }
-
-
         last_time_ = current_time;
     }
 
