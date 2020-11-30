@@ -2,6 +2,7 @@
   <arg name="camera_name" default="realsense/color" />
   <arg name="image_topic" default="image_raw" />
   <arg name="camera_frame" default="realsense_color_optical_frame" />
+  <arg name="remove_duplicates" default="true" />
   <arg name="docking_config" default="$(find unicorn_docking)/config/docking.yaml" />
   <arg name="pid_config" default="$(find unicorn_docking)/config/pid_gains.yaml" />
 
@@ -16,6 +17,7 @@
     <arg name="camera_name" value="$(arg camera_name)" />
     <arg name="image_topic" value="$(arg image_topic)" />
     <arg name="camera_frame" value="$(arg camera_frame)" />
+    <arg name="remove_duplicates" value="$(arg remove_duplicates)" />
 
   </include>
 </launch>

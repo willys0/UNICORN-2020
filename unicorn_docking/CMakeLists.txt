@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
   control_toolbox
   roscpp
   geometry_msgs
+  sensor_msgs
   apriltag_ros
   tf2
   actionlib
