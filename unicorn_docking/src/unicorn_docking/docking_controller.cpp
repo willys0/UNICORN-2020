@@ -247,10 +247,11 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
 }
 
 void DockingController::lidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
-    float avgX = 0.0f, avgY = 0.0f, num = 0.0f, denom = 0.0f;
+    float tempX = 0.0f, avgX = 0.0f, avgY = 0.0f, num = 0.0f, denom = 0.0f;
     for(int i : lidar_indices_) {
-        avgY += msg->ranges[i];
-        avgX += msg->angle_min + i * msg->angle_increment;
+        tempX = msg->angle_min + i * msg->angle_increment;
+        avgX += tempX;
+        avgY += msg->ranges[i]*cos(tempX);
     }
 
     avgY /= lidar_indices_.size();
