@@ -15,6 +15,31 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
 
     nh_.param("base_link_frame", base_link_frame_, std::string("chassis_link"));
 
+    nh_.param("use_lidar", use_lidar_, true);
+
+
+    if(use_lidar_) {
+        // Get offset between lidar and base link
+
+        nh_.param("lidar_frame", lidar_frame_, std::string("rear_laser"));
+
+        lidar_sub_ = nh_.subscribe("/rearLidar/scan", 1, &DockingController::lidarCb, this);
+        nh_.param("included_lidar_measures", lidar_indices_, std::vector<int>());
+
+        while(ros::ok()) {
+            try {
+                geometry_msgs::TransformStamped lidar_transform = tf_buffer_.lookupTransform(base_link_frame_, lidar_frame_, ros::Time::now(), ros::Duration(max_tf_lookup_time_));
+
+                lidar_offset_x_ = fabs(lidar_transform.transform.translation.x);
+
+
+                break;
+            } catch (tf2::TransformException& ex) {
+                ROS_WARN("Could not find transform from %s to %s, %s", base_link_frame_.c_str(), lidar_frame_.c_str(), ex.what());
+            }
+        }
+    }
+
     reset();
 
 }
@@ -40,7 +65,8 @@ double DockingController::getPitchComponent() {
         tag_pitch = -tag_pitch;
     }
 
-    return tag_pitch;
+    //return tag_pitch;
+    return fuseAngles(tag_pitch, lidar_angle_, getDistAlongTagNorm());
 }
 
 double DockingController::getLateralComponent() {
@@ -51,7 +77,8 @@ double DockingController::getLateralComponent() {
 
 double DockingController::getDistAlongTagNorm() {
     // Gets the distance to the robot along the tag normal. (along tags z axis)
-    return wheelbase_to_tag_tf_.transform.translation.z;
+    //return wheelbase_to_tag_tf_.transform.translation.z;
+    return fuseDistances(wheelbase_to_tag_tf_.transform.translation.z, lidar_dist_, lidar_angle_);
 }
 
 double DockingController::getDesiredRotation() {
@@ -92,6 +119,37 @@ double DockingController::getRotationToTag() {
     rot_to_tag = atan2(dock_chassi_tf.transform.translation.y, -dock_chassi_tf.transform.translation.x);
 
     return rot_to_tag;
+}
+
+double DockingController::fuseDistances(double apriltag_dist, double lidar_dist, double lidar_angle) {
+    // TODO: Make it possible to set min dist to activate lidar manually
+    if(use_lidar_ && apriltag_dist < 0.8f && lidar_angle < 0.00872) {
+        float lidar_contrib = 1.0 / exp(40 * (apriltag_dist - desired_offset_.x));
+
+        if(lidar_contrib > 1.0)
+            lidar_contrib = 1.0;
+
+        return (1.0 - lidar_contrib) * apriltag_dist + lidar_contrib * lidar_dist;
+    }
+    else {
+        return apriltag_dist;
+    }
+}
+
+double DockingController::fuseAngles(double apriltag_angle, double lidar_angle, double apriltag_dist) {
+    // TODO: Make it possible to set min dist to activate lidar manually
+    if(use_lidar_ && apriltag_dist < 0.8f) {
+        float lidar_contrib = 1.0 / exp(40 * (apriltag_dist - desired_offset_.x));
+
+        if(lidar_contrib > 1.0)
+            lidar_contrib = 1.0;
+
+        return (1.0 - lidar_contrib) * apriltag_angle + lidar_contrib * lidar_angle;
+    }
+    else {
+        return apriltag_angle;
+    }
+
 }
 
 
@@ -186,6 +244,34 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             break;
         }
     }
+}
+
+void DockingController::lidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
+    float avgX = 0.0f, avgY = 0.0f, num = 0.0f, denom = 0.0f;
+    for(int i : lidar_indices_) {
+        avgY += msg->ranges[i];
+        avgX += msg->angle_min + i * msg->angle_increment;
+    }
+
+    avgY /= lidar_indices_.size();
+    avgX /= lidar_indices_.size();
+
+    float x, y;
+    for(int i : lidar_indices_) {
+        x = i * msg->angle_increment + msg->angle_min;
+        y = msg->ranges[i] * cos(x);
+        num += (x - avgX) * (y - avgY);
+        denom += (x - avgX) * (x - avgX);
+    }
+
+    if(denom == 0.0)
+        return;
+
+    double res = num / denom;
+
+    lidar_dist_ = avgY + lidar_offset_x_;
+    lidar_angle_ = atan(res);
+
 }
 
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {

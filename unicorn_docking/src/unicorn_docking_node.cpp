@@ -123,7 +123,7 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
         // Call the docking controller to get velocity
         dock_status = getDockingVelocity(nh, controller, as, thresh, move_msg);
 
-        if(dock_status == DockStatus::SUCCESS) {
+        if(dock_status == DockStatus::SUCCESS && docking == true) {
             getDockingResultMsg(controller, true, rslt);
             as->setSucceeded(rslt);
 
@@ -137,6 +137,8 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
                 if(docking) {
                     offset.x = retry_offset;
                     thresh.x = thresh_x * 4;
+
+                    ROS_INFO("[Docking Controller] Failed to dock within acceptable error threshold, undocking to try again (remaining retries: %d)...", remaining_retries);
                 }
                 else {
                     offset.x = desired_offset.x;
