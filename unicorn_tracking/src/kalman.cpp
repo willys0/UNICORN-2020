@@ -35,15 +35,11 @@ void KalmanFilter::predict() {
 	}
 
 	//x_hat_new = A*x_hat + B*u;
-	x_hat_new = A*x_hat;
-	P_new = A*P*A.transpose() + Q;
+	x_hat = A*x_hat;
+	P = A*P*A.transpose() + Q;
 }
 
 void KalmanFilter::update(const Eigen::VectorXd& y) {
-
-	x_hat = x_hat_new;
-	P = P_new;
-
 
 	K = P*C.transpose()*(C*P*C.transpose() + R).inverse();
 	x_hat += K * (y - C*x_hat);

@@ -77,8 +77,6 @@ public:
 	Eigen::VectorXd y{MEAS_AMOUNT}; //
   // Matrices for computation
 	//Eigen::MatrixXd A, B, C, Q, R, P, K, P0;
-	Eigen::MatrixXd P_new{STATES, STATES}; // Estimate error covariance
-	Eigen::VectorXd x_hat_new{STATES};	// Estimated states
 
 
 	Eigen::MatrixXd K;

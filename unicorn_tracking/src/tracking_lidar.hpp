@@ -13,6 +13,7 @@
 #include <geometry_msgs/Point.h>
 #include <sensor_msgs/LaserScan.h>
 #include <tf2_ros/transform_listener.h>
+#include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
@@ -36,6 +37,7 @@
 #define SCAN_SIZE 800
 #define MAXTRACKS MAX_OBJECTS
 #define TRACKER_LIFE 1000
+#define CONFIRMED_TRACK 100
 
 
 class tracking_lidar
@@ -69,14 +71,18 @@ private:
 	ros::Subscriber scan_sub_;
 	ros::Publisher object_pub_;
 	ros::Publisher marker_pub_;
+	ros::Publisher marker_Arrow_pub_;
 
 	float lambda;
 	int max_dist_laser;
 	int static_remove_dist;
 	float polygon_tolerance;
 	int polygon_min_points;
-	int seq;
+	float min_twist_detection, max_similarty_deviation;
+	float sim_adj_dist, sim_adj_angle, sim_adj_side, sim_adj_xpos, sim_adj_ypos;
+	bool static_filter;
 
+	int seq;
 
 	float xy_positions[SCAN_SIZE][2];
 	float xy_map_positions[SCAN_SIZE][2];
