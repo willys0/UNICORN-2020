@@ -1,0 +1,13 @@
+offset:
+  x: 0.25
+  y: 0.0
+  th: 0.0
+
+max_retries: 3
+retry_offset: 0.8
+retry_error_times: 50
+nr_for_pitch_average: 1
+
+thresh_x: 0.01
+thresh_y: 0.01
+thresh_th: 0.01
