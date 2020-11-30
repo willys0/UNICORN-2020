@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   nav_msgs
   roscpp
   std_msgs
+  std_srvs
   move_base
   move_base_msgs
   geometry_msgs

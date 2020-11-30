@@ -6,6 +6,7 @@
 #include <geometry_msgs/PoseArray.h>
 
 StateMachine::StateMachine() {
+    paused_ = true;
    
 }
 
@@ -44,8 +45,24 @@ void StateMachine::start(ros::NodeHandle nh, bool publish_poses) {
             pose_pub.publish(pa);
         }
 
+        while(paused_) {
+            if(!ros::ok()) {
+                return;
+            }
+
+            ros::Duration(0.5).sleep();
+        }
+
         newState = currentState->run();
         delete currentState;
         currentState = newState;
     }
+}
+
+void StateMachine::pause() {
+    paused_ = true;
+}
+
+void StateMachine::resume() {
+    paused_ = false;
 }

@@ -12,9 +12,15 @@ class StateMachine {
         void setGoals(const std::vector<struct Goal>& goals);
         void start(ros::NodeHandle nh, bool publish_poses = false);
 
+        void pause();
+        void resume();
+
+        bool isRunning() { return !paused_; }
+
     private:
         std::vector<struct Goal> goals_;
 
+        bool paused_;
 };
 
 #endif // __STATE_MACHINE_H_
