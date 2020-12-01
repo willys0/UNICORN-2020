@@ -73,9 +73,7 @@ class DockingController {
 
         double getRotationToTag();
 
-        double getDistanceToObjectInfront();
-
-        double getDistanceToObjectBehind();
+        double getDistanceToClosestObject(const sensor_msgs::LaserScan& laser_scan, const std::vector<int> laser_scan_indicies);
 
         double fuseDistances(double apriltag_dist, double lidar_dist, double lidar_angle);
 
@@ -131,6 +129,8 @@ class DockingController {
         double min_distance_infront_;
         double min_distance_behind_;
 
+        std::vector<int> rear_lidar_indices_;
+        std::vector<int> front_lidar_indices_;
         sensor_msgs::LaserScan front_lidar_scan_;
         sensor_msgs::LaserScan rear_lidar_scan_;
 

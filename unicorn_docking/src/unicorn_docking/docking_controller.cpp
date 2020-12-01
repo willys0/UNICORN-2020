@@ -19,6 +19,8 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
 
     nh_.param("use_lidar", use_lidar_, true);
 
+    nh_.param("front_lidar_indices", front_lidar_indices_, std::vector<int>());
+    nh_.param("rear_lidar_indices", rear_lidar_indices_, std::vector<int>());
 
     if(use_lidar_) {
         // Get offset between lidar and base link
@@ -154,35 +156,17 @@ double DockingController::fuseAngles(double apriltag_angle, double lidar_angle, 
 
 }
 
-double DockingController::getDistanceToObjectInfront() {
+double DockingController::getDistanceToClosestObject(const sensor_msgs::LaserScan& laser_scan, const std::vector<int> laser_scan_indicies) {
     float range_min = 0.0f;
     // TODO: check time of laser scan so it is not to old.
 
-    range_min = front_lidar_scan_.range_max;
-    for( int i; i < front_lidar_scan_.ranges.size(); i++ ) {
-        if(front_lidar_scan_.ranges[i] < range_min) {
-            range_min = front_lidar_scan_.ranges[i];
+    range_min = laser_scan.range_max;
+    for( int i; i < laser_scan.ranges.size(); i++ ) {
+        if(laser_scan.ranges[i] < range_min) {
+            range_min = laser_scan.ranges[i];
         }
     }
     return range_min;
-}
-
-double DockingController::getDistanceToObjectBehind() {
-    // Need to take the wall into account so it dosn't see docking station as obstacle. Might not be problem if slowing down when getting closer to objects
-    // if it is set to stop at a distance closer then docking distance is..
-    
-    float range_min = 0.0f;
-    // TODO: check time of laser scan so it is not to old.
-
-    range_min = rear_lidar_scan_.range_max;
-    for( int i; i < rear_lidar_scan_.ranges.size(); i++ ) {
-        if(rear_lidar_scan_.ranges[i] < range_min) {
-            range_min = rear_lidar_scan_.ranges[i];
-        }
-    }
-    return range_min;
-
-
 }
 
 
@@ -359,14 +343,14 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
             msg_out.angular.z = pid_th_.computeCommand(-getDesiredRotation() - rotation_to_tag, current_time - last_time_);
 
             // Get speed multiplier depending on distance to objects infront of robot
-            speed_multiplier = 2.5*(getDistanceToObjectInfront()-min_distance_infront_);
+            speed_multiplier = 2.5*(getDistanceToClosestObject(front_lidar_scan_,front_lidar_indices_)-min_distance_infront_);
         }
         else {
             // robot is backing towards tag
             msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - rotation_to_tag, current_time - last_time_);
 
             // Get speed multiplier depending on distance to objects behind robot
-            speed_multiplier = 5*(getDistanceToObjectBehind()-min_distance_behind_);
+            speed_multiplier = 5*(getDistanceToClosestObject(rear_lidar_scan_,rear_lidar_indices_)-min_distance_behind_);
         }
         
         // Cap speed multiplier between 0 and 1
