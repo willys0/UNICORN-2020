@@ -323,6 +323,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
     // Try to timetravel!
     // Try to find transform between DOCK_BUNDLE frame at tag_last_seen_ time and chassis_link at current_time
     try {
+        // The -0.2 on max_tf_lookup_time_ is to allow "rotation_to_tag = getRotationToTag()" below to finnish succesfully before max_tf_lookup_time_ have passed
         wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", tag_last_seen_, base_link_frame_, current_time, "map", ros::Duration(max_tf_lookup_time_-0.2));
     }
     catch(tf2::TransformException &ex) {
@@ -333,6 +334,15 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
         return false;
     }
     
+    // call getRotationToTag as it does a lookupTransform. This helps prevent max_tf_lookup_time_ to have passed even tho the lookupTransform above succeded 
+    double rotation_to_tag = getRotationToTag();
+    // If rotation to tag failed it returns -100
+    if(rotation_to_tag == -100) {
+        ROS_WARN("getRotationToTag() did not succed. Setting velocities to 0");
+        msg_out.linear.x = 0.0;
+        msg_out.angular.z = 0.0;
+        return false;
+    }
 
     if(state_ == DOCKING) {
 
@@ -346,14 +356,14 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
         // when x is positive, the robot is moving forward
         if(msg_out.linear.x >= 0) {
             // If linear.x is positive the rotation needs to be the other way as it is moving away from the tag and not towards it.
-            msg_out.angular.z = pid_th_.computeCommand(-getDesiredRotation() - getRotationToTag(), current_time - last_time_);
+            msg_out.angular.z = pid_th_.computeCommand(-getDesiredRotation() - rotation_to_tag, current_time - last_time_);
 
             // Get speed multiplier depending on distance to objects infront of robot
             speed_multiplier = 2.5*(getDistanceToObjectInfront()-min_distance_infront_);
         }
         else {
             // robot is backing towards tag
-            msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
+            msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - rotation_to_tag, current_time - last_time_);
 
             // Get speed multiplier depending on distance to objects behind robot
             speed_multiplier = 5*(getDistanceToObjectBehind()-min_distance_behind_);
