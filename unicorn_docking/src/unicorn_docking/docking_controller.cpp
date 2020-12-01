@@ -3,6 +3,8 @@
 DockingController::DockingController() : nh_("~"), state_(DockingController::DockState::IDLE), tf_listener_(tf_buffer_) {
 
     apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
+    front_lidar_sub_ = nh_.subscribe("/frontLidar/scan", 1, &DockingController::frontLidarCb, this);
+
     d_pub_ = nh_.advertise<visualization_msgs::Marker>("d_tag", 1);
     n_pub_ = nh_.advertise<visualization_msgs::Marker>("n_tag", 1);
     desired_rot_pub_ = nh_.advertise<std_msgs::Float64>("desired_rot", 1);
@@ -23,7 +25,7 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
 
         nh_.param("lidar_frame", lidar_frame_, std::string("rear_laser"));
 
-        lidar_sub_ = nh_.subscribe("/rearLidar/scan", 1, &DockingController::lidarCb, this);
+        lidar_sub_ = nh_.subscribe("/rearLidar/scan", 1, &DockingController::rearLidarCb, this);
         nh_.param("included_lidar_measures", lidar_indices_, std::vector<int>());
 
         while(ros::ok()) {
@@ -152,6 +154,37 @@ double DockingController::fuseAngles(double apriltag_angle, double lidar_angle, 
 
 }
 
+double DockingController::getDistanceToObjectInfront() {
+    float range_min = 0.0f;
+    // TODO: check time of laser scan so it is not to old.
+
+    range_min = front_lidar_scan_.range_max;
+    for( int i; i < front_lidar_scan_.ranges.size(); i++ ) {
+        if(front_lidar_scan_.ranges[i] < range_min) {
+            range_min = front_lidar_scan_.ranges[i];
+        }
+    }
+    return range_min;
+}
+
+double DockingController::getDistanceToObjectBehind() {
+    // Need to take the wall into account so it dosn't see docking station as obstacle. Might not be problem if slowing down when getting closer to objects
+    // if it is set to stop at a distance closer then docking distance is..
+    
+    float range_min = 0.0f;
+    // TODO: check time of laser scan so it is not to old.
+
+    range_min = rear_lidar_scan_.range_max;
+    for( int i; i < rear_lidar_scan_.ranges.size(); i++ ) {
+        if(rear_lidar_scan_.ranges[i] < range_min) {
+            range_min = rear_lidar_scan_.ranges[i];
+        }
+    }
+    return range_min;
+
+
+}
+
 
 void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg) {
     static int seq = 0;
@@ -246,8 +279,11 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
     }
 }
 
-void DockingController::lidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
+void DockingController::rearLidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
     float tempX = 0.0f, avgX = 0.0f, avgY = 0.0f, num = 0.0f, denom = 0.0f;
+    rear_lidar_scan_ = *msg;
+
+    // Calculate angle and distance to wall
     for(int i : lidar_indices_) {
         tempX = msg->angle_min + i * msg->angle_increment;
         avgX += tempX;
@@ -275,15 +311,19 @@ void DockingController::lidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
 
 }
 
+void DockingController::frontLidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
+    front_lidar_scan_ = *msg;
+}
+
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
 
     ros::Time current_time = ros::Time::now();
-
+    double speed_multiplier;
     
     // Try to timetravel!
     // Try to find transform between DOCK_BUNDLE frame at tag_last_seen_ time and chassis_link at current_time
     try {
-        wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", tag_last_seen_, base_link_frame_, current_time, "map", ros::Duration(max_tf_lookup_time_));
+        wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", tag_last_seen_, base_link_frame_, current_time, "map", ros::Duration(max_tf_lookup_time_-0.2));
     }
     catch(tf2::TransformException &ex) {
         // If no transform could be found, set linear and angular velocities to zero
@@ -303,14 +343,37 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
 
         msg_out.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistAlongTagNorm(), current_time - last_time_);
 
-        // If linear.x is positive the rotation needs to be the other way as it is moving away from the tag and not towards it.
+        // when x is positive, the robot is moving forward
         if(msg_out.linear.x >= 0) {
+            // If linear.x is positive the rotation needs to be the other way as it is moving away from the tag and not towards it.
             msg_out.angular.z = pid_th_.computeCommand(-getDesiredRotation() - getRotationToTag(), current_time - last_time_);
+
+            // Get speed multiplier depending on distance to objects infront of robot
+            speed_multiplier = 2.5*(getDistanceToObjectInfront()-min_distance_infront_);
         }
         else {
+            // robot is backing towards tag
             msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - getRotationToTag(), current_time - last_time_);
+
+            // Get speed multiplier depending on distance to objects behind robot
+            speed_multiplier = 5*(getDistanceToObjectBehind()-min_distance_behind_);
         }
         
+        // Cap speed multiplier between 0 and 1
+        if (speed_multiplier > 1) {
+                speed_multiplier = 1;
+        }
+        else if(speed_multiplier < 0) {
+            speed_multiplier = 0;
+
+            // If speed multiplier is 0, do not rotate
+            msg_out.angular.z = 0.0;
+        }
+
+        // Apply speed modifier
+        msg_out.linear.x = speed_multiplier*msg_out.linear.x;
+
+
         last_time_ = current_time;
     }
 
