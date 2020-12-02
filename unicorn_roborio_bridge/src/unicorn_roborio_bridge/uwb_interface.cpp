@@ -14,6 +14,9 @@ void UwbInterface::setUwbPosition(const geometry_msgs::Point& pos) {
     uwb_pose_msg_.header.seq++;
 
     uwb_pose_msg_.pose.pose.position = pos;
+    uwb_pose_msg_.pose.pose.position.x /= 1000.0;
+    uwb_pose_msg_.pose.pose.position.y /= 1000.0;
+    uwb_pose_msg_.pose.pose.position.z /= 1000.0;
 }
 
 void UwbInterface::initUwbMsg() {
