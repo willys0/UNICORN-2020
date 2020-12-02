@@ -36,5 +36,5 @@ obstacle_layer:
     marking: true, clearing: true, max_obstacle_height: 1, min_obstacle_height: 0.08}
 
     #Stereo camera params
-    point_cloud_sensor: {sensor_frame: zed_depth, data_type: PointCloud2, topic: /zed/depth/points_filtered, expected_update_rate: 1.0,
+    point_cloud_sensor: {sensor_frame: zed_left_camera_optical_frame, data_type: PointCloud2, topic: /zed/depth/points_filtered, expected_update_rate: 1.0,
     marking: true, clearing: true, max_obstacle_height: 3.0, min_obstacle_height: 0.1}
