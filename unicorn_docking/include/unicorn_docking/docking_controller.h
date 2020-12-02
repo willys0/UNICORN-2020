@@ -94,9 +94,6 @@ class DockingController {
 
         ros::Publisher  d_pub_;
         ros::Publisher  n_pub_;
-        ros::Publisher  desired_rot_pub_;
-        ros::Publisher  rot_to_tag_pub_;
-        ros::Publisher  tag_pitch_pub_;
 
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;

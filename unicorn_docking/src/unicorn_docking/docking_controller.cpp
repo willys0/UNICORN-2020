@@ -7,9 +7,6 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
 
     d_pub_ = nh_.advertise<visualization_msgs::Marker>("d_tag", 1);
     n_pub_ = nh_.advertise<visualization_msgs::Marker>("n_tag", 1);
-    desired_rot_pub_ = nh_.advertise<std_msgs::Float64>("desired_rot", 1);
-    rot_to_tag_pub_ = nh_.advertise<std_msgs::Float64>("rot_to_tag", 1);
-    tag_pitch_pub_ = nh_.advertise<std_msgs::Float64>("tag_pitch", 1);
 
     // TODO: Load initial gains from parameter server
     pid_x_.initParam("~/pid/x");
@@ -245,20 +242,6 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             n_pose_msg.lifetime = ros::Duration();
 
             n_pub_.publish(n_pose_msg);
-            //======================================================================================
-
-            //======================================================================================
-            // Publish desired rotation, rotation to tag and tag pitch
-            //======================================================================================
-            std_msgs::Float64 f;
-            f.data = getDesiredRotation();
-            desired_rot_pub_.publish(f);
-            
-            getRotationToTag(f.data);
-            rot_to_tag_pub_.publish(f);
-
-            f.data = getPitchComponent();
-            tag_pitch_pub_.publish(f);
             //======================================================================================
 
             // Set time at witch the tag was last seen
