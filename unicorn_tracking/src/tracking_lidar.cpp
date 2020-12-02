@@ -287,22 +287,26 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
     }*/
 }
 
+/* Associates objects with trackers*/
 void tracking_lidar::association()
 {
-
   int i,j,m = 0;
   double dt,time = scan_data_.header.stamp.sec + scan_data_.header.stamp.nsec*pow(10, -9);
-  float s1,s2,s3,s4,s5,similarity,sim_adj;
+  float s1,s2,s3,s4,s5,similarity,sim_adj,x_dot,y_dot;
 
   vector<vector<double>> object_match_ratio(MAX_OBJECTS,vector<double>(MAXTRACKS));
 
-  memset(object_match,0,sizeof(object_match[0])*MAX_OBJECTS);
 
+  /* Sets start values */
+  memset(object_match,0,sizeof(object_match[0])*MAX_OBJECTS);
+  //memset(object_match_ratio,0,sizeof(object_match_ratio[0][0])*MAX_OBJECTS*MAXTRACKS);
+
+  /**/
   for(i=0; i<MAX_OBJECTS; i++)
     for(j=0; j<MAXTRACKS; j++)
         object_match_ratio[i][j] = 100;
 
-  // Check object against current trackers
+  /* Check object against current trackers and gets similarity index*/
   for(i=0; i<MAXTRACKS; i++)
   {
     if(trackers[i].age > 0){
@@ -345,7 +349,7 @@ void tracking_lidar::association()
   vector<int> assignment;
   double cost = HungAlgo.Solve(object_match_ratio, assignment);
 
-  float x_dot, y_dot;
+  
   /* Associates trackers according to cost*/
   for (m = 0; m < MAXTRACKS; m++)
   {
@@ -377,7 +381,7 @@ void tracking_lidar::association()
       
   }
 		 
-  // Remove old trackers
+  /*  Remove old trackers */
   for(i=0; i<MAXTRACKS; i++){
     if(trackers[i].age > 0){
       if((trackers[i].last_seen > TRACKER_LIFE) || (trackers[i].age < CONFIRMED_TRACK && trackers[i].last_seen > 1))
@@ -389,7 +393,7 @@ void tracking_lidar::association()
   }
 
    
-  // Add new trackers 
+  /* Adds new trackers */
   m = 0;
   for(j=0; j<MAX_OBJECTS; j++)
   {
@@ -421,10 +425,10 @@ void tracking_lidar::association()
       }
     }
   }
-  ROS_INFO("Number of trackers %d",m);
+  //ROS_INFO("Number of trackers %d",m);
 }
 
-
+/* Initiates all trackers */
 void tracking_lidar::initiate_Trackers()
 {
   double dt = 1.0/30;
@@ -451,6 +455,7 @@ void tracking_lidar::initiate_Trackers()
   }
 }
 
+/* Updates A matrix depending on the time differnce and estimates new position*/
 void tracking_lidar::estimate_new_position()
 {
   int i;
@@ -466,6 +471,7 @@ void tracking_lidar::estimate_new_position()
   }
 }
 
+/* Update position with new position estimate*/
 void tracking_lidar::update_position(){
   int i;
   for(i=0; i<MAXTRACKS; i++)
@@ -479,6 +485,7 @@ void tracking_lidar::update_position(){
   }
 }
 
+/* Clusters data into groups */
 void tracking_lidar::adaptive_breaK_point()
 {
   int i,j = 0;
@@ -503,6 +510,7 @@ void tracking_lidar::adaptive_breaK_point()
       
       clusters[i] = j;
     }
+    /* Filters scans that over a set threshold*/
     if(scan_data_.ranges[i] > max_dist_laser)
       clusters[i] = -1;
   }
@@ -578,7 +586,7 @@ void tracking_lidar::polygon_extraction(){
   }
 }
 
-/*  Finds all corners in a scan between two points*/
+/*  Finds all corners between two points that satisfy a threshold*/
 void tracking_lidar::extract_corners(int startpoint,int endpoint, int length,int shape_nr)
 {
   if(length < polygon_min_points)
@@ -641,15 +649,16 @@ void tracking_lidar::search_longest(int startpoint,int end_point, int current_po
 /* Collects information polygon attributes for a simularity comparison*/
 void tracking_lidar::polygon_attribute_extraction()
 {
-  int i,j;
+  int i,j, m = 0;
   geometry_msgs::Point32 point1,point2,point3;
-  float length1,length2,length3;
+  float length1,length2,length3, angle,lowest_angle;
   for(i=0; i < MAX_OBJECTS; i++){
     object_attributes_list[i].longest_size = 0;
     object_attributes_list[i].sides_amount = 0;
     object_attributes_list[i].estimated_x = 0;
     object_attributes_list[i].estimated_y = 0;
     object_attributes_list[i].average_angle = 0;
+    lowest_angle = 10;
     if(polygon_size[i] > 0){
       /* Get angle average, length average*/
       for(j=0;j < polygon_size[i]-1;j++)
@@ -668,7 +677,13 @@ void tracking_lidar::polygon_attribute_extraction()
           point3 = shapes[i].points[j+2];
           length2 = sqrt(pow(point3.x - point2.x,2) + pow(point3.y - point2.y,2));
           length3 = sqrt(pow(point3.x - point1.x,2) + pow(point3.y - point1.y,2));
-          object_attributes_list[i].average_angle += acos((pow(length1,2) + pow(length2,2) - pow(length3,2))/(2*length1*length2));
+          angle = acos((pow(length1,2) + pow(length2,2) - pow(length3,2))/(2*length1*length2));
+          object_attributes_list[i].average_angle += angle;
+          if(angle < lowest_angle)
+          {
+            lowest_angle = angle;
+            m = j+1;
+          }
         }
       }
       object_attributes_list[i].estimated_x += point2.x;
@@ -678,6 +693,12 @@ void tracking_lidar::polygon_attribute_extraction()
       object_attributes_list[i].estimated_y /= polygon_size[i];
       if(polygon_size[i]-2 > 0)
         object_attributes_list[i].average_angle /= polygon_size[i]-2;
+
+      if(lowest_angle < 10)
+      {
+        object_attributes_list[i].estimated_x = shapes[i].points[m].x;
+        object_attributes_list[i].estimated_y = shapes[i].points[m].y;
+      }
     }
   }
 }
