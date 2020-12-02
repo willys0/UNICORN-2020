@@ -307,7 +307,7 @@ void DockingController::frontLidarCb(const sensor_msgs::LaserScanConstPtr& msg) 
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
 
     ros::Time current_time = ros::Time::now();
-    double speed_multiplier;
+    double speed_multiplier, time_since_lidar_scan;
     bool got_error = false;
     
     // Try to timetravel!
@@ -332,13 +332,15 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
         got_error = true;
     }
 
-    if(got_error == false && current_time - rear_lidar_scan_.header.stamp > ros::Duration(max_time_since_lidar_scan_)) {
-        ROS_INFO("rear lidar scan is older than %f seconds", max_time_since_lidar_scan_);
+    time_since_lidar_scan = (current_time - rear_lidar_scan_.header.stamp).toSec();
+    if(got_error == false && time_since_lidar_scan > max_time_since_lidar_scan_) {
+        ROS_INFO("rear lidar scan is older than %f seconds, it is: %f seconds old", max_time_since_lidar_scan_, time_since_lidar_scan);
         got_error = true;
     }
 
-    if(got_error == false && current_time - front_lidar_scan_.header.stamp > ros::Duration(max_time_since_lidar_scan_)) {
-        ROS_INFO("front lidar scan is older than %f seconds", max_time_since_lidar_scan_);
+    time_since_lidar_scan = (current_time - front_lidar_scan_.header.stamp).toSec();
+    if(got_error == false && time_since_lidar_scan > max_time_since_lidar_scan_) {
+        ROS_INFO("front lidar scan is older than %f seconds, it is: %f seconds old", max_time_since_lidar_scan_, time_since_lidar_scan);
         got_error = true;
     }
 
