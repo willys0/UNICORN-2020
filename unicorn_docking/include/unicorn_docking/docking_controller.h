@@ -71,7 +71,7 @@ class DockingController {
 
         double getDesiredRotation();
 
-        double getRotationToTag();
+        bool getRotationToTag(double& rotation_to_tag);
 
         double getDistanceToClosestObject(const sensor_msgs::LaserScan& laser_scan, double laser_scan_angle);
 

@@ -107,8 +107,8 @@ double DockingController::getDesiredRotation() {
     return des_rot;
 }
 
-double DockingController::getRotationToTag() {
-    double rot_to_tag;
+bool DockingController::getRotationToTag(double& rotation_to_tag) {
+
     geometry_msgs::TransformStamped dock_chassi_tf;
     // rotation from base_link_frame to tag normal (tag z axis)
 
@@ -118,12 +118,13 @@ double DockingController::getRotationToTag() {
     }
     catch(tf2::TransformException &ex) {
         ROS_WARN("in getRotationToTag(): %s",ex.what());
-        return -100;
+        rotation_to_tag = 0.0;
+        return true;
     }
     // Rotation from chassis_ling frame to DOCK_BUNDLE frame
-    rot_to_tag = atan2(dock_chassi_tf.transform.translation.y, -dock_chassi_tf.transform.translation.x);
+    rotation_to_tag = atan2(dock_chassi_tf.transform.translation.y, -dock_chassi_tf.transform.translation.x);
 
-    return rot_to_tag;
+    return true;
 }
 
 double DockingController::fuseDistances(double apriltag_dist, double lidar_dist, double lidar_angle) {
@@ -253,7 +254,7 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             f.data = getDesiredRotation();
             desired_rot_pub_.publish(f);
             
-            f.data = getRotationToTag();
+            getRotationToTag(f.data);
             rot_to_tag_pub_.publish(f);
 
             f.data = getPitchComponent();
@@ -307,9 +308,9 @@ void DockingController::frontLidarCb(const sensor_msgs::LaserScanConstPtr& msg) 
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
 
     ros::Time current_time = ros::Time::now();
-    double speed_multiplier, time_since_lidar_scan;
+    double speed_multiplier, time_since_lidar_scan, rotation_to_tag;
     bool got_error = false;
-    
+
     if(state_ == DOCKING) {
 
         // Calculate x, y and theta errors
@@ -332,9 +333,8 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
         }
         
         // call getRotationToTag as it does a lookupTransform. This helps prevent max_tf_lookup_time_ to have passed even tho the lookupTransform above succeded 
-        double rotation_to_tag = getRotationToTag();
         // If rotation to tag failed it returns -100
-        if(rotation_to_tag == -100) {
+        if(getRotationToTag(rotation_to_tag)) {
             ROS_WARN("getRotationToTag() did not succed. Setting velocities to 0");
             got_error = true;
         }
