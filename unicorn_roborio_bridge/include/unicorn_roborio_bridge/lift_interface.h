@@ -15,6 +15,9 @@ class LiftInterface {
 
         LiftInterface(ros::NodeHandle nh);
 
+        void publish();
+        void startTimer();
+
         void startPickupRoutine();
         void startDropoffRoutine();
         void stopLift();

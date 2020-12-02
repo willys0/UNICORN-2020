@@ -12,6 +12,9 @@ class UwbInterface {
 
         void setUwbPosition(const geometry_msgs::Point& pos);
 
+        void publish();
+        void startTimer();
+
     protected:
         void initUwbMsg();
 

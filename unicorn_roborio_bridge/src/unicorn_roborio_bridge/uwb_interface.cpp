@@ -6,7 +6,6 @@ UwbInterface::UwbInterface(ros::NodeHandle nh) :
     initUwbMsg();
 
     uwb_pub_ = nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("/uwb/pose", 10);
-    uwb_pub_timer_ = nh.createTimer(ros::Duration(1.0 / uwb_pub_freq_), &UwbInterface::uwbPubTimeout, this);
 }
 
 void UwbInterface::setUwbPosition(const geometry_msgs::Point& pos) {
@@ -17,6 +16,15 @@ void UwbInterface::setUwbPosition(const geometry_msgs::Point& pos) {
     uwb_pose_msg_.pose.pose.position.x /= 1000.0;
     uwb_pose_msg_.pose.pose.position.y /= 1000.0;
     uwb_pose_msg_.pose.pose.position.z /= 1000.0;
+}
+
+
+void UwbInterface::publish() {
+    uwb_pub_.publish(uwb_pose_msg_);
+}
+
+void UwbInterface::startTimer() {
+    uwb_pub_timer_ = nh_.createTimer(ros::Duration(1.0 / uwb_pub_freq_), &UwbInterface::uwbPubTimeout, this);
 }
 
 void UwbInterface::initUwbMsg() {
@@ -44,5 +52,5 @@ void UwbInterface::initUwbMsg() {
 }
 
 void UwbInterface::uwbPubTimeout(const ros::TimerEvent& e) {
-    uwb_pub_.publish(uwb_pose_msg_);
+    publish();
 }

@@ -8,6 +8,13 @@ LiftInterface::LiftInterface(ros::NodeHandle nh) :
     lift_state_pub_ = nh_.advertise<std_msgs::Int32>("/lift/state", 1);
     run_lift_pub_   = nh_.advertise<std_msgs::Int32>("/TX2_unicorn_picking_routine", 1);
 
+}
+
+void LiftInterface::publish() {
+    lift_state_pub_.publish(lift_state_);
+}
+
+void LiftInterface::startTimer() {
     lift_pub_timer_ = nh_.createTimer(ros::Duration(1.0 / lift_state_pub_freq_), &LiftInterface::liftPubTimeout, this);
 }
 
@@ -49,9 +56,7 @@ LiftInterface::LiftState LiftInterface::getCurrentState() {
         default:
             return LiftState::ERROR;
     }
-
 }
-
 void LiftInterface::initLiftMsg() {
     run_msg_.data = 0;
 
@@ -62,7 +67,7 @@ void LiftInterface::initLiftMsg() {
 }
 
 void LiftInterface::liftPubTimeout(const ros::TimerEvent& e) {
-    lift_state_pub_.publish(lift_state_);
+    publish();
 }
 
 void LiftInterface::waitForMsgPublish() {
