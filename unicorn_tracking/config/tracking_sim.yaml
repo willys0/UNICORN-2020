@@ -1,0 +1,21 @@
+
+
+
+lambda: 0.15
+max_dist_laser: 10
+
+static_filter: true
+Static_map_removal_tolerance: 4
+
+polygon_tolerance: 1.1 # 1.04
+polygon_min_points_required: 4
+
+min_twist_detection: 0.2 #0.08
+
+similarty_side_length_weight: 1.0
+similarty_side_angle_weigh: 1.0
+similarty_side_amount_weight: 3.0
+similarty_side_xposition_weight: 5.0
+similarty_side_yposition_weight: 5.0
+
+max_similarty_deviation: 1.5
