@@ -40,21 +40,30 @@ void UwbInterface::initUwbMsg() {
     nh_.param<std::string>("uwb/reference_frame", uwb_pose_msg_.header.frame_id, "");
     nh_.param<float>("uwb/publish_frequency", uwb_pub_freq_, 30.0);
 
+    std::vector<double> covariance_vector;
+    nh_.param<std::vector<double>>("uwb/covariance_matrix",
+                                   covariance_vector,
+                                   std::vector<double>({
+                                       1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                       0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                                       0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                                       0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+                                       0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                                       0.0, 0.0, 0.0, 0.0, 0.0, 1.0
+                                       }));
+
     // TODO: Incorporate orientation if we can get it later
     uwb_pose_msg_.pose.pose.orientation.x = 0;
     uwb_pose_msg_.pose.pose.orientation.y = 0;
     uwb_pose_msg_.pose.pose.orientation.z = 0;
     uwb_pose_msg_.pose.pose.orientation.w = 1;
 
-    boost::array<double, 36UL> covariance({
-        1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
-        0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
-        0.0, 0.0, 0.0, 0.0, 0.0, 1.0
-    });
-    uwb_pose_msg_.pose.covariance.swap(covariance);
+    if(covariance_vector.size() != uwb_pose_msg_.pose.covariance.size()) {
+        ROS_ERROR("[UWB settings] Covariance matrix not well formed, expected size: %lu, given size: %lu", uwb_pose_msg_.pose.covariance.size(), covariance_vector.size());
+    }
+    else {
+        std::copy( covariance_vector.begin(), covariance_vector.end(), uwb_pose_msg_.pose.covariance.begin() );
+    }
 
     ROS_INFO("[UWB settings] reference_frame: %s, publish_frequency: %f", uwb_pose_msg_.header.frame_id.c_str(), uwb_pub_freq_);
 }
