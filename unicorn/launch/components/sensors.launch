@@ -24,13 +24,14 @@
     <!-- Run zed camera -->
     <group if="$(arg use_zed)">
         <remap from="/odom" to="/zed/odom" />
+        <remap from="/point_cloud/cloud_registered" to="/zed/depth/points" />
 
         <include file="$(find zed_wrapper)/launch/zed_camera.launch">
             <arg name="gpu_id" value="-1"/>
             <arg name="publish_tf" value="false"/>
-            <arg name="publish_urdf" value="false"/>
-            <arg name="odometry_frame" value="/zed/odom"/>
-            <arg name="base_frame" value="zed_camera"/><!--Default: zed_center-->
+            <arg name="publish_urdf" value="true"/>
+            <!--<arg name="odometry_frame" value="/zed/odom"/>
+            <arg name="base_frame" value="zed_camera"/>--><!--Default: zed_center-->
             <!--arg name="camera_frame" value="zed_left_camera"/-->
             <!--arg name="depth_frame" value="zed_depth_camera"/-->
         </include>
