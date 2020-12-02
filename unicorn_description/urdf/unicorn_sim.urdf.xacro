@@ -402,6 +402,7 @@
     <stereo_camera frame_rgb="zed_camera_center" frame_depth="zed_depth_dummy_frame_sim_only" cameraName="zed"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
 
     <link name="zed_depth_dummy_frame_sim_only"></link>
+    
     <joint name="zed_camera_depth_joint" type="fixed">
       <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
       <parent link="zed_camera_center"/>
