@@ -81,10 +81,12 @@ tracking_lidar::tracking_lidar()
   n_.param("similarty_side_yposition_weight",sim_adj_ypos, 5.0f);
 
   n_.param("max_similarty_deviation",max_similarty_deviation, 1.5f);
+  //n_.param("map_topic",mapframeid, "/map");
+  
  
 
-  odometry_sub_ = n_.subscribe("/odometry/filtered", 10, &tracking_lidar::odomCallback, this);
-  scan_sub_ = n_.subscribe("/frontLidar/scan", 10, &tracking_lidar::scanCallback, this);
+  odometry_sub_ = n_.subscribe("/odom", 10, &tracking_lidar::odomCallback, this);
+  scan_sub_ = n_.subscribe("/scan", 10, &tracking_lidar::scanCallback, this);
   object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("obstacles",10,false);
   marker_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArray",10,false);
   marker_Arrow_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArrowArray",10,false);
@@ -112,10 +114,8 @@ void tracking_lidar::object_publisher()
   visualization_msgs::MarkerArray markerArray, markerDArray;
   geometry_msgs::Point point;
   tf2::Quaternion Quad;
-  
-  std::string frameid ("/map");
 
-  object.header.frame_id = frameid;
+  object.header.frame_id = mapframeid;
   seq++;
   object.header.seq = seq;
   object.header.stamp = scan_data_.header.stamp;

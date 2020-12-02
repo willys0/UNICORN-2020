@@ -67,6 +67,7 @@ public:
 	float min_twist_detection, max_similarty_deviation;
 	float sim_adj_dist, sim_adj_angle, sim_adj_side, sim_adj_xpos, sim_adj_ypos;
 	bool static_filter;
+	std::string mapframeid = "/map";
 
 private:
 	void extract_corners(int startpoint,int endpoint, int length,int shape_nr);
