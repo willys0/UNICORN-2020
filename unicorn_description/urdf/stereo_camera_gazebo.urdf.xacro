@@ -1,26 +1,10 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
-  <xacro:macro name="stereo_camera" params="frame_rgb frame_depth topic:=pointcloud simulation:=true filename cameraName:=camera robot_namespace:=/" >
-
-  <xacro:arg name="sim" default="${simulation}" />
-
-    <link name="${frame_rgb}">
-
-
-     <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="${filename}" />
-        </geometry>
-      </visual>
-
-    </link>
+  <xacro:macro name="stereo_camera" params="frame_rgb frame_depth topic:=pointcloud cameraName:=camera robot_namespace:=/" >
 
 
 <!-- Gazebo simulation -->
-    <link name="${frame_depth}"></link>
-    <xacro:if value="$(arg sim)">  
       <!-- camera -->
       <gazebo reference="${frame_rgb}">
           <sensor type="depth" name="openni_camera_camera">      
@@ -65,6 +49,5 @@
           </plugin>
         </sensor>
       </gazebo>
-    </xacro:if>
   </xacro:macro>
 </robot>
