@@ -55,7 +55,7 @@
   <xacro:arg name="zed_meshfile" default="package://unicorn_description/meshes/zed_link.STL" />
 
   <!-- Real Sense -->
-  <xacro:arg name="real_base" default="-0.4065 ${-0.03882+0.015} 0.33658" />
+  <xacro:arg name="real_base" default="${-0.4065-0.025} ${-0.03882+0.015} 0.33658" />
   <xacro:arg name="real_rgb_xyz" default="0 0.015 0" />
   <xacro:arg name="real_depth_xyz" default="0 0 0" /> 
 
