@@ -241,33 +241,68 @@
     <child link="rear_laser" />
   </joint>
 
+
   <!-- Zed Camera -->
-    <stereo_camera frame_rgb="zed_camera" frame_depth="zed_depth" cameraName="zed"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
-
-  <link name="zed_camera"> 
-    <visual>
-      <origin xyz="0 0 0" rpy="0 0 0"/>
-      <geometry>
-          <mesh filename="$(arg zed_meshfile)"/>
-      </geometry>
-    </visual>
-  </link>
-
-  <link name="zed_depth"></link>
-
-
-    <joint name="zed_camera_rgb_joint" type="fixed"> 
-      <origin xyz="$(arg zed_xyz)" rpy="$(arg zed_rpy)"/>
-      <parent link="base_link"/>  
-      <child link="zed_camera"/>
+<!-- Camera Center -->
+    <joint name="zed_camera_center_joint" type="fixed">
+        <parent link="chassis_link"/>
+        <child link="zed_camera_center"/>
+        <origin xyz="$(arg zed_xyz)" rpy="0 0 0" />
     </joint>
 
+    <link name="zed_camera_center">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="$(arg zed_meshfile)" />
+            </geometry>
+        </visual>
+    </link>
+
+<!-- Left Camera -->
+    <joint name="zed_left_camera_joint" type="fixed">
+        <parent link="zed_camera_center"/>
+        <child link="zed_left_camera_frame"/>
+        <origin xyz="0 6 0" rpy="0 0 0" />
+    </joint>
+
+    <link name="zed_left_camera_frame" />
+
+    <joint name="zed_left_camera_optical_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="-${M_PI/2} 0.0 -${M_PI/2}"/>
+        <parent link="zed_left_camera_frame"/>
+        <child link="zed_left_camera_optical_frame"/>
+    </joint>
+
+    <link name="zed_left_camera_optical_frame"/>
+
+<!-- Right Camera -->
+    <joint name="zed_right_camera_joint" type="fixed">
+        <parent link="zed_camera_center"/>
+        <child link="zed_right_camera_frame"/>
+        <origin xyz="0 -6 0" rpy="0 0 0" />
+    </joint>
+
+    <link name="zed_right_camera_frame" />
+
+    <joint name="zed_right_camera_optical_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="-${M_PI/2} 0.0 -${M_PI/2}"/>
+        <parent link="zed_right_camera_frame"/>
+        <child link="zed_right_camera_optical_frame"/>
+    </joint>
+
+    <link name="zed_right_camera_optical_frame"/>
+<!---->
+<xacro:if value="$(arg sim)">
+    <stereo_camera frame_rgb="zed_camera_center" frame_depth="zed_depth_dummy_frame_sim_only" cameraName="zed"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+
+    <link name="zed_depth_dummy_frame_sim_only"></link>
     <joint name="zed_camera_depth_joint" type="fixed">
       <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
-      <parent link="zed_camera"/>
-      <child link="zed_depth"/>
+      <parent link="zed_camera_center"/>
+      <child link="zed_depth_dummy_frame_sim_only"/>
     </joint>
-
+</xacro:if> 
 
 
 
@@ -296,11 +331,13 @@
 
   
 <xacro:if value="$(arg sim)">
-  <stereo_camera frame_rgb="realsense_color_frame" frame_depth="realsense_depth_frame" cameraName="realsense" topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+  <stereo_camera frame_rgb="realsense_color_frame" frame_depth="realsense_depth_dummy_frame_sim_only" cameraName="realsense" topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
   
   <link name="realsense_color_frame"> </link>
 
   <link name="realsense_depth_frame"></link>
+
+   <link name="realsense_depth_dummy_frame_sim_only"></link>
 
   <link
     name="realsense_depth_optical_frame">
@@ -321,6 +358,12 @@
     <origin xyz="$(arg real_depth_xyz)" rpy="0 0 0"/>
     <parent link="realsense_link"/>
     <child link="realsense_depth_frame"/>
+  </joint>
+
+  <joint name="realsense_depth_dummy_joint" type="fixed">
+    <origin xyz="$(arg real_depth_xyz)" rpy="-${M_PI/2} 0.0 -${M_PI/2}"/>
+    <parent link="realsense_link"/>
+    <child link="realsense_depth_dummy_frame_sim_only"/>
   </joint>
 
   <joint name="realsense_optical_color_joint" type="fixed"> 
