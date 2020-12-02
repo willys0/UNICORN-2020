@@ -6,7 +6,10 @@
 	<arg name="map_file"   			default="$(find unicorn_slam)/maps/c2.yaml"/>
 
 	<arg name="do_slam" 	        default="true" />
-	<arg name="use_camera"			default="true" />
+
+	<arg name="use_zed"						default="true" />
+	<arg name="use_realsense"			default="true" />
+
 	<arg name="use_object_tracking" default="false" />
 
 	<arg name="sim" 				default="false" />
@@ -18,16 +21,31 @@
 
 	<group unless="$(arg sim)">
 		<include file="$(find unicorn)/launch/components/sensors.launch">
-			<arg name="use_zed" value="$(arg use_camera)" />
+			<arg name="use_zed" value="$(arg use_zed)" />
+			<arg name="use_realsense" value="$(arg use_realsense)" />
 		</include>
+
+		<include file="$(find unicorn_roborio_bridge)/launch/bridge.launch" />
 	</group>
-	
-	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
+
+
+	<include file="$(find unicorn_localization)/launch/localization.launch">
 		<arg name="sim" value="$(arg sim)" />
+
+		<arg name="use_amcl" value="true"  unless="$(arg do_slam)" />
+		<arg name="use_amcl" value="false" if="$(arg do_slam)" />
+
+		<arg name="scan_topic" value="$(arg scan_topic)" />
+	</include>
+
+	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
+		<arg name="global_frame" value="map" />
+		<arg unless="$(arg sim)" name="robot_base_frame_frame" value="base_link" />
+		<arg if="$(arg sim)" name="robot_base_frame" value="chassis_link" />
 	</include>
 
 	<group if="$(arg do_slam)">
-		<include file="$(find unicorn)/launch/components/slam.launch">
+		<include file="$(find unicorn_slam)/launch/gmapping.launch">
 			<arg name="scan_topic" value="$(arg scan_topic)" />
 		</include>
 	</group>
@@ -42,22 +60,14 @@
 
 	</group>
 
+	<!--include unless="$(arg sim)" file="$(find unicorn_intention)/launch/intention.launch"-->
+	<include file="$(find unicorn_intention)/launch/intention.launch" >
+		<arg name="unicorn_state_topic" 	value="/unicorn/state" />
+		<arg name="intention_angle_topic" 	value="/TX2_localplanner_intention" />
+		<arg name="led_state_topic" 		value="/TX2_unicorn_state" />
 
-	<!--- Run AMCL -->
-	<group unless="$(arg sim)">
-		<node pkg="amcl" type="amcl" name="amcl" output="screen">
-			<rosparam command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
-			<remap from="scan" to="$(arg scan_topic)"/>
-		</node>
-	</group>
-	<group if="$(arg sim)">
-	<!-- -->
-		<node pkg="amcl" type="amcl" name="amcl" output="screen">
-			<rosparam if="$(arg sim)" command="load" file="$(find unicorn_slam)/config/amcl_sim.yaml"/>
-			<remap from="scan" to="$(arg scan_topic)"/>
-		</node>
-		
-	</group>
+	</include>
+
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
@@ -65,7 +75,7 @@
 	<!-- publish all the frames to TF -->
 
 	<group if="$(arg sim)">
-		<include file="$(find unicorn)/launch/components/gazebo.launch" />
+		<include file="$(find unicorn_simulator)/launch/gazebo.launch" />
 	</group>
 
 	<param unless="$(arg sim)" name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target.urdf.xacro'" />
@@ -77,11 +87,6 @@
 	<node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
 		<param name="use_gui" value="false"/>
 		<param name="rate" value="100"/>
-	</node>
-
-	<node pkg="robot_localization" type="ekf_localization_node" name="odom_localization_node" clear_params="true">
-		<rosparam unless="$(arg sim)" command="load" file="$(find unicorn)/config/sim/unicorn_EKF.yaml" />
-		<rosparam if="$(arg sim)" command="load" file="$(find unicorn)/config/sim/unicorn_sim_EKF.yaml" />
 	</node>
 
 </launch>

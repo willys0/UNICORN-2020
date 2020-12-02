@@ -1,10 +1,15 @@
 # UNICORN
 
-The trash-collecting robot.
+![Unicorn](docs/unicorn.jpg)
+![Unicorn sim](docs/unicorn_sim.jpg)
 
-This project was made using the ROS navigation stack.
+This repository contains the main ROS packages for the 2020th iteration of UNICORN, the trash-collecting robot.
 
-* [ROS Navigation](http://wiki.ros.org/navigation/Tutorials/RobotSetup) - ROS Navigation stack setup guide
+This project was made for ROS Kinetic.
+
+* [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) - ROS Kinetic installation instructions for Ubuntu 16.04.
+
+* [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment) - Guide for setting up your ROS workspace. 
 
 ## Getting Started
 
@@ -13,22 +18,18 @@ Please read through the coding style guides we are using
 * [CppStyleGuide](http://wiki.ros.org/CppStyleGuide) - ROS Cpp Style Guide
 * [PyStyleGuide](http://wiki.ros.org/PyStyleGuide) - ROS Python Style Guide
 
-* [The Command Interface Node](https://github.com/jannesuuronen/UNICORN-CIN) - Repository containing the user interface for the robot(command to clone repo. is listed below)
-* [LabVIEW implementations](https://github.com/jannesuuronen/UNICORN-2019-LabVIEW) - Repository containing the LabVIEW implementations for the robots sensors etc.
-## Dependencies
+* [LabVIEW implementations](https://github.com/NihadF7/UNICORN-2020-LabVIEW) - Repository containing the LabVIEW implementations for the robots sensors etc.
+
+### Dependencies
+
+Make sure you have cloned the repository into the src folder of your workspace (the following instructions assumes that it is called catkin_ws).
 
 ```
-sudo apt-get install ros-kinetic-effort-controllers
-sudo apt-get install ros-kinetic-gmapping
-sudo apt-get install ros-kinetic-gazebo-ros
-sudo apt-get install ros-kinetic-navigation
-sudo apt-get install ros-kinetic-range-sensor-layer
-sudo apt-get install ros-kinetic-global-planner
-sudo apt-get install ros-kinetic-teb-local-planner
-sudo apt-get install ros-kinetic-robot-localization
 cd ~/catkin_ws/src
 git clone https://github.com/HusqvarnaResearch/hrp.git
-git clone https://github.com/jannesuuronen/UNICORN-CIN
+git clone https://github.com/husky/husky.git
+
+rosdep install --from-path src --ignore-src -r -y
 ```
 
 Goto hrp/am_driver_safe and insert a CATKIN_IGNORE file.
@@ -37,21 +38,40 @@ cd hrp/am_driver_safe
 touch CATKIN_IGNORE
 ```
 
-Then continue getting other packages.
-```
-cd ~/catkin_ws/src
-git clone https://github.com/clearpathrobotics/LMS1xx.git
-git clone https://github.com/husky/husky.git
-cd ~/catkin_ws/src/husky
-git checkout kinetic-devel
-cd ~/catkin_ws && rosdep install --from-paths src --ignore-src -r -y
-cd ~/catkin_ws && catkin_make
-```
+The above dependencies should be enough to get the simulator working.
 
-### Dependencies for object detection and tracking using the StereoLabs ZED Camera
+### Dependencies for the robot
 * [ZED Camera SDK](https://www.stereolabs.com/developers/release/) - Install the SDK for JETPACK 3.3 on the TX2 platform if needed
 
-* [Darknet ROS](https://github.com/leggedrobotics/darknet_ros) - Follow the build and install instructions described in the package README
+*TODO: Add realsense camera instructions*
+
+*TODO: Probably add even more instructions*
+
+### Run the Simulator
+
+The simulator can be started using the simulator_2020.launch file in the main unicorn package.
+
+```
+roslaunch unicorn simulator_2020.launch
+```
+
+Launching without any additional arguments will start SLAM by default, but can be turned off with the do_slam argument. 
+
+```
+roslaunch unicorn simulator_2020.launch do_slam:=false
+```
+
+The gazebo client is not started by default, and needs to be stared manually.
+
+```
+gzclient
+```
+
+A rviz configuration including all sensors is included in the unicorn package, and can be launched using the rviz.launch file.
+
+```
+roslaunch unicorn rviz.launch
+```
 
 ## Documentation
 
@@ -84,7 +104,7 @@ To access the git manual.
 
 ```
 cd ~/catkin_ws/src
-git clone https://github.com/jsn15011/UNICORN-2019.git
+git clone https://github.com/willys0/UNICORN-2020.git
 ```
 
 #### Checkout the branch you want and make a local one

@@ -240,13 +240,13 @@ target_link_libraries(unicorn_statemachine ${catkin_LIBRARIES} pid_controller_li
 #############
 ## Testing ##
 ##############
-catkin_add_gtest(unicorn-test test/test_unicorn.cpp)
+#catkin_add_gtest(unicorn-test test/test_unicorn.cpp)
 #target_link_libraries(unicorn-test ${catkin_LIBRARIES})
 
 #add_executable(unicorn-test test/test_unicorn.cpp)
 #target_link_libraries(unicorn-test ${GTEST_LIBRARIES} pthread)
 #add_rostest_gtest(unicorn-tests test/test_unicorn.test test/test_unicorn.cpp)
-target_link_libraries(unicorn-test ${catkin_LIBRARIES} ${GTEST_LIBRARIES} unicorn_statemachine_lib)
+#target_link_libraries(unicorn-test ${catkin_LIBRARIES} ${GTEST_LIBRARIES} unicorn_statemachine_lib)
 #add_dependencies(unicorn-test unicorn_statemachine ${catkin_EXPORTED_TARGETS})
 ## Add gtest based cpp test target and link libraries
 #add_dependencies(unicorn-test ${catkin_EXPORTED_TARGETS})

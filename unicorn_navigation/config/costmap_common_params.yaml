@@ -9,42 +9,39 @@ plugins:
   - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
 
 #For this example we'll configure the costmap in voxel-grid mode
+map_type: costmap
+
+#Voxel grid specific parameters
+origin_z: 0.0
+z_resolution: 0.2
+z_voxels: 10
+unknown_threshold: 9
+
+#Set the tolerance we're willing to have for tf transforms
+transform_tolerance: 0.3
+
+#Obstacle marking parameters
 obstacle_layer:
-  map_type: costmap
+    obstacle_range: 3.0
+    max_obstacle_height: 2.0
+    raytrace_range: 3.0
 
-  #Voxel grid specific parameters
-  origin_z: 0.0
-  z_resolution: 0.2
-  z_voxels: 10
-  unknown_threshold: 9
+#Cost function parameters
+inflation_layer:
+    inflation_radius: 0.55
+    cost_scaling_factor: 8.0
 
+#The cost at which a cell is considered an obstacle when a map is read from the map_server
+static_map:
+    lethal_cost_threshold: 250
 
-  #Set the tolerance we're willing to have for tf transforms
-  transform_tolerance: 0.3
+#Configuration for the sensors that the costmap will use to update a map
+observation_sources: laser_scan_sensor point_cloud_sensor
 
-  #Obstacle marking parameters
-  obstacle_range: 3.0
-  max_obstacle_height: 2.0
-  raytrace_range: 3.0
+#testing with 360 degrees of view from LIDAR
+laser_scan_sensor: {sensor_frame: base_laser, data_type: LaserScan, topic: /frontLidar/scan, expected_update_rate: 0.5,
+marking: true, clearing: true, max_obstacle_height: 1, min_obstacle_height: 0.08}
 
-  #Cost function parameters
-  inflation_radius: 0.7
-  cost_scaling_factor: 8.0
-
-  #The cost at which a cell is considered an obstacle when a map is read from the map_server
-  lethal_cost_threshold: 250
-
-  #Configuration for the sensors that the costmap will use to update a map
-  observation_sources: laser_scan_sensor point_cloud_sensor
-
-    #testing with 360 degrees of view from LIDAR
-  laser_scan_sensor: {sensor_frame: base_laser, data_type: LaserScan, topic: /frontLidar/scan, expected_update_rate: 0.5,
-    marking: true, clearing: true, max_obstacle_height: 1, min_obstacle_height: 0.08}
-
-  #Stereo camera params
-  point_cloud_sensor: {sensor_frame: zed_center, data_type: PointCloud2, topic: /cloud_filtered, expected_update_rate: 1.0,
-     marking: true, clearing: true, max_obstacle_height: 1.0, min_obstacle_height: 0.1, observation_persistence: 0.0, mark_threshold: 9}
-
-
-
-
+#Stereo camera params
+# point_cloud_sensor: {sensor_frame: zed_center, data_type: PointCloud2, topic: /cloud_filtered, expected_update_rate: 1.0,
+#    marking: true, clearing: true, max_obstacle_height: 1.0, min_obstacle_height: 0.1, observation_persistence: 0.0, mark_threshold: 9}

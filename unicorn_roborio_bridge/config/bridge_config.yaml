@@ -1,0 +1,3 @@
+# If true, a constant stream of messages be published (with a fixed rate),
+# else when the master message arrives from the roboRIO.
+use_timer: false

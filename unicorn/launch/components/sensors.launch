@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
-    <arg name="use_zed" default="true" />
+    <arg name="use_zed"       default="true" />
+    <arg name="use_realsense" default="true" />
 
     <!-- Start R2000 Lidar node -->
     <node pkg="pepperl_fuchs_r2000" type="r2000_node" name="TX2_r2000Lidar" output="screen">
@@ -13,16 +14,25 @@
         <remap from="/TX2_r2000Lidar/laserScan" to="/frontLidar/scan" />
     </node>
 
+    <!-- Run realsense camera -->
+    <group if="$(arg use_realsense)">
+        <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+            <arg name="camera" value="realsense" />
+        </include>
+    </group>
+
     <!-- Run zed camera -->
     <group if="$(arg use_zed)">
+        <remap from="/odom" to="/zed/odom" />
+
         <include file="$(find zed_wrapper)/launch/zed_camera.launch">
             <arg name="gpu_id" value="-1"/>
             <arg name="publish_tf" value="false"/>
             <arg name="publish_urdf" value="false"/>
-            <arg name="odometry_frame" value="odom"/>
-            <arg name="base_frame" value="zed_center"/>
-            <arg name="camera_frame" value="zed_left_camera"/>
-            <arg name="depth_frame" value="zed_depth_camera"/> 
+            <arg name="odometry_frame" value="/zed/odom"/>
+            <arg name="base_frame" value="zed_camera"/><!--Default: zed_center-->
+            <!--arg name="camera_frame" value="zed_left_camera"/-->
+            <!--arg name="depth_frame" value="zed_depth_camera"/-->
         </include>
 
         <!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->

@@ -1,0 +1,3 @@
+<launch>
+    <node name="rqt_docking" pkg="rqt_gui" type="rqt_gui" output="screen" args="--perspective-file $(find unicorn_docking)/config/rqt/dock.perspective" />
+</launch>
