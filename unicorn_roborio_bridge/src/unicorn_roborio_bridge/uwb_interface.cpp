@@ -20,7 +20,15 @@ void UwbInterface::setUwbPosition(const geometry_msgs::Point& pos) {
 
 
 void UwbInterface::publish() {
-    uwb_pub_.publish(uwb_pose_msg_);
+    // Should not be able to get zeros from UWB. If we get it anyway, something is not correct
+    // so do not publish the message.
+    if(uwb_pose_msg_.pose.pose.position.x != 0.0 ||
+       uwb_pose_msg_.pose.pose.position.y != 0.0 ||
+       uwb_pose_msg_.pose.pose.position.z != 0.0)
+    {
+        uwb_pub_.publish(uwb_pose_msg_);
+    }
+
 }
 
 void UwbInterface::startTimer() {
