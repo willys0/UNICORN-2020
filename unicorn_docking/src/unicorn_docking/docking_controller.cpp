@@ -310,53 +310,57 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
     double speed_multiplier, time_since_lidar_scan;
     bool got_error = false;
     
-    // Try to timetravel!
-    // Try to find transform between DOCK_BUNDLE frame at tag_last_seen_ time and chassis_link at current_time
-    try {
-        // The -0.2 on max_tf_lookup_time_ is to allow "rotation_to_tag = getRotationToTag()" below to finnish succesfully before max_tf_lookup_time_ have passed
-        wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", tag_last_seen_, base_link_frame_, current_time, "map", ros::Duration(max_tf_lookup_time_-0.2));
-    }
-    catch(tf2::TransformException &ex) {
-        // If no transform could be found, set linear and angular velocities to zero
-        ROS_WARN("in computeVelocity(): %s",ex.what());
-        msg_out.linear.x = 0.0;
-        msg_out.angular.z = 0.0;
-        return false;
-    }
-    
-    // call getRotationToTag as it does a lookupTransform. This helps prevent max_tf_lookup_time_ to have passed even tho the lookupTransform above succeded 
-    double rotation_to_tag = getRotationToTag();
-    // If rotation to tag failed it returns -100
-    if(rotation_to_tag == -100) {
-        ROS_WARN("getRotationToTag() did not succed. Setting velocities to 0");
-        got_error = true;
-    }
-
-    time_since_lidar_scan = (current_time - rear_lidar_scan_.header.stamp).toSec();
-    if(got_error == false && time_since_lidar_scan > max_time_since_lidar_scan_) {
-        ROS_INFO("rear lidar scan is older than %f seconds, it is: %f seconds old", max_time_since_lidar_scan_, time_since_lidar_scan);
-        got_error = true;
-    }
-
-    time_since_lidar_scan = (current_time - front_lidar_scan_.header.stamp).toSec();
-    if(got_error == false && time_since_lidar_scan > max_time_since_lidar_scan_) {
-        ROS_INFO("front lidar scan is older than %f seconds, it is: %f seconds old", max_time_since_lidar_scan_, time_since_lidar_scan);
-        got_error = true;
-    }
-
-    if(got_error){
-        msg_out.linear.x = 0.0;
-        msg_out.angular.z = 0.0;
-        return false;
-    }
-
-
     if(state_ == DOCKING) {
 
         // Calculate x, y and theta errors
         err_x_ = desired_offset_.x - getDistAlongTagNorm();
         err_y_ = desired_offset_.y - getLateralComponent();
         err_th_ = desired_offset_.z - getPitchComponent();
+
+        // Try to timetravel!
+        // Try to find transform between DOCK_BUNDLE frame at tag_last_seen_ time and chassis_link at current_time
+        try {
+            // The -0.2 on max_tf_lookup_time_ is to allow "rotation_to_tag = getRotationToTag()" below to finnish succesfully before max_tf_lookup_time_ have passed
+            wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", tag_last_seen_, base_link_frame_, current_time, "map", ros::Duration(max_tf_lookup_time_-0.2));
+        }
+        catch(tf2::TransformException &ex) {
+            // If no transform could be found, set linear and angular velocities to zero
+            ROS_WARN("in computeVelocity(): %s",ex.what());
+            msg_out.linear.x = 0.0;
+            msg_out.angular.z = 0.0;
+            return false;
+        }
+        
+        // call getRotationToTag as it does a lookupTransform. This helps prevent max_tf_lookup_time_ to have passed even tho the lookupTransform above succeded 
+        double rotation_to_tag = getRotationToTag();
+        // If rotation to tag failed it returns -100
+        if(rotation_to_tag == -100) {
+            ROS_WARN("getRotationToTag() did not succed. Setting velocities to 0");
+            got_error = true;
+        }
+
+        // Check if rear lidar scan is to old
+        time_since_lidar_scan = (current_time - rear_lidar_scan_.header.stamp).toSec();
+        if(got_error == false && time_since_lidar_scan > max_time_since_lidar_scan_) {
+            ROS_INFO("rear lidar scan is older than %f seconds, it is: %f seconds old", max_time_since_lidar_scan_, time_since_lidar_scan);
+            got_error = true;
+        }
+
+        // Check if front lidar scan is to old
+        time_since_lidar_scan = (current_time - front_lidar_scan_.header.stamp).toSec();
+        if(got_error == false && time_since_lidar_scan > max_time_since_lidar_scan_) {
+            ROS_INFO("front lidar scan is older than %f seconds, it is: %f seconds old", max_time_since_lidar_scan_, time_since_lidar_scan);
+            got_error = true;
+        }
+
+        // If an error occured set velocities to 0.0
+        if(got_error){
+            msg_out.linear.x = 0.0;
+            msg_out.angular.z = 0.0;
+            return false;
+        }
+
+
 
         msg_out.linear.x = pid_x_.computeCommand(desired_offset_.x - getDistAlongTagNorm(), current_time - last_time_);
 
