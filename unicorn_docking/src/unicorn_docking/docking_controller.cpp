@@ -317,7 +317,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
         
         // call getRotationToTag as it does a lookupTransform. This helps prevent max_tf_lookup_time_ to have passed even tho the lookupTransform above succeded 
         // If rotation to tag failed it returns -100
-        if(getRotationToTag(rotation_to_tag)) {
+        if(getRotationToTag(rotation_to_tag) == false) {
             ROS_WARN("getRotationToTag() did not succed. Setting velocities to 0");
             got_error = true;
         }
