@@ -50,6 +50,22 @@ void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, u
 DockStatus getDockingVelocity(ros::NodeHandle nh, DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
     controller->computeVelocity(out_velocity);
 
+    // cap the linear speed 
+    if(out_velocity.linear.x > max_docking_speed) {
+        out_velocity.linear.x = max_docking_speed;
+    }
+    else if(out_velocity.linear.x < -max_docking_speed) {
+        out_velocity.linear.x = -max_docking_speed;
+    }
+
+    // cap the angular speed 
+    if(out_velocity.angular.z > max_rotation_speed) {
+        out_velocity.angular.z = max_rotation_speed;
+    }
+    else if(out_velocity.angular.z < -max_rotation_speed) {
+        out_velocity.angular.z = -max_rotation_speed;
+    }
+
     geometry_msgs::Vector3 pid_errors;
 
     pid_errors.x = fabs(controller->xError());
@@ -164,22 +180,6 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
             }
         }
 
-        // cap the linear speed 
-        if(move_msg.linear.x > max_docking_speed) {
-            move_msg.linear.x = max_docking_speed;
-        }
-        else if(move_msg.linear.x < -max_docking_speed) {
-            move_msg.linear.x = -max_docking_speed;
-        }
-
-        // cap the angular speed 
-        if(move_msg.angular.z > max_rotation_speed) {
-            move_msg.angular.z = max_rotation_speed;
-        }
-        else if(move_msg.angular.z < -max_rotation_speed) {
-            move_msg.angular.z = -max_rotation_speed;
-        }
-
         vel_pub.publish(move_msg);
 
         getDockingFeedbackMsg(controller, fbk);
@@ -249,22 +249,6 @@ void undock(ros::NodeHandle nh, DockingController* controller, DockActionServer*
             ROS_INFO("[Docking Controller] Undock action failed with errors x: %f, y: %f, th: %f!", controller->xError(), controller->yError(), controller->thError());
 
             break;
-        }
-
-        // cap the linear speed 
-        if(move_msg.linear.x > max_undocking_speed) {
-            move_msg.linear.x = max_undocking_speed;
-        }
-        else if(move_msg.linear.x < -max_undocking_speed) {
-            move_msg.linear.x = -max_undocking_speed;
-        }
-
-        // cap the angular speed 
-        if(move_msg.angular.z > max_rotation_speed) {
-            move_msg.angular.z = max_rotation_speed;
-        }
-        else if(move_msg.angular.z < -max_rotation_speed) {
-            move_msg.angular.z = -max_rotation_speed;
         }
 
         vel_pub.publish(move_msg);
