@@ -368,7 +368,7 @@
     <joint name="zed_left_camera_joint" type="fixed">
         <parent link="zed_camera_center"/>
         <child link="zed_left_camera_frame"/>
-        <origin xyz="0 6 0" rpy="0 0 0" />
+        <origin xyz="0 0.06 0" rpy="0 0 0" />
     </joint>
 
     <link name="zed_left_camera_frame" />
@@ -385,7 +385,7 @@
     <joint name="zed_right_camera_joint" type="fixed">
         <parent link="zed_camera_center"/>
         <child link="zed_right_camera_frame"/>
-        <origin xyz="0 -6 0" rpy="0 0 0" />
+        <origin xyz="0 -0.06 0" rpy="0 0 0" />
     </joint>
 
     <link name="zed_right_camera_frame" />
