@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(tracking_lidar)
+project(unicorn_tracking)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
@@ -19,6 +19,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   costmap_converter
   visualization_msgs
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -100,10 +101,9 @@ find_package(catkin REQUIRED COMPONENTS
 ##     and list every .cfg file to be processed
 
 ## Generate dynamic reconfigure parameters in the 'cfg' folder
-# generate_dynamic_reconfigure_options(
-#   cfg/DynReconf1.cfg
-#   cfg/DynReconf2.cfg
-# )
+generate_dynamic_reconfigure_options(
+  cfg/Tracking.cfg
+)
 
 ###################################
 ## catkin specific configuration ##
@@ -138,9 +138,9 @@ include_directories(
 # )
 
 
- add_executable(tracking_lidar src/tracking_lidar.cpp src/kalman.cpp src/Hungarian.cpp)
- target_link_libraries(tracking_lidar ${catkin_LIBRARIES})
- add_dependencies(tracking_lidar ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+ add_executable(${PROJECT_NAME}_node src/tracking_lidar.cpp src/kalman.cpp src/Hungarian.cpp)
+ target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
+ add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries

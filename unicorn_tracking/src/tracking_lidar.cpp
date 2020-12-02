@@ -1,18 +1,39 @@
 #include "tracking_lidar.hpp"
 
 
-
 static bool map_received = false;
 static bool odom_received = false;
 static bool scan_received = false;
 
 
-int main(int argc, char** argv){
-  ros::init(argc, argv, "tracking_lidar");
+/* Makes Variables reconfigurable */
+void dynamicReconfigCallback(unicorn_tracking::TrackingConfig& config, uint32_t level, tracking_lidar *data) {
+  data->lambda = config.lambda;
+  data->max_dist_laser = config.max_dist_laser;
+  data->static_filter = config.static_filter;
+  data->static_remove_dist = config.static_remove_dist;
+  data->polygon_tolerance = config.polygon_tolerance;
+  data->polygon_min_points = config.polygon_min_points;
+  data->min_twist_detection = config.min_twist_detection;
+  data->sim_adj_dist = config.sim_adj_dist;
+  data->sim_adj_angle = config.sim_adj_angle;
+  data->sim_adj_side = config.sim_adj_side;
+  data->sim_adj_xpos = config.sim_adj_xpos;
+  data->sim_adj_ypos = config.sim_adj_ypos;
+  data->max_similarty_deviation = config.max_similarty_deviation;
 
+}
+
+
+
+int main(int argc, char** argv){
+  ros::init(argc, argv, "unicorn_tracking_node");
 
   ROS_INFO("Started Lidar Tracking node");
   tracking_lidar tracking_lidar_interface;
+  
+  dynamic_reconfigure::Server<unicorn_tracking::TrackingConfig> reconfig_server;
+  reconfig_server.setCallback(boost::bind(&dynamicReconfigCallback, _1, _2, &tracking_lidar_interface));
   ros::Rate r(30.0);
 
 /*
@@ -36,12 +57,14 @@ while(ros::ok)
 }
 
 
+
+/* Initiate varibles and callsbacks  */
 tracking_lidar::tracking_lidar()
 : n_("~")
 {
   
   n_.param("lambda",lambda, 0.15f);
-  n_.param("Max_Laser_dist",max_dist_laser, 10);
+  n_.param("max_dist_laser",max_dist_laser, 10);
 
   n_.param("static_filter",static_filter, true);
   n_.param("Static_map_removal_tolerance",static_remove_dist, 4);
@@ -78,12 +101,9 @@ tracking_lidar::tracking_lidar()
   memset(polygon_size, 0, MAX_OBJECTS*sizeof(polygon_size[0])); 
 
   initiate_Trackers();
-
-
 }
 
-
-
+/* Publishes data to topics */
 void tracking_lidar::object_publisher()
 {
   costmap_converter::ObstacleMsg object;
@@ -161,19 +181,18 @@ void tracking_lidar::object_publisher()
 
       Quad.setRPY(0,0,atan2(object.velocities.twist.linear.y,object.velocities.twist.linear.x));
 
-
       object_array.obstacles.push_back(object);
+
       marker.color.a = trackers[i].color[0]*(TRACKER_LIFE - (trackers[i].last_seen+1))/TRACKER_LIFE;
       marker.color.b = trackers[i].color[1];
       marker.color.g = trackers[i].color[2];
       marker.color.r = trackers[i].color[3];
-
       marker.pose.position.x = trackers[i].tracker.x_hat(0);
       marker.pose.position.y = trackers[i].tracker.x_hat(2);
       
-
-
       marker.id = i;
+
+
       marker.points.clear();
       for(m =0; m < trackers[i].sides_amount; m++)
       {
@@ -213,12 +232,14 @@ void tracking_lidar::object_publisher()
   
 }
 
+/* Odometry Call back */
 void tracking_lidar::odomCallback(const nav_msgs::Odometry& odometry)
 {
     odometry_data_ = odometry;
     
     tf::Quaternion q(odometry.pose.pose.orientation.x,odometry.pose.pose.orientation.y,odometry.pose.pose.orientation.z,odometry.pose.pose.orientation.w);
     tf::Matrix3x3 m(q);
+    /* Get Euler angles */
     m.getRPY(roll,pitch,yaw);
     yaw = -yaw; 
     x = odometry.pose.pose.position.x;
@@ -227,14 +248,20 @@ void tracking_lidar::odomCallback(const nav_msgs::Odometry& odometry)
     odom_received = true;
 }
 
+/* Get map  */
 void tracking_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
 {
     map_data_ = map;
-    map_received = true;
+    if(!map_received){
+      map_received = true;
+      ROS_INFO("Map Received");
+    }
+    
     mapx = map_data_.info.height;
     mapy = map_data_.info.width;
 }
 
+/* Scan callback, each frame is one scan*/
 void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 {
     scan_data_ = scan;
@@ -244,6 +271,7 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       adaptive_breaK_point();
       if(static_filter)
         static_map_filter();
+
       polygon_extraction();
       polygon_attribute_extraction();
       estimate_new_position();
@@ -251,11 +279,12 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       update_position();
       object_publisher();
       scan_received = false; 
-    }else if(!map_received){
+    }/*
+    else if(!map_received){
       ROS_INFO("Waiting for map, no map recieved!");
     }else if(!odom_received){
       ROS_INFO("Waiting odometry, no odometry recieved!");
-    }
+    }*/
 }
 
 void tracking_lidar::association()
@@ -392,6 +421,7 @@ void tracking_lidar::association()
       }
     }
   }
+  ROS_INFO("Number of trackers %d",m);
 }
 
 
