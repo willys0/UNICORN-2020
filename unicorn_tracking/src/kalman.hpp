@@ -74,6 +74,7 @@ public:
 	Eigen::MatrixXd P0{STATES, STATES}; // initial error covariance
 	Eigen::MatrixXd I{STATES, STATES};  // n-size identity
 	Eigen::VectorXd x_hat{STATES};	// Estimated states
+	Eigen::VectorXd x_hat_new{STATES};	// Estimated states
 	Eigen::VectorXd y{MEAS_AMOUNT}; //
   // Matrices for computation
 	//Eigen::MatrixXd A, B, C, Q, R, P, K, P0;

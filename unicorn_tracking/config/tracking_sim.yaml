@@ -10,7 +10,7 @@ Static_map_removal_tolerance: 4
 polygon_tolerance: 1.1 # 1.04
 polygon_min_points_required: 4
 
-min_twist_detection: 0.2 #0.08
+min_twist_detection: 0.15 #0.08
 
 similarty_side_length_weight: 1.0
 similarty_side_angle_weigh: 1.0

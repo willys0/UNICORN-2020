@@ -274,6 +274,8 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 
       polygon_extraction();
       polygon_attribute_extraction();
+
+      
       estimate_new_position();
       association();
       update_position();
@@ -292,7 +294,7 @@ void tracking_lidar::association()
 {
   int i,j,m = 0;
   double dt,time = scan_data_.header.stamp.sec + scan_data_.header.stamp.nsec*pow(10, -9);
-  float s1,s2,s3,s4,s5,similarity,sim_adj,x_dot,y_dot;
+  float s1,s2,s3,s4,s45,s5,s55,similarity,sim_adj,x_dot,y_dot;
 
   vector<vector<double>> object_match_ratio(MAX_OBJECTS,vector<double>(MAXTRACKS));
 
@@ -322,6 +324,12 @@ void tracking_lidar::association()
           s3 = sim_adj_side*abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount));  
           s4 = sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (object_attributes_list[j].estimated_x));
           s5 = sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (object_attributes_list[j].estimated_y));
+          /**/
+          if(trackers[i].last_seen > 0)
+          {
+            
+          }
+
           if(s1 > s2)
           {
             similarity = s2;
