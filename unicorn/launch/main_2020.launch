@@ -45,7 +45,7 @@
 
 	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
 		<arg name="global_frame" value="map" />
-		<arg unless="$(arg sim)" name="robot_base_frame_frame" value="base_link" />
+		<arg unless="$(arg sim)" name="robot_base_frame" value="base_link" />
 		<arg if="$(arg sim)" name="robot_base_frame" value="chassis_link" />
 	</include>
 
