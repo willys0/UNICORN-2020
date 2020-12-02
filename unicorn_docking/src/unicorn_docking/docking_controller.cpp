@@ -21,6 +21,7 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
 
     nh_.param("front_lidar_angle", front_lidar_angle_, 1.57079632679);
     nh_.param("rear_lidar_angle", rear_lidar_angle_, 1.57079632679);
+    nh_.param("max_time_since_lidar_scan", max_time_since_lidar_scan_, 1.0);
 
     if(use_lidar_) {
         // Get offset between lidar and base link
@@ -307,6 +308,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
 
     ros::Time current_time = ros::Time::now();
     double speed_multiplier;
+    bool got_error = false;
     
     // Try to timetravel!
     // Try to find transform between DOCK_BUNDLE frame at tag_last_seen_ time and chassis_link at current_time
@@ -327,10 +329,25 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
     // If rotation to tag failed it returns -100
     if(rotation_to_tag == -100) {
         ROS_WARN("getRotationToTag() did not succed. Setting velocities to 0");
+        got_error = true;
+    }
+
+    if(got_error == false && current_time - rear_lidar_scan_.header.stamp > ros::Duration(max_time_since_lidar_scan_)) {
+        ROS_INFO("rear lidar scan is older than %f seconds", max_time_since_lidar_scan_);
+        got_error = true;
+    }
+
+    if(got_error == false && current_time - front_lidar_scan_.header.stamp > ros::Duration(max_time_since_lidar_scan_)) {
+        ROS_INFO("front lidar scan is older than %f seconds", max_time_since_lidar_scan_);
+        got_error = true;
+    }
+
+    if(got_error){
         msg_out.linear.x = 0.0;
         msg_out.angular.z = 0.0;
         return false;
     }
+
 
     if(state_ == DOCKING) {
 

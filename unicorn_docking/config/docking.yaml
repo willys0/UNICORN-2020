@@ -12,6 +12,9 @@ rear_lidar_angle: 1.57079632679
 # The angle that objects are detected within by the front lidar 
 front_lidar_angle: 1.57079632679
 
+# The max number of seconds it can be since last laser scan
+max_time_since_lidar_scan: 0.5
+
 # The offset of the tag from the base frame
 offset:
   x: 0.64

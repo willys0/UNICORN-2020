@@ -133,6 +133,7 @@ class DockingController {
         double front_lidar_angle_;
         sensor_msgs::LaserScan front_lidar_scan_;
         sensor_msgs::LaserScan rear_lidar_scan_;
+        double max_time_since_lidar_scan_;
 
         ros::Time last_time_;
         ros::Time tag_last_seen_;
