@@ -451,6 +451,7 @@
     <joint_properties damping="1000" friction="0.5" />
   </joint>
 
+<<<<<<< HEAD
 
   <gazebo reference="lift_horizontal_joint">
       <mu1 value="10000.0" />
@@ -461,6 +462,21 @@
       <fdir1 value="1 0 0" />
       <material>Gazebo/Black</material>
       <turnGravityOff>false</turnGravityOff>
+=======
+<xacro:if value="$(arg sim)">
+  <!-- Fake UWB -->
+  <gazebo>
+    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>50.0</updateRate>
+        <bodyName>chassis_link</bodyName>
+        <topicName>uwb/pose</topicName>
+        <gaussianNoise>0.1</gaussianNoise>
+        <frameName>map</frameName>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+      </plugin>
+>>>>>>> c6a34eb1ea5167d43927d40b71a6c3829b7e0557
   </gazebo>
 
   <transmission name="lift_horizontal_joint_trans">
