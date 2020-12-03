@@ -63,7 +63,7 @@ public:
 	int max_dist_laser;
 	int static_remove_dist;
 	float polygon_tolerance;
-	int polygon_min_points;
+	int polygon_min_points, min_size_cluster;
 	float min_twist_detection, max_similarty_deviation;
 	float sim_adj_dist, sim_adj_angle, sim_adj_side, sim_adj_xpos, sim_adj_ypos;
 	bool static_filter;

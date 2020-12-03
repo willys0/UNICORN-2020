@@ -21,6 +21,8 @@ void dynamicReconfigCallback(unicorn_tracking::TrackingConfig& config, uint32_t 
   data->sim_adj_xpos = config.sim_adj_xpos;
   data->sim_adj_ypos = config.sim_adj_ypos;
   data->max_similarty_deviation = config.max_similarty_deviation;
+  data->min_size_cluster = config.min_size_cluster;
+
 
 }
 
@@ -53,7 +55,9 @@ tracking_lidar::tracking_lidar()
   n_.param("Static_map_removal_tolerance",static_remove_dist, 4);
 
   n_.param("polygon_tolerance",polygon_tolerance, 1.04f);
-  n_.param("polygon_min_points_required",polygon_min_points, 4);
+  n_.param("polygon_side_min_points_required",polygon_min_points, 4);
+  n_.param("Cluster_Lower_Limit",min_size_cluster, 5);
+  
 
   n_.param("min_twist_detection",min_twist_detection, 0.08f);
 
@@ -304,7 +308,7 @@ void tracking_lidar::association()
       dt = time - trackers[i].time;  
       for(j=0; j<MAX_OBJECTS; j++)
       {
-        if(polygon_size[j] > 0){
+        if(polygon_size[j] >= 1){
           s1 = sim_adj_angle*abs((trackers[i].average_angle) - (object_attributes_list[j].average_angle));
           s2 = sim_adj_dist*abs((trackers[i].longest_size) - (object_attributes_list[j].longest_size));
           s3 = sim_adj_side*abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount));  
@@ -393,7 +397,7 @@ void tracking_lidar::association()
   {
     if(trackers[j].age > 0)
       m++;
-    if(polygon_size[j] > 0 && object_match[j] == 0)
+    if(polygon_size[j] >= 1 && object_match[j] == 0)
     {
       for(i=0; i<MAXTRACKS; i++)
       {    
@@ -541,7 +545,7 @@ void tracking_lidar::polygon_extraction(){
   // Clear shape array
   for(i=0; i < MAX_OBJECTS; i++)
   {
-    if(polygon_size[i] > 0)
+    if(polygon_size[i] >= 1)
     {
       shapes[i].points.clear();
       polygon_size[i] = 0;
@@ -552,7 +556,7 @@ void tracking_lidar::polygon_extraction(){
     polygon[i] = 0;
     if(clusters[i] != current_cluster){ 
       end_point = i-1;
-      if(current_cluster != -1){
+      if(current_cluster != -1 && end_point-start_point > min_size_cluster){
           l = end_point-start_point+1;
           if(l >= 3){
             polygon[start_point] = 1;
@@ -653,7 +657,7 @@ void tracking_lidar::polygon_attribute_extraction()
     object_attributes_list[i].estimated_y = 0;
     object_attributes_list[i].average_angle = 0;
     lowest_angle = 10;
-    if(polygon_size[i] > 0){
+    if(polygon_size[i] >= 1){
       /* Get angle average, length average*/
       for(j=0;j < polygon_size[i]-1;j++)
       {

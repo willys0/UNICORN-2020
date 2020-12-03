@@ -8,7 +8,7 @@ static_filter: true
 Static_map_removal_tolerance: 4
 
 polygon_tolerance: 1.04 # 1.04
-polygon_min_points_required: 4
+polygon_side_min_points_required: 4
 
 min_twist_detection: 0.3 #0.08
 
@@ -19,3 +19,5 @@ similarty_side_xposition_weight: 2.0
 similarty_side_yposition_weight: 2.0
 
 max_similarty_deviation: 2
+
+min_size_cluster: 4
