@@ -1,0 +1,9 @@
+# The ZED camera and the simulator one use different coordinate systems,
+# so we need separate configs for them.
+
+# For sim, the y axis is the "height"
+filter_field_name: y
+filter_limit_max: 0.35
+filter_limit_min: -1.0
+filter_limit_negative: false
+leaf_size: 0.1
