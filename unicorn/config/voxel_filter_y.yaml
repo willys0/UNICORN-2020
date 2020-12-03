@@ -1,5 +1,0 @@
-filter_field_name: y
-filter_limit_max: 0.35
-filter_limit_min: -1.0
-filter_limit_negative: false
-leaf_size: 0.1

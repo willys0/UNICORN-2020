@@ -2,13 +2,16 @@
     <arg name="input_pointcloud_topic" default="/zed/depth/points" />
     <arg name="output_pointcloud_topic" default="/zed/depth/points_filtered" />
 
+    <arg name="sim" default="false" />
+
     <!-- Run a VoxelGrid filter to clean NaNs and downsample the pointcloud output goes to cloud_filtered -->
     <group>
         <node pkg="nodelet" type="nodelet" name="pcl_manager" args="manager" output="screen" />
 
         <!-- Run a voxel filter on the y axis -->
         <node pkg="nodelet" type="nodelet" name="voxel_grid" args="load pcl/VoxelGrid pcl_manager" output="screen">
-            <rosparam file="$(find unicorn)/config/voxel_filter_y.yaml" command="load" />
+            <rosparam if="$(arg sim)" file="$(find unicorn)/config/sim_voxel_filter_y.yaml" command="load" />
+            <rosparam unless="$(arg sim)" file="$(find unicorn)/config/voxel_filter_z.yaml" command="load" />
 
             <remap from="~input" to="$(arg input_pointcloud_topic)" />
             <remap from="~output" to="$(arg output_pointcloud_topic)" />
