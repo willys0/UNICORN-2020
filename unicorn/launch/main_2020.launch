@@ -28,6 +28,11 @@
 		<include file="$(find unicorn_roborio_bridge)/launch/bridge.launch" />
 	</group>
 
+	<include file="$(find unicorn)/launch/components/voxel_filter.launch">
+		<arg name="input_pointcloud_topic" value="/zed/depth/points"/>
+		<arg name="output_pointcloud_topic" value="/zed/depth/points_filtered"/>
+		<arg name="sim" value="$(arg sim)" />
+	</include>
 
 	<include file="$(find unicorn_localization)/launch/localization.launch">
 		<arg name="sim" value="$(arg sim)" />
@@ -39,7 +44,9 @@
 	</include>
 
 	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
-		<arg name="sim" value="$(arg sim)" />
+		<arg name="global_frame" value="map" />
+		<arg unless="$(arg sim)" name="robot_base_frame" value="base_link" />
+		<arg if="$(arg sim)" name="robot_base_frame" value="chassis_link" />
 	</include>
 
 	<group if="$(arg do_slam)">
@@ -57,6 +64,14 @@
 		<node pkg="tf" type="static_transform_publisher" name="map_transform" args="0 0 0 0 0 0 /map /odom_chassis 100"/>
 
 	</group>
+
+	<!--include unless="$(arg sim)" file="$(find unicorn_intention)/launch/intention.launch"-->
+	<include file="$(find unicorn_intention)/launch/intention.launch" >
+		<arg name="unicorn_state_topic" 	value="/unicorn/state" />
+		<arg name="intention_angle_topic" 	value="/TX2_localplanner_intention" />
+		<arg name="led_state_topic" 		value="/TX2_unicorn_state" />
+
+	</include>
 
 
 	<!-- load joint controller configurations from YAML file to parameter server -->

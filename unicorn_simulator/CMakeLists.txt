@@ -12,6 +12,8 @@ find_package(catkin REQUIRED COMPONENTS
   husky_gazebo
 )
 
+file(COPY models/. DESTINATION $ENV{HOME}/.gazebo/models)
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 

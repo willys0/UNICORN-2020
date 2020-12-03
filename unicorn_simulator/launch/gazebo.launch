@@ -14,7 +14,9 @@
 
 		<!-- Launch gazebo world -->
 		<include file="$(find gazebo_ros)/launch/empty_world.launch">
-			<arg name="world_name" value="$(find husky_gazebo)/worlds/clearpath_playpen.world"/>
+			<!--arg name="world_name" value="$(find husky_gazebo)/worlds/clearpath_playpen.world"/-->
+			<!-- <arg name="world_name" value="$(find unicorn_simulator)/worlds/Apriltag_0_world.world"/> -->
+			<arg name="world_name" value="$(find unicorn_simulator)/worlds/Apriltag_bundle_world.world"/>
 			<!--arg name="world_name" value="$(find unicorn_simulator)/worlds/clearpath_playpen_moving_obstacle.world"/-->
 			<!--arg name="world_name" value="$(find unicorn_simulator)/worlds/testworld_moving_obstacle.world"/-->
 			<arg name="paused" value="false"/>
@@ -29,7 +31,7 @@
 		<param name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_sim.urdf.xacro'" />
 
 		<!-- push robot_description to factory and spawn robot in gazebo -->
-		<node name="automower_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model automower -x 0.0 -y 0.0 -z 0.2 -Y 0.0"/> <!-- 5.5 -2.6 0.2 -1.5707 -->
+		<node name="automower_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model UNICORN -x 0.0 -y 0.0 -z 0.2 -Y 0.0"/> <!-- 5.5 -2.6 0.2 -1.5707 -->
 	</group>
 
 </launch>
