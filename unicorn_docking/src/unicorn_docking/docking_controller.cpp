@@ -285,6 +285,8 @@ void DockingController::rearLidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
 
 void DockingController::frontLidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
     front_lidar_scan_ = *msg;
+    front_lidar_scan_.angle_min = front_lidar_scan_.angle_min/10000;
+    front_lidar_scan_.angle_max = front_lidar_scan_.angle_max/10000;
 }
 
 bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
