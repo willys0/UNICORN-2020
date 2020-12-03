@@ -157,13 +157,12 @@ double DockingController::fuseAngles(double apriltag_angle, double lidar_angle, 
 
 double DockingController::getDistanceToClosestObject(const sensor_msgs::LaserScan& laser_scan, double laser_scan_angle) {
     float range_min = 0.0f, current_angle = 0.0f;
-    // TODO: check time of laser scan so it is not to old.
 
     range_min = laser_scan.range_max;
-    for( int i; i < laser_scan.ranges.size(); i++ ) {
+    for( int i = 0; i < laser_scan.ranges.size(); i++ ) {
         // Get the angle of the laser scan
         current_angle = laser_scan.angle_min + i*laser_scan.angle_increment;
-        if((current_angle >= -laser_scan_angle/2) && (current_angle >= laser_scan_angle/2)) {
+        if((current_angle >= -laser_scan_angle/2.0) && (current_angle <= laser_scan_angle/2.0)) {
             if(laser_scan.ranges[i] < range_min) {
                 range_min = laser_scan.ranges[i];
             }
