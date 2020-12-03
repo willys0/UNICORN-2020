@@ -1,4 +1,5 @@
-	
+
+<!-- packages needed: sudo apt-get install ros-kinetic-gazebo-ros-pkgs ros-kinetic-gazebo-ros-control -->
     
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
