@@ -36,24 +36,7 @@ int main(int argc, char** argv){
   reconfig_server.setCallback(boost::bind(&dynamicReconfigCallback, _1, _2, &tracking_lidar_interface));
   ros::Rate r(30.0);
 
-/*
-while(ros::ok)
-  {
-
-
-    ros::spinOnce();
-    r.sleep();
-    
-    
-    if(map_received && odom_received && scan_received){
-      //ROS_INFO(" Running ");
-      tracking_lidar_interface.association();
-      tracking_lidar_interface.object_publisher();
-      scan_received = false;
-
-    }
-    }*/
-    ros::spin();
+  ros::spin();
 }
 
 
@@ -85,9 +68,12 @@ tracking_lidar::tracking_lidar()
   
  
 
-  odometry_sub_ = n_.subscribe("/odom", 10, &tracking_lidar::odomCallback, this);
-  scan_sub_ = n_.subscribe("/scan", 10, &tracking_lidar::scanCallback, this);
-  object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("obstacles",10,false);
+  //odometry_sub_ = n_.subscribe("/odom", 10, &tracking_lidar::odomCallback, this); /move_base/TebLocalPlannerROS/obstacles
+  //scan_sub_ = n_.subscribe("/scan", 10, &tracking_lidar::scanCallback, this);
+  odometry_sub_ = n_.subscribe("/odometry/filtered", 10, &tracking_lidar::odomCallback, this);
+  scan_sub_ = n_.subscribe("/frontLidar/scan", 10, &tracking_lidar::scanCallback, this);
+  // object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("obstacles",10,false);
+  object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("/move_base/TebLocalPlannerROS/obstacles",10,false);
   marker_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArray",10,false);
   marker_Arrow_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArrowArray",10,false);
 
@@ -433,7 +419,7 @@ void tracking_lidar::association()
       }
     }
   }
-  //ROS_INFO("Number of trackers %d",m);
+  ROS_INFO("Number of trackers %d",m);
 }
 
 /* Initiates all trackers */
@@ -448,7 +434,7 @@ void tracking_lidar::initiate_Trackers()
   kf.P0 << 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0.05, 0.05;
   // Tunable noise matrices
   kf.Q << 0.05, 0.05, 0, 0, 0.05, 0.05, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0.05, 0.05;
-  kf.R << 0.05, 0.05, 0, 0, 0, 0.05, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0, 0.05; 
+  kf.R << 0.05, 0.05, 0, 0, 0, 0.2, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0, 0.2; 
   
   int i;
   for(i=0; i<MAXTRACKS; i++)
@@ -702,7 +688,7 @@ void tracking_lidar::polygon_attribute_extraction()
       if(polygon_size[i]-2 > 0)
         object_attributes_list[i].average_angle /= polygon_size[i]-2;
 
-      if(lowest_angle < 10)
+      if(lowest_angle < 2)
       {
         object_attributes_list[i].estimated_x = shapes[i].points[m].x;
         object_attributes_list[i].estimated_y = shapes[i].points[m].y;

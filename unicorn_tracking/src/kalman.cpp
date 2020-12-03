@@ -23,7 +23,7 @@ void KalmanFilter::init() {
 
 	I.setIdentity();
 	x_hat.setZero();
-	x_hat_new.setZero();
+	//x_hat_new.setZero();
 	P = P0;
 	initialized = true;
 }
@@ -42,7 +42,7 @@ void KalmanFilter::predict() {
 
 void KalmanFilter::update(const Eigen::VectorXd& y) {
 
-	x_hat = x_hat_new;
+	//x_hat = x_hat_new;
 	K = P*C.transpose()*(C*P*C.transpose() + R).inverse();
 	x_hat += K * (y - C*x_hat);
 	P = (I - K*C)*P;
