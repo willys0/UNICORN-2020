@@ -30,6 +30,15 @@ odom0_config: [true, true, false,
 odom0_differential: true
 odom0_queue_size: 100
 
+# odom/uwb
+odom1: /uwb
+odom1_config: [true, true, false,
+               false, false, false,
+               false, false, false,
+               false, false, false,
+               false, false, false]
+odom1_differential: false
+odom1_queue_size: 100
 
 
 # # Odometry/zedS
