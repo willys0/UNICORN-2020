@@ -507,15 +507,15 @@ void tracking_lidar::adaptive_breaK_point()
   {
     current_angle = float(i)*scan_data_.angle_increment+scan_data_.angle_min;
     // Calculate xy position
-    xy_positions[i][1] = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw)) + x;
-    xy_positions[i][2] = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw)) + y;
+    //xy_positions[i][1] = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw)) + x;
+    //xy_positions[i][2] = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw)) + y;
 
-    point.x = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw)) + x;
-    point.y = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw)) + y;
+    point.x = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw));
+    point.y = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw));
     point.z = 0;
     tf2::doTransform(point,point,Lidar2base);
-    xy_positions[i][1] = point.x;
-    xy_positions[i][2] = point.y;
+    xy_positions[i][1] = point.x  + x;
+    xy_positions[i][2] = point.y  + y;
     if(i == 0)
     {
       clusters[i] = 0;

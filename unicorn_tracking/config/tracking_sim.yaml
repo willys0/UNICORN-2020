@@ -15,14 +15,14 @@ min_twist_detection: 0.3 #0.08
 similarty_side_length_weight: 1.0
 similarty_side_angle_weigh: 1.0
 similarty_side_amount_weight: 1.0
-similarty_side_xposition_weight: 2.0
-similarty_side_yposition_weight: 2.0
+similarty_side_xposition_weight: 2.2
+similarty_side_yposition_weight: 2.2
 
 max_similarty_deviation: 2
 
 min_size_cluster: 4
 
 
-mapframeid: /map
+mapframeid: odom_chassis
 base_laser_frame: base_laser
 base_frame: chassis_link
