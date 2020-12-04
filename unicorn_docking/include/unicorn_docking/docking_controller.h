@@ -62,6 +62,12 @@ class DockingController {
             lidar_rotational_missalignment_ = rotation_offset;
         }
 
+        void setLidarContributionParameters(double lidar_contrib_factor, double lidar_contrib_offset) {
+            lidar_contrib_factor_ = lidar_contrib_factor;
+            lidar_contrib_offset_ = lidar_contrib_offset;
+
+        }
+
         double xError() { return err_x_; }
         double yError() { return err_y_; }
         double thError() { return err_th_; }
@@ -136,6 +142,9 @@ class DockingController {
         sensor_msgs::LaserScan rear_lidar_scan_;
         double max_time_since_lidar_scan_;
         double lidar_rotational_missalignment_;
+
+        double lidar_contrib_factor_;
+        double lidar_contrib_offset_;
 
         ros::Time last_time_;
         ros::Time tag_last_seen_;

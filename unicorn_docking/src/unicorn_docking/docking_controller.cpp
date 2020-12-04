@@ -127,7 +127,7 @@ bool DockingController::getRotationToTag(double& rotation_to_tag) {
 double DockingController::fuseDistances(double apriltag_dist, double lidar_dist, double lidar_angle) {
     // TODO: Make it possible to set min dist to activate lidar manually
     if(use_lidar_ && apriltag_dist < 0.8f && lidar_angle < 0.00872) {
-        float lidar_contrib = 1.0 / exp(40 * (apriltag_dist - desired_offset_.x));
+        float lidar_contrib = lidar_contrib_offset_ / exp(lidar_contrib_factor_ * (apriltag_dist - desired_offset_.x));
 
         if(lidar_contrib > 1.0)
             lidar_contrib = 1.0;
@@ -142,7 +142,7 @@ double DockingController::fuseDistances(double apriltag_dist, double lidar_dist,
 double DockingController::fuseAngles(double apriltag_angle, double lidar_angle, double apriltag_dist) {
     // TODO: Make it possible to set min dist to activate lidar manually
     if(use_lidar_ && apriltag_dist < 0.8f) {
-        float lidar_contrib = 1.0 / exp(40 * (apriltag_dist - desired_offset_.x));
+        float lidar_contrib = lidar_contrib_offset_ / exp(lidar_contrib_factor_ * (apriltag_dist - desired_offset_.x));
 
         if(lidar_contrib > 1.0)
             lidar_contrib = 1.0;
