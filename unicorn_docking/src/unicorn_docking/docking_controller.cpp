@@ -257,7 +257,7 @@ void DockingController::rearLidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
 
     // Calculate angle and distance to wall
     for(int i : lidar_indices_) {
-        tempX = msg->angle_min+lidar_rotational_missalignment_ + i * msg->angle_increment;
+        tempX = msg->angle_min + i * msg->angle_increment;
         avgX += tempX;
         avgY += msg->ranges[i]*cos(tempX);
     }
@@ -267,7 +267,7 @@ void DockingController::rearLidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
 
     float x, y;
     for(int i : lidar_indices_) {
-        x = i * msg->angle_increment + msg->angle_min+lidar_rotational_missalignment_;
+        x = i * msg->angle_increment + msg->angle_min;
         y = msg->ranges[i] * cos(x);
         num += (x - avgX) * (y - avgY);
         denom += (x - avgX) * (x - avgX);
@@ -279,7 +279,7 @@ void DockingController::rearLidarCb(const sensor_msgs::LaserScanConstPtr& msg) {
     double res = num / denom;
 
     lidar_dist_ = avgY + lidar_offset_x_;
-    lidar_angle_ = atan(res);
+    lidar_angle_ = atan(res) + lidar_rotational_missalignment_;
 
 }
 
