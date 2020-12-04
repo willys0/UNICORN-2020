@@ -291,9 +291,9 @@ int main(int argc, char **argv) {
     // load settings
     nh.param("retry_error_times", max_error_times, 50);
     nh.param("max_retries", max_retries, 3);
-    nh.param("thresh_x", thresh_x, 0.01);
-    nh.param("thresh_y", thresh_y, 0.01);
-    nh.param("thresh_th", thresh_th, 0.01);
+    // nh.param("thresh_x", thresh_x, 0.01);
+    // nh.param("thresh_y", thresh_y, 0.01);
+    // nh.param("thresh_th", thresh_th, 0.01);
 
     nh.param("retry_offset", retry_offset, 0.6);
     nh.param("offset/x",desired_offset.x, 0.2);

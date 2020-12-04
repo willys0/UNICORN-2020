@@ -30,11 +30,11 @@ retry_offset: 1.6
 # Number of cycles to try to put robot within error margins before retrying
 retry_error_times: 50
 
-# Accepted threshold for x (forward) error
-thresh_x: 0.01
+# # Accepted threshold for x (forward) error
+# thresh_x: 0.01
 
-# Accepted threshold for y (lateral) error
-thresh_y: 0.02
+# # Accepted threshold for y (lateral) error
+# thresh_y: 0.02
 
-#Accepted threshold for th (angular) error
-thresh_th: 0.045
+# #Accepted threshold for th (angular) error
+# thresh_th: 0.045
