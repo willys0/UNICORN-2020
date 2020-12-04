@@ -45,6 +45,7 @@ void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, u
     controller->setDesiredRotationFunctionParameters(config.a, config.b, config.c);
     controller->setMaxTfLookupTime(config.max_tf_lookup_time);
     controller->setMinObjectDistances(config.min_dist_to_object_infront,config.min_dist_to_object_behind);
+    controller->setRearLidarRotationMissalignment(config.rear_lidar_angle_offset);
 }
 
 DockStatus getDockingVelocity(ros::NodeHandle nh, DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {

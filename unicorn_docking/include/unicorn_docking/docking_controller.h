@@ -58,6 +58,10 @@ class DockingController {
             min_distance_behind_ = min_distance_behind;
         }
 
+        void setRearLidarRotationMissalignment(double rotation_offset) {
+            lidar_rotational_missalignment_ = rotation_offset;
+        }
+
         double xError() { return err_x_; }
         double yError() { return err_y_; }
         double thError() { return err_th_; }
@@ -131,6 +135,7 @@ class DockingController {
         sensor_msgs::LaserScan front_lidar_scan_;
         sensor_msgs::LaserScan rear_lidar_scan_;
         double max_time_since_lidar_scan_;
+        double lidar_rotational_missalignment_;
 
         ros::Time last_time_;
         ros::Time tag_last_seen_;
