@@ -245,6 +245,16 @@
     </collision>
   </link>
 
+  <joint name="lift_horizontal_joint" type="prismatic">
+    <parent  link="lift_link" />
+    <child  link="lift_horizontal_link" />
+    <origin xyz="0.05 0 0.137" rpy="${M_PI2} 0 ${-M_PI2}" />
+    <axis xyz="0 0.0024714 -1" rpy="0 0 0"  />
+    <limit lower="0.17" upper="0" effort="100" velocity="100" />
+    <joint_properties damping="1000" friction="0.5" />
+  </joint>
+
+
   <joint
     name="lift_vertical_joint"
     type="prismatic">
@@ -265,16 +275,6 @@
       <joint_properties damping="10" friction="0.5" />
   </joint>
 
-  <gazebo reference="lift_vertical_joint">
-      <mu1 value="10000.0" />
-      <mu2 value="10000.0" />
-      <kp value="100000.0" />
-      <kd value="10000.0" />
-      <dampingFactor value="0.5" />
-      <fdir1 value="1 0 0" />
-      <material>Gazebo/Black</material>
-      <turnGravityOff>false</turnGravityOff>
-  </gazebo>
 
 
   <wheel fb="back" lr="left" parent="lift_link"  translateY="0.24" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
@@ -442,16 +442,17 @@
 </xacro:if>
 
 
-  <joint name="lift_horizontal_joint" type="prismatic">
-    <parent  link="lift_link" />
-    <child  link="lift_horizontal_link" />
-    <origin xyz="0.05 0 0.137" rpy="${M_PI2} 0 ${-M_PI2}" />
-    <axis xyz="0 0.0024714 -1" rpy="0 0 0"  />
-    <limit lower="0.17" upper="0" effort="100" velocity="100" />
-    <joint_properties damping="1000" friction="0.5" />
-  </joint>
 
-<<<<<<< HEAD
+  <gazebo reference="lift_vertical_joint">
+      <mu1 value="10000.0" />
+      <mu2 value="10000.0" />
+      <kp value="100000.0" />
+      <kd value="10000.0" />
+      <dampingFactor value="0.5" />
+      <fdir1 value="1 0 0" />
+      <material>Gazebo/Black</material>
+      <turnGravityOff>false</turnGravityOff>
+  </gazebo>
 
   <gazebo reference="lift_horizontal_joint">
       <mu1 value="10000.0" />
@@ -462,46 +463,35 @@
       <fdir1 value="1 0 0" />
       <material>Gazebo/Black</material>
       <turnGravityOff>false</turnGravityOff>
-=======
-<xacro:if value="$(arg sim)">
-  <!-- Fake UWB -->
-  <gazebo>
-    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
-        <alwaysOn>true</alwaysOn>
-        <updateRate>50.0</updateRate>
-        <bodyName>chassis_link</bodyName>
-        <topicName>uwb/pose</topicName>
-        <gaussianNoise>0.1</gaussianNoise>
-        <frameName>map</frameName>
-        <xyzOffset>0 0 0</xyzOffset>
-        <rpyOffset>0 0 0</rpyOffset>
-      </plugin>
->>>>>>> c6a34eb1ea5167d43927d40b71a6c3829b7e0557
   </gazebo>
 
-  <transmission name="lift_horizontal_joint_trans">
+  <transmission name="lift_h_trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="lift_horizontal_joint">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
       </joint>
-      <actuator name="lift_horizontal_joint_motor">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <actuator name="lift_h_motor">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
         <mechanicalReduction>5</mechanicalReduction>
       </actuator>
   </transmission>
 
 
-  <transmission name="lift_vertical_joint_trans">
+  <transmission name="lift_v_trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="lift_vertical_joint">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
       </joint>
-      <actuator name="lift_vertical_joint_motor">
-        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      <actuator name="lift_v_motor">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
         <mechanicalReduction>5</mechanicalReduction>
       </actuator>
   </transmission>
-
+<gazebo>
+  <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+    <robotNamespace>/unicorn</robotNamespace>
+  </plugin>
+</gazebo>
 <xacro:if value="$(arg sim)">
   <!-- GAZEBO STUFF -->
   <gazebo>
@@ -569,7 +559,10 @@
         <headingGaussianNoise>0.00</headingGaussianNoise>-->
     </plugin>
     <!-- Joint controll plugin -->
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/unicorn</robotNamespace>
+    </plugin>
+
     <!-- gazebo wheel encoders -->
     <plugin name="am_gazebo_wheelencoder" filename="libam_gazebo_wheelencoder.so">
   </plugin>
