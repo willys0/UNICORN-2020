@@ -5,14 +5,14 @@
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://bin_hanger/meshes/bin_hanger.dae</uri>
+            <uri>model://bin_hanger/meshes/Bin_hanger.dae</uri>
           </mesh>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://bin_hanger/meshes/bin_hanger.dae</uri>
+            <uri>model://bin_hanger/meshes/Bin_hanger.dae</uri>
           </mesh>
         </geometry>
         <material name="">
