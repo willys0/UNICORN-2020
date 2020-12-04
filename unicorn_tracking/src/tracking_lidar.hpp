@@ -15,11 +15,14 @@
 #include <tf2_ros/transform_listener.h>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <unicorn_tracking/TrackingConfig.h>
+#include <tf/transform_listener.h>
+
 
 /* C / C++ */
 #include <iostream>
@@ -68,6 +71,9 @@ public:
 	float sim_adj_dist, sim_adj_angle, sim_adj_side, sim_adj_xpos, sim_adj_ypos;
 	bool static_filter;
 	std::string mapframeid = "/map";
+	std::string base_laser_frame = "base_laser";
+	std::string base_frame = "chassis_link";
+	
 
 private:
 	void extract_corners(int startpoint,int endpoint, int length,int shape_nr);
@@ -87,6 +93,7 @@ private:
 	ros::Publisher object_pub_;
 	ros::Publisher marker_pub_;
 	ros::Publisher marker_Arrow_pub_;
+	geometry_msgs::TransformStamped Lidar2base;
 
 	int seq;
 

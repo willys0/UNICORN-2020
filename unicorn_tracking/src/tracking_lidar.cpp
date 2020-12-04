@@ -68,7 +68,9 @@ tracking_lidar::tracking_lidar()
   n_.param("similarty_side_yposition_weight",sim_adj_ypos, 5.0f);
 
   n_.param("max_similarty_deviation",max_similarty_deviation, 1.5f);
-  //n_.param("map_topic",mapframeid, "/map");
+  n_.param("map_topic",mapframeid, std::string("/map")); //std::string("rear_laser")
+  n_.param("base_laser_frame",base_laser_frame, std::string("base_laser")); 
+  n_.param("base_frame",base_frame, std::string("chassis_link")); 
   
  
 
@@ -80,6 +82,14 @@ tracking_lidar::tracking_lidar()
   object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("/move_base/TebLocalPlannerROS/obstacles",10,false);
   marker_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArray",10,false);
   marker_Arrow_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArrowArray",10,false);
+
+  tf2_ros::Buffer tf_buffer;
+  tf2_ros::TransformListener tf2_listener(tf_buffer);
+
+  Lidar2base = tf_buffer.lookupTransform(base_frame, base_laser_frame, ros::Time(0), ros::Duration(100.0) );
+ 
+
+  //tf2_geometry_msgs
 
   if(static_filter)
   {
@@ -256,6 +266,9 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 {
     scan_data_ = scan;
     scan_received = true;
+
+    
+
     
     if(map_received && odom_received && scan_received){
       adaptive_breaK_point();
@@ -488,6 +501,7 @@ void tracking_lidar::adaptive_breaK_point()
 {
   int i,j = 0;
   float current_angle,r,p,dmax;
+  geometry_msgs::Point point;
   int max_itterations = round((scan_data_.angle_max - scan_data_.angle_min)/scan_data_.angle_increment);
   for(i = 0; i < max_itterations+1; i++)
   {
@@ -495,6 +509,13 @@ void tracking_lidar::adaptive_breaK_point()
     // Calculate xy position
     xy_positions[i][1] = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw)) + x;
     xy_positions[i][2] = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw)) + y;
+
+    point.x = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw)) + x;
+    point.y = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw)) + y;
+    point.z = 0;
+    tf2::doTransform(point,point,Lidar2base);
+    xy_positions[i][1] = point.x;
+    xy_positions[i][2] = point.y;
     if(i == 0)
     {
       clusters[i] = 0;

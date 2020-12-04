@@ -25,4 +25,4 @@ min_size_cluster: 4
 
 mapframeid: /map
 base_laser_frame: base_laser
-base_frame: chassis_link
+base_frame: base_link
