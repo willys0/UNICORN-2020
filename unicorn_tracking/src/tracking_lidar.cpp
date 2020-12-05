@@ -502,7 +502,7 @@ void tracking_lidar::adaptive_breaK_point()
   float current_angle,r,p,dmax;
   geometry_msgs::Point point;
   int max_itterations = round((scan_data_.angle_max - scan_data_.angle_min)/scan_data_.angle_increment);
-  odom2map = tf_buffer.lookupTransform(mapframeid, base_laser_frame, ros::Time(0), ros::Duration(100.0) );
+  odom2map = tf_buffer.lookupTransform(mapframeid, odomframeid, ros::Time(0), ros::Duration(100.0) );
   for(i = 0; i < max_itterations+1; i++)
   {
     current_angle = float(i)*scan_data_.angle_increment+scan_data_.angle_min;
@@ -513,9 +513,9 @@ void tracking_lidar::adaptive_breaK_point()
     point.x = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw));
     point.y = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw));
     point.z = 0;
-    //tf2::doTransform(point,point,Lidar2base);
-    //point.x  + x;
-    //point.y  + y;
+    tf2::doTransform(point,point,Lidar2base);
+    point.x  + x;
+    point.y  + y;
     tf2::doTransform(point,point,odom2map);
     xy_positions[i][1] = point.x;
     xy_positions[i][2] = point.y;
