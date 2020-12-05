@@ -23,6 +23,7 @@ max_similarty_deviation: 2
 min_size_cluster: 4
 
 
-mapframeid: odom_chassis
+mapframeid: map
+odomframeid: odom_chassis
 base_laser_frame: base_laser
 base_frame: chassis_link

@@ -70,9 +70,13 @@ public:
 	float min_twist_detection, max_similarty_deviation;
 	float sim_adj_dist, sim_adj_angle, sim_adj_side, sim_adj_xpos, sim_adj_ypos;
 	bool static_filter;
-	std::string mapframeid = "/map";
+	std::string mapframeid = "map";
+	std::string odomframeid = "odom_chassis";
 	std::string base_laser_frame = "base_laser";
 	std::string base_frame = "chassis_link";
+
+	tf2_ros::Buffer tf_buffer;
+  	
 	
 
 private:
@@ -94,6 +98,7 @@ private:
 	ros::Publisher marker_pub_;
 	ros::Publisher marker_Arrow_pub_;
 	geometry_msgs::TransformStamped Lidar2base;
+	geometry_msgs::TransformStamped odom2map;
 
 	int seq;
 

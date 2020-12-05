@@ -23,7 +23,6 @@ void dynamicReconfigCallback(unicorn_tracking::TrackingConfig& config, uint32_t 
   data->max_similarty_deviation = config.max_similarty_deviation;
   data->min_size_cluster = config.min_size_cluster;
 
-
 }
 
 
@@ -68,9 +67,11 @@ tracking_lidar::tracking_lidar()
   n_.param("similarty_side_yposition_weight",sim_adj_ypos, 5.0f);
 
   n_.param("max_similarty_deviation",max_similarty_deviation, 1.5f);
-  n_.param("map_topic",mapframeid, std::string("/map")); //std::string("rear_laser")
+  n_.param("map_topic",mapframeid, std::string("map")); //std::string("rear_laser")
   n_.param("base_laser_frame",base_laser_frame, std::string("base_laser")); 
   n_.param("base_frame",base_frame, std::string("chassis_link")); 
+  n_.param("odomframeid",odomframeid, std::string("odom_chassis")); 
+
   
  
 
@@ -83,9 +84,7 @@ tracking_lidar::tracking_lidar()
   marker_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArray",10,false);
   marker_Arrow_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArrowArray",10,false);
 
-  tf2_ros::Buffer tf_buffer;
   tf2_ros::TransformListener tf2_listener(tf_buffer);
-
   Lidar2base = tf_buffer.lookupTransform(base_frame, base_laser_frame, ros::Time(0), ros::Duration(100.0) );
  
 
@@ -241,7 +240,7 @@ void tracking_lidar::odomCallback(const nav_msgs::Odometry& odometry)
     tf::Matrix3x3 m(q);
     /* Get Euler angles */
     m.getRPY(roll,pitch,yaw);
-    yaw = -yaw; 
+    //yaw = -yaw; 
     x = odometry.pose.pose.position.x;
     y = odometry.pose.pose.position.y;
     z = odometry.pose.pose.position.z;
@@ -503,6 +502,7 @@ void tracking_lidar::adaptive_breaK_point()
   float current_angle,r,p,dmax;
   geometry_msgs::Point point;
   int max_itterations = round((scan_data_.angle_max - scan_data_.angle_min)/scan_data_.angle_increment);
+  odom2map = tf_buffer.lookupTransform(mapframeid, base_laser_frame, ros::Time(0), ros::Duration(100.0) );
   for(i = 0; i < max_itterations+1; i++)
   {
     current_angle = float(i)*scan_data_.angle_increment+scan_data_.angle_min;
@@ -513,9 +513,12 @@ void tracking_lidar::adaptive_breaK_point()
     point.x = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw));
     point.y = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw));
     point.z = 0;
-    tf2::doTransform(point,point,Lidar2base);
-    xy_positions[i][1] = point.x  + x;
-    xy_positions[i][2] = point.y  + y;
+    //tf2::doTransform(point,point,Lidar2base);
+    //point.x  + x;
+    //point.y  + y;
+    tf2::doTransform(point,point,odom2map);
+    xy_positions[i][1] = point.x;
+    xy_positions[i][2] = point.y;
     if(i == 0)
     {
       clusters[i] = 0;
