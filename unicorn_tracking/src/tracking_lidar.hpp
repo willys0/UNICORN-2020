@@ -68,7 +68,7 @@ public:
 	float polygon_tolerance;
 	int polygon_min_points, min_size_cluster;
 	float min_twist_detection, max_similarty_deviation;
-	float sim_adj_dist, sim_adj_angle, sim_adj_side, sim_adj_xpos, sim_adj_ypos;
+	float sim_adj_dist, sim_adj_angle, sim_adj_side, sim_adj_xpos, sim_adj_ypos,sim_adj_posdiff;
 	bool static_filter;
 	std::string mapframeid = "map";
 	std::string odomframeid = "odom_chassis";
@@ -85,6 +85,7 @@ private:
 	void initiate_Trackers();
 	void estimate_new_position();
 	void update_position();
+	void calculateVel(int objectnr, int trackernr,float *sum);
 
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
@@ -119,6 +120,7 @@ private:
 		float average_angle;
 		float estimated_x;
 		float estimated_y;
+		geometry_msgs::Polygon points;
 	}typedef object_attributes;
 	object_attributes object_attributes_list[MAX_OBJECTS];
 
