@@ -52,6 +52,8 @@
 	<group if="$(arg do_slam)">
 		<include file="$(find unicorn_slam)/launch/gmapping.launch">
 			<arg name="scan_topic" value="$(arg scan_topic)" />
+            <arg if="$(arg sim)" name="robot_base_frame" value="chassis_link" />
+            <arg unless="$(arg sim)" name="robot_base_frame" value="base_link" />
 		</include>
 	</group>
 

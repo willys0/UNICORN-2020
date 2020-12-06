@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<launch>       
+<launch>
     <arg name="scan_topic" default="scan" />
+    <arg name="map_frame" default="map" />
+    <arg name="odom_frame" default="odom_chassis" />
+    <arg name="robot_base_frame" default="base_link" />
+
     <!-- Launch grid-mapping -->
     <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping">
         <!--<rosparam file="$(find unicorn_slam)/config/gmapping_default.yaml"/>-->
         <rosparam file="$(find unicorn_slam)/config/gmapping_sim.yaml"/>
-        <!--<param name="odom_frame" value="odom_gazebo" />-->
+        <param name="map_frame"  value="$(arg map_frame)" />
+        <param name="odom_frame" value="$(arg odom_frame)" />
+        <param name="base_frame" value="$(arg robot_base_frame)" />
         <remap from="scan" to="$(arg scan_topic)" />
     </node>
 </launch>
