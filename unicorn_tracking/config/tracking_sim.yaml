@@ -4,7 +4,7 @@
 lambda: 0.15
 max_dist_laser: 10
 
-static_filter: true
+static_filter: false
 Static_map_removal_tolerance: 4
 
 polygon_tolerance: 1.04 # 1.04

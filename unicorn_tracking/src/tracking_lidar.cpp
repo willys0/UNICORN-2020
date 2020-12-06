@@ -240,7 +240,7 @@ void tracking_lidar::odomCallback(const nav_msgs::Odometry& odometry)
     tf::Matrix3x3 m(q);
     /* Get Euler angles */
     m.getRPY(roll,pitch,yaw);
-    //yaw = -yaw; 
+    yaw = -yaw; 
     x = odometry.pose.pose.position.x;
     y = odometry.pose.pose.position.y;
     z = odometry.pose.pose.position.z;
@@ -450,7 +450,7 @@ void tracking_lidar::initiate_Trackers()
   kf.P0 << 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0.05, 0.05;
   // Tunable noise matrices
   kf.Q << 0.05, 0.05, 0, 0, 0.05, 0.05, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0.05, 0.05;
-  kf.R << 0.05, 0.05, 0, 0, 0, 0.2, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0, 0.2; 
+  kf.R << 0.05, 0.05, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0, 0.5; 
   
   int i;
   for(i=0; i<MAXTRACKS; i++)
@@ -510,13 +510,43 @@ void tracking_lidar::adaptive_breaK_point()
     //xy_positions[i][1] = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw)) + x;
     //xy_positions[i][2] = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw)) + y;
 
+
     point.x = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw));
     point.y = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw));
     point.z = 0;
     tf2::doTransform(point,point,Lidar2base);
-    point.x  + x;
-    point.y  + y;
+    /*
+    point.x = (scan_data_.ranges[i])*(cos(current_angle));
+    point.y = (scan_data_.ranges[i])*(sin(current_angle));
+    point.z = 0;
+
+    //tf2::doTransform(point,point,Lidar2base);
+
+    point.x = point.x*cos(yaw) + point.y*sin(yaw);
+    point.y = point.y*cos(yaw) - point.x*sin(yaw);
+    point.z = 0;
+    */
+    point.x += x;
+    point.y += y;
+    point.z = 0;
+
+
+    //odom2map.transform.
+    // Lidar points
+    //point.x = (scan_data_.ranges[i])*(cos(current_angle));
+    //point.y = (scan_data_.ranges[i])*(sin(current_angle));
+    //point.z = 0;
+
+    // transform to base link
+    //tf2::doTransform(point,point,Lidar2base);
+
+    // transform to Odom link
+    //point.x = point.x*cos(yaw) - point.y*sin(yaw) + x;
+    //point.y = point.x*sin(yaw) + point.y*cos(yaw) + y;
+
+    // transform to map
     tf2::doTransform(point,point,odom2map);
+    
     xy_positions[i][1] = point.x;
     xy_positions[i][2] = point.y;
     if(i == 0)
