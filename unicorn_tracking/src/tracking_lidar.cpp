@@ -23,7 +23,6 @@ void dynamicReconfigCallback(unicorn_tracking::TrackingConfig& config, uint32_t 
   data->max_similarty_deviation = config.max_similarty_deviation;
   data->min_size_cluster = config.min_size_cluster;
   data->sim_adj_posdiff = config.sim_adj_posdiff;
-
   data->TRACKER_LIFE = config.TRACKER_LIFE;
   data->CONFIRMED_TRACK = config.CONFIRMED_TRACK;
 
@@ -80,9 +79,8 @@ tracking_lidar::tracking_lidar()
   n_.param("similarty_track_xposition_weight",sim_adj_xpos, 5.0f);
   n_.param("similarty_track_yposition_weight",sim_adj_ypos, 5.0f);
   n_.param("similarty_previous_position_weight",sim_adj_posdiff, 5.0f);
-  
-  n_.param("Tracker life timer",TRACKER_LIFE, 1000);
-  n_.param("Confirmed timer",CONFIRMED_TRACK, 100);
+  n_.param("TRACKER_LIFE",TRACKER_LIFE, 1000);
+  n_.param("CONFIRMED_TRACK",CONFIRMED_TRACK, 100);
   
 
   n_.param("max_similarty_deviation",max_similarty_deviation, 1.5f);
@@ -347,8 +345,6 @@ void tracking_lidar::association()
           s3 = sim_adj_side*abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount));  
           s4 = sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (object_attributes_list[j].estimated_x));
           s5 = sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (object_attributes_list[j].estimated_y));
-          s6 = sim_adj_posdiff*abs(sum[0]);
-          s6 = sim_adj_posdiff;
           ROS_INFO("Object %d tracker %d: Sim: %f %f %f ",i,j,sum[0],sum[1],sum[2]);
           /**/
           
