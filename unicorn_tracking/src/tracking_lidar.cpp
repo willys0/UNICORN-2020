@@ -340,6 +340,7 @@ void tracking_lidar::association()
           s4 = sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (object_attributes_list[j].estimated_x));
           s5 = sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (object_attributes_list[j].estimated_y));
           s6 = sim_adj_posdiff*abs(sum[0]);
+          s6 = sim_adj_posdiff;
           ROS_INFO("Object %d tracker %d: Sim: %f %f %f ",i,j,sum[0],sum[1],sum[2]);
           /**/
           
@@ -360,6 +361,10 @@ void tracking_lidar::association()
           {
             s4 = 5;
             s5 = 5;
+          }
+          if(isnan(s6))
+          {
+            s6 = sim_adj_posdiff;
           }
           similarity += s3 + s4 + s5 + s6;
           similarity /= (sim_adj_dist + sim_adj_angle + sim_adj_side + sim_adj_xpos + sim_adj_ypos + sim_adj_posdiff);
@@ -392,9 +397,11 @@ void tracking_lidar::association()
       trackers[m].average_angle = object_attributes_list[j].average_angle;
       trackers[m].longest_size = object_attributes_list[j].longest_size;
       trackers[m].sides_amount = object_attributes_list[j].sides_amount;
+      /*
+      x_dot = (trackers[m].tracker.x_hat(0)-object_attributes_list[j].estimated_x)/float(dt);
+      y_dot = (trackers[m].tracker.x_hat(2)-object_attributes_list[j].estimated_y)/float(dt);
+      */
       calculateVel(j, m,sum);
-      //x_dot = (trackers[m].tracker.x_hat(0)-object_attributes_list[j].estimated_x)/float(dt);
-      //y_dot = (trackers[m].tracker.x_hat(2)-object_attributes_list[j].estimated_y)/float(dt);
       x_dot = sum[1];
       y_dot = sum[2];
       if(isnan(x_dot))
@@ -491,23 +498,29 @@ void tracking_lidar::calculateVel(int objectnr, int trackernr,float *sum)
   int i,j;
 
   float x_t,y_t,x_o,y_o,distance;
+  /**/
   geometry_msgs::Polygon points;
   geometry_msgs::Point32 point1;
-  float min_x_value,min_y_value;
   
+  //ROS_INFO("TEST object %d tracker %d, size object %d, size tracker %d", objectnr, trackernr, i ,j);
   //memset(min_dist_value,999,sizeof(min_dist_value[0])*100);
   //object_attributes_list[objectnr].point.points.size();
-  memset(sum,0,sizeof(sum[0])*3);
-  
-  for(j=0;j < trackers[trackernr].points.points.size(); j++)
+  //memset(sum,0,sizeof(sum[0])*3);
+  point1.z = 10;
+  point1.x = 0;
+  point1.y = 0;
+  sum[0] = 0;
+  sum[1] = 0;
+  sum[2] = 0;
+  /**/
+  for(j=0;j < (int)(trackers[trackernr].points.points.size()); j++)
   {
-
     x_t = trackers[trackernr].points.points[j].x;
     y_t = trackers[trackernr].points.points[j].y;
-    point1.z = 999;
+    point1.z = 10;
     point1.x = 0;
     point1.y = 0;
-    for(i=0;i < object_attributes_list[objectnr].points.points.size();i++)
+    for(i=0;i < (int)(object_attributes_list[objectnr].points.points.size());i++)
     {
       x_o = object_attributes_list[objectnr].points.points[i].x;
       y_o = object_attributes_list[objectnr].points.points[i].y;
@@ -519,12 +532,14 @@ void tracking_lidar::calculateVel(int objectnr, int trackernr,float *sum)
          point1.y = y_o-y_t;
       }
     }
-    points.points.push_back(point1);
+    if(point1.z < 10)
+      points.points.push_back(point1);
 
   }
-  j=0;
-  for(i=0;i<points.points.size();i++)
-    if(points.points[i].z < 999)
+  j=1;
+  /**/
+  for(i=0;i<(int)(points.points.size());i++)
+    if(points.points[i].z < 10)
     {
       //ROS_INFO("dist %f dx %f dy %f ",points.points[i].z,points.points[i].x,points.points[i].y);
       j++;
@@ -532,10 +547,12 @@ void tracking_lidar::calculateVel(int objectnr, int trackernr,float *sum)
       sum[1] += points.points[i].x;
       sum[2] += points.points[i].y;
     }
+    
   sum[0] /= j;
   sum[1] /= j;
-  sum[2] /= j;     
-  points.points.clear();
+  sum[2] /= j;
+
+  
 
 }
 
