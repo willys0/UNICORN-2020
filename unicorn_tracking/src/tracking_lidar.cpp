@@ -24,6 +24,11 @@ void dynamicReconfigCallback(unicorn_tracking::TrackingConfig& config, uint32_t 
   data->min_size_cluster = config.min_size_cluster;
   data->sim_adj_posdiff = config.sim_adj_posdiff;
 
+  data->TRACKER_LIFE = config.TRACKER_LIFE;
+  data->CONFIRMED_TRACK = config.CONFIRMED_TRACK;
+
+
+
 }
 
 
@@ -75,6 +80,9 @@ tracking_lidar::tracking_lidar()
   n_.param("similarty_track_xposition_weight",sim_adj_xpos, 5.0f);
   n_.param("similarty_track_yposition_weight",sim_adj_ypos, 5.0f);
   n_.param("similarty_previous_position_weight",sim_adj_posdiff, 5.0f);
+  
+  n_.param("Tracker life timer", 1000);
+  n_.param("Confirmed timer",CONFIRMED_TRACK, 100);
   
 
   n_.param("max_similarty_deviation",max_similarty_deviation, 1.5f);
