@@ -1,10 +1,10 @@
 # The frame which will be used to compare distance and rotation to
-base_link_frame: "base_link"
-lidar_frame: "rear_laser"
+base_link_frame: "chassis_link"
 
 use_lidar: true
 
-included_lidar_measures: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+#included_lidar_measures: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+included_lidar_measures: [ 3, 4, 5, 6, 7 ]
 
 # The angle that objects are detected within by the rear lidar 
 rear_lidar_angle: 1.57079632679
@@ -17,7 +17,7 @@ max_time_since_lidar_scan: 0.5
 
 # The offset of the tag from the base frame
 offset:
-  x: 0.71
+  x: 0.64
   y: 0.0
   th: 0.0
 
