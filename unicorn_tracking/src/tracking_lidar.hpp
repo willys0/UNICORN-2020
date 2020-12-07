@@ -69,8 +69,8 @@ public:
 	float min_twist_detection, max_similarty_deviation;
 	float sim_adj_dist, sim_adj_angle, sim_adj_side, sim_adj_xpos, sim_adj_ypos,sim_adj_posdiff;
 	bool static_filter;
-	int TRACKER_LIFE = 1000;
-	int CONFIRMED_TRACK = 100;
+	int TRACKER_LIFE; 
+	int CONFIRMED_TRACK;
 	std::string mapframeid = "map";
 	std::string odomframeid = "odom_chassis";
 	std::string base_laser_frame = "base_laser";

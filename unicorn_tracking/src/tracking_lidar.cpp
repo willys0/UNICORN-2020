@@ -81,7 +81,7 @@ tracking_lidar::tracking_lidar()
   n_.param("similarty_track_yposition_weight",sim_adj_ypos, 5.0f);
   n_.param("similarty_previous_position_weight",sim_adj_posdiff, 5.0f);
   
-  n_.param("Tracker life timer", 1000);
+  n_.param("Tracker life timer",TRACKER_LIFE, 1000);
   n_.param("Confirmed timer",CONFIRMED_TRACK, 100);
   
 
