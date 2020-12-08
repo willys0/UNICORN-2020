@@ -48,11 +48,9 @@ LiftInterface::LiftState LiftInterface::getCurrentState() {
             return LiftState::IDLE;
         case 1:
         case 2:
-        case 3:
-        case 4:
-        case 5:
             return LiftState::RUNNING;
-        case 6:
+        case 3:
+            return LiftState::RESETTING;
         default:
             return LiftState::ERROR;
     }
