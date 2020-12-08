@@ -12,8 +12,9 @@ int main(int argc, char** argv){
 
     while(ros::ok())
     {
-        am_unicorn_interface.publishCmd();
         ros::spinOnce();
+
+        am_unicorn_interface.publishCmd();
         r.sleep();
     }
 }
