@@ -371,7 +371,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
             }
 
             // Get speed multiplier depending on distance to objects behind robot
-            speed_multiplier = 5*(getDistanceToClosestObject(rear_lidar_scan_,rear_lidar_angle_) - min_distance_behind_);
+            speed_multiplier = 5*(getDistanceToClosestObject(rear_lidar_scan_,rear_lidar_angle_) - min_object_distance_depending_on_tag_dist);
         }
         
         // Cap speed multiplier between 0 and 1
