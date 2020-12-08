@@ -28,11 +28,11 @@
 		<include file="$(find unicorn_roborio_bridge)/launch/bridge.launch" />
 	</group>
 
-	<include file="$(find unicorn)/launch/components/voxel_filter.launch">
+	<!--include file="$(find unicorn)/launch/components/voxel_filter.launch">
 		<arg name="input_pointcloud_topic" value="/zed/depth/points"/>
 		<arg name="output_pointcloud_topic" value="/zed/depth/points_filtered"/>
 		<arg name="sim" value="$(arg sim)" />
-	</include>
+	</include-->
 
 	<include file="$(find unicorn_localization)/launch/localization.launch">
 		<arg name="sim" value="$(arg sim)" />
