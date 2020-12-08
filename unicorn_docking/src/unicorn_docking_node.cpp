@@ -15,7 +15,7 @@
 
 typedef actionlib::SimpleActionServer<unicorn_docking::DockAction> DockActionServer;
 
-enum DockStatus { RUNNING, SUCCESS, FAILED };
+enum DockStatus { RUNNING, SUCCESS, FAILED, ERROR };
 
 double retry_offset;
 
@@ -50,7 +50,12 @@ void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, u
 }
 
 DockStatus getDockingVelocity(ros::NodeHandle nh, DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
-    controller->computeVelocity(out_velocity);
+    bool success;
+    success = controller->computeVelocity(out_velocity);
+
+    if(success == false) {
+        return DockStatus::ERROR;
+    }
 
     // cap the linear speed 
     if(out_velocity.linear.x > max_docking_speed) {
@@ -123,6 +128,7 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
 
     bool docking = true;
     int error_times = 0;
+    int sensor_error_times = 0;
 
     controller->reset();
     controller->setDesiredOffset(desired_offset);
@@ -181,6 +187,15 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
                 break;
             }
         }
+        else if(dock_status == DockStatus::ERROR && sensor_error_times++ > max_error_times){
+                // Error during docking, not good!
+                getDockingResultMsg(controller, false, rslt);
+                as->setPreempted(rslt);
+
+                ROS_INFO("[Docking Controller] Dock action failed due to outdated sensor data or transform error after %d retries with errors x: %f, y: %f, th: %f!", max_retries, controller->xError(), controller->yError(), controller->thError());
+
+                break;
+        }
 
         vel_pub.publish(move_msg);
 
@@ -219,6 +234,8 @@ void undock(ros::NodeHandle nh, DockingController* controller, DockActionServer*
     thresh.y = thresh_y;
     thresh.z = thresh_th;
 
+    int sensor_error_times = 0;
+
     controller->reset();
     controller->setDesiredOffset(offset);
     controller->setState(DockingController::DockState::DOCKING);
@@ -252,7 +269,15 @@ void undock(ros::NodeHandle nh, DockingController* controller, DockActionServer*
 
             break;
         }
+        else if(dock_status == DockStatus::ERROR && sensor_error_times++ > max_error_times) {
+                // Error during docking, not good!
+                getDockingResultMsg(controller, false, rslt);
+                as->setPreempted(rslt);
 
+                ROS_INFO("[Docking Controller] Undock action failed due to outdated sensor data or transform error, error with errors x: %f, y: %f, th: %f!",controller->xError(), controller->yError(), controller->thError());
+
+                break;
+        }
         vel_pub.publish(move_msg);
 
         getDockingFeedbackMsg(controller, fbk);
