@@ -527,7 +527,7 @@
         <alwaysOn>true</alwaysOn>
         <updateRate>50.0</updateRate>
         <bodyName>chassis_link</bodyName>
-        <topicName>uwb</topicName>
+        <topicName>uwb/pose</topicName>
         <gaussianNoise>0.1</gaussianNoise>
         <frameName>map</frameName>
         <xyzOffset>0 0 0</xyzOffset>
