@@ -32,10 +32,8 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
     std_msgs::Int32 msg;
     int dir;
 
-    if(!lift_interface->isIdle()) {
-        // Reset the lift
-        lift_interface->cancelLift();
-    }
+    // Reset the lift
+    lift_interface->cancelLift();
 
     while(ros::ok() && !lift_interface->isIdle()) {
         if(as->isPreemptRequested()) {
