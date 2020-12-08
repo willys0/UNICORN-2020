@@ -11,7 +11,7 @@
 
 class LiftInterface {
     public:
-        enum LiftState { IDLE, RUNNING, ERROR };
+        enum LiftState { IDLE, RUNNING, RESETTING, ERROR };
 
         LiftInterface(ros::NodeHandle nh);
 
@@ -24,6 +24,7 @@ class LiftInterface {
 
         bool isIdle()    { return getCurrentState() == LiftState::IDLE; }
         bool isRunning() { return getCurrentState() == LiftState::RUNNING; }
+        bool isResetting() { return getCurrentState() == LiftState::RESETTING; }
         bool isErrored() { return getCurrentState() == LiftState::ERROR; }
 
         void setRioLiftState(int state) { lift_state_.data = state; }
