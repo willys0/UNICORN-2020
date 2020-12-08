@@ -292,6 +292,7 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
     ros::Time current_time = ros::Time::now();
     double speed_multiplier, time_since_lidar_scan, rotation_to_tag;
     bool got_error = false;
+    bool min_object_distance_depending_on_tag_dist;
 
     if(state_ == DOCKING) {
 
@@ -358,8 +359,19 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
             // robot is backing towards tag
             msg_out.angular.z = pid_th_.computeCommand(getDesiredRotation() - rotation_to_tag, current_time - last_time_);
 
+            // Get min distance to object depending on how far away the tag is. This prevents the wall from being seen as an object
+            min_object_distance_depending_on_tag_dist = fabs(err_x_) + 0.1;
+            // Cap min distance to object to  min_distance_behind_
+            if(min_object_distance_depending_on_tag_dist > min_distance_behind_) {
+                min_object_distance_depending_on_tag_dist = min_distance_behind_;
+            }
+            else if(min_object_distance_depending_on_tag_dist < 0.1) {
+                // set lowest allowed distance to 10cm as safety
+                min_object_distance_depending_on_tag_dist = 0.1;
+            }
+
             // Get speed multiplier depending on distance to objects behind robot
-            speed_multiplier = 5*(getDistanceToClosestObject(rear_lidar_scan_,rear_lidar_angle_)-min_distance_behind_);
+            speed_multiplier = 5*(getDistanceToClosestObject(rear_lidar_scan_,rear_lidar_angle_) - min_distance_behind_);
         }
         
         // Cap speed multiplier between 0 and 1
