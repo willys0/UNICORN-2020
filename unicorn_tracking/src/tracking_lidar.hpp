@@ -11,6 +11,7 @@
 #include <costmap_converter/ObstacleMsg.h>
 #include <geometry_msgs/Point32.h>
 #include <geometry_msgs/Point.h>
+#include <geometry_msgs/Pose.h>
 #include <sensor_msgs/LaserScan.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2/LinearMath/Quaternion.h>
@@ -43,8 +44,6 @@
 #define SCAN_SIZE 800
 #define MAXTRACKS MAX_OBJECTS
 
-
-
 class tracking_lidar
 {
 public:
@@ -60,7 +59,7 @@ public:
 	void object_publisher();
 	void association();
 
-	/* Variables that can be changed */
+	/* Variables that can be dynamically changed */
 	float lambda;
 	int max_dist_laser;
 	int static_remove_dist;
@@ -75,11 +74,8 @@ public:
 	std::string odomframeid = "odom_chassis";
 	std::string base_laser_frame = "base_laser";
 	std::string base_frame = "chassis_link";
-
 	tf2_ros::Buffer tf_buffer;
   	
-	
-
 private:
 	void extract_corners(int startpoint,int endpoint, int length,int shape_nr);
 	void search_longest(int startpoint, int current_point,int end_point, int length, float distance_S, int itteration, int max_itteration, int *best_point, float *best_dist);
@@ -87,6 +83,7 @@ private:
 	void estimate_new_position();
 	void update_position();
 	void calculateVel(int objectnr, int trackernr,float *sum);
+	
 
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
@@ -103,14 +100,25 @@ private:
 	geometry_msgs::TransformStamped odom2map;
 
 	int seq;
+	int tf_frame_listener_thread;
 
+
+
+	
 	float xy_positions[SCAN_SIZE][2];
-	float xy_map_positions[SCAN_SIZE][2];
   	int clusters[SCAN_SIZE];
 	int polygon[SCAN_SIZE];
 	int polygon_size[MAX_OBJECTS];
 	
-	  
+	/*
+	struct polygon_points{
+		float x;
+		float y;
+		int cluster; 
+		int polygon_num;
+	}typedef polygon_points;
+	std::vector<polygon_points> polygon_points;
+	*/
 	double roll, pitch, yaw;
 	double x,y,z;
 	uint32_t mapx,mapy;
@@ -124,6 +132,8 @@ private:
 		geometry_msgs::Polygon points;
 	}typedef object_attributes;
 	object_attributes object_attributes_list[MAX_OBJECTS];
+
+	
 
 	int object_match[MAX_OBJECTS];
 	//float object_match_ratio[MAX_OBJECTS][MAXTRACKS];

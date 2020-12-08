@@ -25,12 +25,7 @@ void dynamicReconfigCallback(unicorn_tracking::TrackingConfig& config, uint32_t 
   data->sim_adj_posdiff = config.sim_adj_posdiff;
   data->TRACKER_LIFE = config.TRACKER_LIFE;
   data->CONFIRMED_TRACK = config.CONFIRMED_TRACK;
-
-
-
 }
-
-
 
 int main(int argc, char** argv){
   ros::init(argc, argv, "unicorn_tracking_node");
@@ -42,18 +37,8 @@ int main(int argc, char** argv){
   reconfig_server.setCallback(boost::bind(&dynamicReconfigCallback, _1, _2, &tracking_lidar_interface));
   ros::Rate r(30.0);
 
-/*
-  while(tracking_lidar_interface.n_.ok())
-  {
-
-
-    r.sleep();
-  }
-*/
   ros::spin();
 }
-
-
 
 /* Initiate varibles and callsbacks  */
 tracking_lidar::tracking_lidar()
@@ -103,10 +88,6 @@ tracking_lidar::tracking_lidar()
 
   tf2_ros::TransformListener tf2_listener(tf_buffer);
   Lidar2base = tf_buffer.lookupTransform(base_frame, base_laser_frame, ros::Time(0),ros::Duration(100));
-  
- 
-
-  //tf2_geometry_msgs
 
   if(static_filter)
   {
@@ -121,6 +102,7 @@ tracking_lidar::tracking_lidar()
 
   initiate_Trackers();
 }
+
 
 /* Publishes data to topics */
 void tracking_lidar::object_publisher()
@@ -284,9 +266,6 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
     scan_data_ = scan;
     scan_received = true;
 
-    
-
-    
     if(map_received && odom_received && scan_received){
       adaptive_breaK_point();
       if(static_filter)
@@ -301,12 +280,7 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       update_position();
       object_publisher();
       scan_received = false; 
-    }/*
-    else if(!map_received){
-      ROS_INFO("Waiting for map, no map recieved!");
-    }else if(!odom_received){
-      ROS_INFO("Waiting odometry, no odometry recieved!");
-    }*/
+    }
 }
 
 /* Associates objects with trackers*/
@@ -345,15 +319,6 @@ void tracking_lidar::association()
           s3 = sim_adj_side*abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount));  
           s4 = sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (object_attributes_list[j].estimated_x));
           s5 = sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (object_attributes_list[j].estimated_y));
-          ROS_INFO("Object %d tracker %d: Sim: %f %f %f ",i,j,sum[0],sum[1],sum[2]);
-          /**/
-          
-          /**/
-
-          if(trackers[i].last_seen > 0)
-          {
-            
-          }
 
           if(s1 > s2)
           {
@@ -497,26 +462,23 @@ void tracking_lidar::initiate_Trackers()
   }
 }
 
+/* Estimates the movment between an object a a tracker*/
 void tracking_lidar::calculateVel(int objectnr, int trackernr,float *sum)
 {
   int i,j;
 
   float x_t,y_t,x_o,y_o,distance;
-  /**/
+
   geometry_msgs::Polygon points;
   geometry_msgs::Point32 point1;
   
-  //ROS_INFO("TEST object %d tracker %d, size object %d, size tracker %d", objectnr, trackernr, i ,j);
-  //memset(min_dist_value,999,sizeof(min_dist_value[0])*100);
-  //object_attributes_list[objectnr].point.points.size();
-  //memset(sum,0,sizeof(sum[0])*3);
   point1.z = 10;
   point1.x = 0;
   point1.y = 0;
   sum[0] = 0;
   sum[1] = 0;
   sum[2] = 0;
-  /**/
+  /* Checks minimum movent between each point recorded in the tracker and the repective object*/
   for(j=0;j < (int)(trackers[trackernr].points.points.size()); j++)
   {
     x_t = trackers[trackernr].points.points[j].x;
@@ -541,23 +503,17 @@ void tracking_lidar::calculateVel(int objectnr, int trackernr,float *sum)
 
   }
   j=1;
-  /**/
   for(i=0;i<(int)(points.points.size());i++)
     if(points.points[i].z < 10)
     {
-      //ROS_INFO("dist %f dx %f dy %f ",points.points[i].z,points.points[i].x,points.points[i].y);
       j++;
       sum[0] += points.points[i].z;
       sum[1] += points.points[i].x;
       sum[2] += points.points[i].y;
     }
-    
   sum[0] /= j;
   sum[1] /= j;
   sum[2] /= j;
-
-  
-
 }
 
 /* Updates A matrix depending on the time differnce and estimates new position*/
@@ -595,56 +551,34 @@ void tracking_lidar::adaptive_breaK_point()
 {
   int i,j = 0;
   float current_angle,r,p,dmax;
+  double roll_map, pitch_map, yaw_map;
   geometry_msgs::Point point;
   int max_itterations = round((scan_data_.angle_max - scan_data_.angle_min)/scan_data_.angle_increment);
-  
-  odom2map = tf_buffer.lookupTransform(mapframeid, odomframeid, ros::Time(0),ros::Duration(1));
+
+  odom2map = tf_buffer.lookupTransform(mapframeid, odomframeid, ros::Time(0),ros::Duration(5));
   
   for(i = 0; i < max_itterations+1; i++)
   {
     current_angle = float(i)*scan_data_.angle_increment+scan_data_.angle_min;
+
     // Calculate xy position
-    //xy_positions[i][1] = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw)) + x;
-    //xy_positions[i][2] = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw)) + y;
-
-
     point.x = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw));
     point.y = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw));
     point.z = 0;
+
+
     tf2::doTransform(point,point,Lidar2base);
-    /*
-    point.x = (scan_data_.ranges[i])*(cos(current_angle));
-    point.y = (scan_data_.ranges[i])*(sin(current_angle));
-    point.z = 0;
 
-    //tf2::doTransform(point,point,Lidar2base);
-
-    point.x = point.x*cos(yaw) + point.y*sin(yaw);
-    point.y = point.y*cos(yaw) - point.x*sin(yaw);
-    point.z = 0;
-    */
     point.x += x;
     point.y += y;
     point.z = 0;
 
 
-    //odom2map.transform.
-    // Lidar points
-    //point.x = (scan_data_.ranges[i])*(cos(current_angle));
-    //point.y = (scan_data_.ranges[i])*(sin(current_angle));
-    //point.z = 0;
-
-    // transform to base link
-    //tf2::doTransform(point,point,Lidar2base);
-
-    // transform to Odom link
-    //point.x = point.x*cos(yaw) - point.y*sin(yaw) + x;
-    //point.y = point.x*sin(yaw) + point.y*cos(yaw) + y;
-
     // transform to map
     tf2::doTransform(point,point,odom2map);
     
-    xy_positions[i][1] = point.x + odom2map.transform.translation.x;
+    
+    xy_positions[i][1] = point.x;
     xy_positions[i][2] = point.y;
     if(i == 0)
     {
@@ -670,7 +604,7 @@ void tracking_lidar::static_map_filter()
 {
   int i,m,n;
   uint32_t x_map,y_map;
-  for(i=0; i < 800;i++){
+  for(i=0; i < SCAN_SIZE;i++){
     x_map = round(xy_positions[i][1]/map_data_.info.resolution) + (map_data_.info.width/2);
     y_map = round(xy_positions[i][2]/map_data_.info.resolution) + (map_data_.info.height/2);
     if(clusters[i] != -1)
@@ -816,7 +750,6 @@ void tracking_lidar::polygon_attribute_extraction()
     object_attributes_list[i].estimated_x = 0;
     object_attributes_list[i].estimated_y = 0;
     object_attributes_list[i].average_angle = 0;
-    lowest_angle = 10;
     if(polygon_size[i] >= 1){
       /* Get angle average, length average*/
       for(j=0;j < polygon_size[i]-1;j++)
@@ -837,11 +770,6 @@ void tracking_lidar::polygon_attribute_extraction()
           length3 = sqrt(pow(point3.x - point1.x,2) + pow(point3.y - point1.y,2));
           angle = acos((pow(length1,2) + pow(length2,2) - pow(length3,2))/(2*length1*length2));
           object_attributes_list[i].average_angle += angle;
-          if(angle < lowest_angle)
-          {
-            lowest_angle = angle;
-            m = j+1;
-          }
         }
       }
       object_attributes_list[i].estimated_x += point2.x;
@@ -852,11 +780,6 @@ void tracking_lidar::polygon_attribute_extraction()
       if(polygon_size[i]-2 > 0)
         object_attributes_list[i].average_angle /= polygon_size[i]-2;
 
-      if(lowest_angle < 2)
-      {
-        object_attributes_list[i].estimated_x = shapes[i].points[m].x;
-        object_attributes_list[i].estimated_y = shapes[i].points[m].y;
-      }
     }
   }
 }
