@@ -34,6 +34,11 @@ double max_rotation_speed;
 
 
 void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, uint32_t level, DockingController* controller) {
+    desired_offset.x = config.x_desired_offset;
+    desired_offset.y = config.y_desired_offset;
+    desired_offset.z = config.th_desired_offset;
+    retry_offset = config.x_desired_retry_offset;
+
     thresh_x = config.x_error_thresh;
     thresh_y = config.y_error_thresh;
     thresh_th = config.th_error_thresh;
@@ -318,15 +323,7 @@ int main(int argc, char **argv) {
     // load settings
     nh.param("retry_error_times", max_error_times, 50);
     nh.param("max_retries", max_retries, 3);
-    // nh.param("thresh_x", thresh_x, 0.01);
-    // nh.param("thresh_y", thresh_y, 0.01);
-    // nh.param("thresh_th", thresh_th, 0.01);
 
-    nh.param("retry_offset", retry_offset, 0.6);
-    nh.param("offset/x",desired_offset.x, 0.2);
-    nh.param("offset/y",desired_offset.y, 0.0);
-    nh.param("offset/th",desired_offset.z, 0.0);
-    ROS_INFO("Setting dock offset to x: %.2f, y: %.2f, th: %.2f", desired_offset.x, desired_offset.y, desired_offset.z);
 
     err_pub = nh.advertise<geometry_msgs::Vector3>("errors", 1);
 
