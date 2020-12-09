@@ -32,6 +32,8 @@ class State {
 
         static void setGoals(std::vector<struct Goal> goals) { goals_ = goals; }
 
+        static void addGoal(struct Goal goal) { goals_.insert(goals_.begin(), goal); }
+
         static std::vector<struct Goal> getGoals() { return goals_;}
 
 

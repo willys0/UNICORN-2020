@@ -4,8 +4,12 @@
 #include <unicorn_state_machine/goal.h>
 
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/TransformStamped.h>
 
 #include <std_srvs/SetBool.h>
+#include <unicorn_state_machine/StampGoal.h>
+
+#include <tf2_ros/transform_listener.h>
 
 #include <math.h>
 
@@ -17,6 +21,36 @@ bool toggleRunningCb(std_srvs::SetBool::Request&  req,
         sm->resume();
     else
         sm->pause();
+
+    return true;
+}
+
+bool stampGoalCb(unicorn_state_machine::StampGoal::Request&  req,
+                 unicorn_state_machine::StampGoal::Response& resp,
+                 StateMachine* sm) {
+
+
+    tf2_ros::Buffer tf_buffer;
+    tf2_ros::TransformListener tf_listener(tf_buffer);
+
+    try {
+        geometry_msgs::TransformStamped robot_transform = tf_buffer.lookupTransform("map", "chassis_link", ros::Time(0), ros::Duration(1.0));
+
+        geometry_msgs::Pose pose;
+        pose.position.x = robot_transform.transform.translation.x;
+        pose.position.y = robot_transform.transform.translation.y;
+        pose.position.z = 0.0;
+        pose.orientation = robot_transform.transform.rotation;
+
+        struct Goal goal { pose, (LiftCommand)req.goal_type };
+
+        sm->addGoal(goal);
+        resp.success = true;
+    }
+    catch (tf2::TransformException& ex){
+        resp.message = std::string("Failed to lookup transform");
+        resp.success = false;
+    }
 
     return true;
 }
@@ -76,6 +110,8 @@ int main(int argc, char** argv) {
     StateMachine state_machine;
 
     ros::ServiceServer run_service = nh.advertiseService<std_srvs::SetBoolRequest, std_srvs::SetBoolResponse>("set_running", boost::bind(&toggleRunningCb, _1, _2, &state_machine));
+
+    ros::ServiceServer stamp_service = nh.advertiseService<unicorn_state_machine::StampGoalRequest, unicorn_state_machine::StampGoalResponse>("stamp_goal", boost::bind(&stampGoalCb, _1, _2, &state_machine));
 
     std::vector<struct Goal> goals;
     bool publish_poses;

@@ -19,6 +19,8 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib_msgs
   unicorn_docking
   unicorn_roborio_bridge
+  tf2
+  tf2_ros
 )
 
 ## System dependencies are found with CMake's conventions
@@ -62,11 +64,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  StampGoal.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -76,10 +77,10 @@ find_package(catkin REQUIRED COMPONENTS
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   nav_msgs#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
