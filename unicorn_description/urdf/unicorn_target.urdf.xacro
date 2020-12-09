@@ -245,7 +245,7 @@
   <!-- Zed Camera -->
 <!-- Camera Center -->
     <joint name="zed_camera_center_joint" type="fixed">
-        <parent link="chassis_link"/>
+        <parent link="base_link"/>
         <child link="zed_camera_center"/>
         <origin xyz="$(arg zed_xyz)" rpy="0 0 0" />
     </joint>
