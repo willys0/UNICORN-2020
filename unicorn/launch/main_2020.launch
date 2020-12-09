@@ -60,6 +60,8 @@
 
 	</group>
 
+	<include file="$(find unicorn_state_machine)/launch/state_machine.launch" />
+
 	<!--include unless="$(arg sim)" file="$(find unicorn_intention)/launch/intention.launch"-->
 	<include file="$(find unicorn_intention)/launch/intention.launch" >
 		<arg name="unicorn_state_topic" 	value="/unicorn/state" />

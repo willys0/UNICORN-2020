@@ -60,6 +60,9 @@ void parseGoalYaml(ros::NodeHandle& nh, std::vector<struct Goal>& goals) {
 
     nh.param("goals", v, v);
 
+    if(!v.valid())
+        return;
+
     XmlRpc::XmlRpcValue inner;
 
     double x, y, th;
