@@ -34,6 +34,17 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
     std_msgs::Int32 msg;
     int dir;
 
+    // Reset the lift
+    lift_interface->cancelLift();
+
+    while(ros::ok() && !lift_interface->isIdle()) {
+        if(as->isPreemptRequested()) {
+            break;
+        }
+
+        ros::spinOnce();
+    }
+
     if(goal->direction == goal->DIRECTION_PICKUP) {
         ROS_INFO("[Roborio Bridge] Running lift pickup routine.");
         lift_interface->startPickupRoutine();
@@ -73,7 +84,6 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
             ROS_INFO("[Roborio Bridge] Lift action preempted.");
             as->setPreempted();
 
-            // TODO: Shall we reverse the lift back to initial position?
             break;
         }
 
