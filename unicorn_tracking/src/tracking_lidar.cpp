@@ -608,31 +608,28 @@ void tracking_lidar::adaptive_breaK_point()
 /* Filters static map from scan, requires reliable odometry and static map*/
 void tracking_lidar::static_map_filter()
 {
+  if(!static_filter)
+    return;
+
   int i,m,n;
-  uint32_t x_map,y_map;
+  int x_map,y_map;
   for(i=0; i < SCAN_SIZE;i++){
-    x_map = (uint32_t) round(polygon_point_list[i].point.x/((int) map_data_.info.resolution)) + (int)(map_data_.info.width/2);
-    y_map = (uint32_t) round(polygon_point_list[i].point.y/((int) map_data_.info.resolution)) + (int)(map_data_.info.height/2);
+    x_map = round((int)((float)polygon_point_list[i].point.x/(map_data_.info.resolution))) + ((int)(map_data_.info.width)/2);
+    y_map = round((int)((float)polygon_point_list[i].point.y/(map_data_.info.resolution))) + ((int)(map_data_.info.height)/2);
     if(polygon_point_list[i].cluster != -1)
     {
       for(m=-static_remove_dist; m <= static_remove_dist;m++)
         for(n=-static_remove_dist; n <= static_remove_dist;n++){
-          if((x_map+m) < map_data_.info.height && (y_map+n) < map_data_.info.width){
-            if((0 > map_data_.info.height) && (y_map+n > 0))
+          if(((x_map+m) < (int)map_data_.info.height && (y_map+n) < (int)map_data_.info.width)){
+            if((0 < (x_map+m)) && (0 < (y_map+n)))
             {
-              if(map_data_.data[(x_map+m) + (y_map+n-1)*map_data_.info.width] > 0){
+              if(map_data_.data[(x_map+m) + (y_map+n)*map_data_.info.width] > 0){
                 polygon_point_list[i].cluster = -1;
+                m = static_remove_dist+1;
+                n = static_remove_dist+1;
               }
-            }else
-              polygon_point_list[i].cluster = -1;
-          }else
-            polygon_point_list[i].cluster = -1;  
-
-        if(polygon_point_list[i].cluster = -1)
-        {
-            m = static_remove_dist+1;
-            n = static_remove_dist+1;
-        }
+            }
+          }
         }
     }
   }
