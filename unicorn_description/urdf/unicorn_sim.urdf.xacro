@@ -71,6 +71,20 @@
  <!-- Main Body-base -->
   <link
     name="chassis_link">
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="15" />
+      <inertia
+        ixx="1"
+        ixy="0"
+        ixz="3"
+        iyy="3"
+        iyz="3"
+        izz="1" />
+    </inertial>
     <visual>
       <origin
         xyz="0 0 0"
@@ -85,6 +99,24 @@
           rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
       </material>
     </visual>
+    <surface>
+      <friction>
+        <ode>
+          <mu>0.8</mu>
+          <mu2>0.8</mu2>
+        </ode>
+      </friction>
+    </surface>
+  <collision>
+    <origin
+      xyz="0 0 0"
+
+      rpy="0 0 0" />
+    <geometry>
+      <mesh
+        filename="package://unicorn_description/meshes/chassis_link.STL" />
+    </geometry>
+  </collision>
   </link>
 
 <!-- Lift -->
@@ -121,8 +153,8 @@
       <surface>
         <friction>
           <ode>
-            <mu>0.5</mu>
-            <mu2>0.5</mu2>
+            <mu>0.8</mu>
+            <mu2>0.8</mu2>
           </ode>
         </friction>
       </surface>
@@ -173,8 +205,8 @@
       <surface>
         <friction>
           <ode>
-            <mu>0.5</mu>
-            <mu2>0.5</mu2>
+            <mu>0.8</mu>
+            <mu2>0.8</mu2>
           </ode>
         </friction>
       </surface>
@@ -234,6 +266,14 @@
           rgba="1 0.69412 0.27843 1" />
       </material>
     </visual>
+    <surface>
+      <friction>
+        <ode>
+          <mu>0.8</mu>
+          <mu2>0.8</mu2>
+        </ode>
+      </friction>
+    </surface>
     <collision>
       <origin
         xyz="0 0 0"
@@ -249,30 +289,19 @@
     <parent  link="lift_link" />
     <child  link="lift_horizontal_link" />
     <origin xyz="0.05 0 0.137" rpy="${M_PI2} 0 ${-M_PI2}" />
-    <axis xyz="0 0.0024714 -1" rpy="0 0 0"  />
-    <limit lower="0.17" upper="0" effort="200" velocity="50" />
-    <joint_properties damping="1000" friction="100" />
+    <axis xyz="0 0 -1" rpy="0 0 0"  />
+    <limit lower="0.17" upper="0" effort="100" velocity="0" />
+    <joint_properties damping="1000" friction="1000" />
   </joint>
 
 
-  <joint
-    name="lift_vertical_joint"
-    type="prismatic">
-    <origin
-      xyz="0 -0.16 0"
-      rpy="0 0 0" />
-    <parent
-      link="lift_horizontal_link" />
-    <child
-      link="lift_vertical_link" />
-    <axis
-      xyz="0 1 0" />
-    <limit
-      lower="0"
-      upper="0.16"
-      effort="100"
-      velocity="50" />
-      <joint_properties damping="1000" friction="10" />
+  <joint name="lift_vertical_joint" type="prismatic">
+    <origin xyz="0 -0.16 0" rpy="0 0 0" />
+    <parent link="lift_horizontal_link" />
+    <child link="lift_vertical_link" />
+    <axis xyz="0 1 0" />
+    <limit lower="0" upper="0.16" effort="50" velocity="0" />
+    <joint_properties damping="1000" friction="1000" />
   </joint>
 
 
@@ -448,10 +477,10 @@
       <mu2 value="10000.0" />
       <kp value="100000.0" />
       <kd value="10000.0" />
-      <dampingFactor value="10" />
+      <dampingFactor value="100" />
       <fdir1 value="1 0 0" />
       <material>Gazebo/Black</material>
-      <turnGravityOff>false</turnGravityOff>
+      <turnGravityOff>true</turnGravityOff>
   </gazebo>
 
   <gazebo reference="lift_horizontal_joint">
@@ -468,10 +497,10 @@
   <transmission name="lift_h_trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="lift_horizontal_joint">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       </joint>
       <actuator name="lift_h_motor">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
         <mechanicalReduction>500</mechanicalReduction>
       </actuator>
   </transmission>
@@ -480,10 +509,10 @@
   <transmission name="lift_v_trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="lift_vertical_joint">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       </joint>
       <actuator name="lift_v_motor">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
         <mechanicalReduction>500</mechanicalReduction>
       </actuator>
   </transmission>
