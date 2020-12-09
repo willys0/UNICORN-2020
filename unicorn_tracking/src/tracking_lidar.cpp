@@ -255,9 +255,6 @@ void tracking_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
       map_received = true;
       ROS_INFO("Map Received");
     }
-    
-    mapx = map_data_.info.height;
-    mapy = map_data_.info.width;
 }
 
 /* Scan callback, each frame is one scan*/
@@ -283,6 +280,64 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
     }
 }
 
+/* Initiates all trackers */
+void tracking_lidar::initiate_Trackers()
+{
+  double dt = 1.0/30;
+
+  // Construct the filter
+  KalmanFilter kf;
+  kf.A << 1, dt, 0, 0, 0, 1, 0, 0, 0, 0, 1, dt, 0, 0, 0, 1;
+  kf.C << 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1; 
+  kf.P0 << 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0.05, 0.05;
+  // Tunable noise matrices
+  kf.Q << 0.05, 0.05, 0, 0, 0.05, 0.05, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0.05, 0.05;
+  kf.R << 0.05, 0.05, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0, 0.5; 
+  
+  int i;
+  for(i=0; i<MAXTRACKS; i++)
+  {
+      trackers[i].tracker = kf;
+      trackers[i].age = 0;
+      trackers[i].average_angle = 0;
+      trackers[i].confirmed = 0;
+      trackers[i].longest_size = 0;
+      trackers[i].sides_amount = 0;
+      trackers[i].time = 0;
+  }
+}
+
+
+/* Updates A matrix depending on the time differnce and estimates new position*/
+void tracking_lidar::estimate_new_position()
+{
+  int i;
+  double dt, time = scan_data_.header.stamp.sec + scan_data_.header.stamp.nsec*pow(10, -9);
+  for(i=0; i<MAXTRACKS; i++)
+  {
+    if(trackers[i].age > 0)
+    {
+      dt = time - trackers[i].time;
+      trackers[i].tracker.A << 1, dt, 0, 0, 0, 1, 0, 0, 0, 0, 1, dt, 0, 0, 0, 1;
+      trackers[i].tracker.predict();
+    }
+  }
+}
+
+/* Update position with new position estimate*/
+void tracking_lidar::update_position(){
+  int i;
+  for(i=0; i<MAXTRACKS; i++)
+  {
+    if(trackers[i].age > 0 && trackers[i].last_seen == 0)
+    {
+      trackers[i].tracker.update(trackers[i].tracker.y);
+      if(isnan(trackers[i].tracker.x_hat(0)+trackers[i].tracker.x_hat(1)+trackers[i].tracker.x_hat(2)+trackers[i].tracker.x_hat(3)))
+        trackers[i].age = 0;
+    }
+  }
+}
+// ------------------------------------------ Association -----------------------------------------------------------------------
 /* Associates objects with trackers*/
 void tracking_lidar::association()
 {
@@ -435,33 +490,6 @@ void tracking_lidar::association()
   ROS_INFO("Number of trackers %d",m);
 }
 
-/* Initiates all trackers */
-void tracking_lidar::initiate_Trackers()
-{
-  double dt = 1.0/30;
-
-  // Construct the filter
-  KalmanFilter kf;
-  kf.A << 1, dt, 0, 0, 0, 1, 0, 0, 0, 0, 1, dt, 0, 0, 0, 1;
-  kf.C << 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1; 
-  kf.P0 << 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0.05, 0.05;
-  // Tunable noise matrices
-  kf.Q << 0.05, 0.05, 0, 0, 0.05, 0.05, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0.05, 0.05;
-  kf.R << 0.05, 0.05, 0, 0, 0, 0.5, 0, 0, 0, 0, 0.05, 0.05, 0, 0, 0, 0.5; 
-  
-  int i;
-  for(i=0; i<MAXTRACKS; i++)
-  {
-      trackers[i].tracker = kf;
-      trackers[i].age = 0;
-      trackers[i].average_angle = 0;
-      trackers[i].confirmed = 0;
-      trackers[i].longest_size = 0;
-      trackers[i].sides_amount = 0;
-      trackers[i].time = 0;
-  }
-}
-
 /* Estimates the movment between an object a a tracker*/
 void tracking_lidar::calculateVel(int objectnr, int trackernr,float *sum)
 {
@@ -516,35 +544,9 @@ void tracking_lidar::calculateVel(int objectnr, int trackernr,float *sum)
   sum[2] /= j;
 }
 
-/* Updates A matrix depending on the time differnce and estimates new position*/
-void tracking_lidar::estimate_new_position()
-{
-  int i;
-  double dt, time = scan_data_.header.stamp.sec + scan_data_.header.stamp.nsec*pow(10, -9);
-  for(i=0; i<MAXTRACKS; i++)
-  {
-    if(trackers[i].age > 0)
-    {
-      dt = time - trackers[i].time;
-      trackers[i].tracker.A << 1, dt, 0, 0, 0, 1, 0, 0, 0, 0, 1, dt, 0, 0, 0, 1;
-      trackers[i].tracker.predict();
-    }
-  }
-}
 
-/* Update position with new position estimate*/
-void tracking_lidar::update_position(){
-  int i;
-  for(i=0; i<MAXTRACKS; i++)
-  {
-    if(trackers[i].age > 0 && trackers[i].last_seen == 0)
-    {
-      trackers[i].tracker.update(trackers[i].tracker.y);
-      if(isnan(trackers[i].tracker.x_hat(0)+trackers[i].tracker.x_hat(1)+trackers[i].tracker.x_hat(2)+trackers[i].tracker.x_hat(3)))
-        trackers[i].age = 0;
-    }
-  }
-}
+// ------------------------------------------ Association -----------------------------------------------------------------------
+// ------------------------------------------ Shape Extraction -----------------------------------------------------------------------
 
 /* Clusters data into groups */
 void tracking_lidar::adaptive_breaK_point()
@@ -553,12 +555,15 @@ void tracking_lidar::adaptive_breaK_point()
   float current_angle,r,p,dmax;
   double roll_map, pitch_map, yaw_map;
   geometry_msgs::Point point;
+  polygon_points clustered_point;
+  polygon_point_list.clear();
   int max_itterations = round((scan_data_.angle_max - scan_data_.angle_min)/scan_data_.angle_increment);
 
   odom2map = tf_buffer.lookupTransform(mapframeid, odomframeid, ros::Time(0),ros::Duration(5));
   
   for(i = 0; i < max_itterations+1; i++)
   {
+    polygon_point_list.push_back(clustered_point);
     current_angle = float(i)*scan_data_.angle_increment+scan_data_.angle_min;
 
     // Calculate xy position
@@ -577,25 +582,26 @@ void tracking_lidar::adaptive_breaK_point()
     // transform to map
     tf2::doTransform(point,point,odom2map);
     
-    
-    xy_positions[i][1] = point.x;
-    xy_positions[i][2] = point.y;
+    polygon_point_list[i].point.x = point.x;
+    polygon_point_list[i].point.y = point.y;
     if(i == 0)
     {
-      clusters[i] = 0;
+      polygon_point_list[i].cluster = 0;
     }else
     {
-      r = sqrt(pow(xy_positions[i-1][1],2) + (xy_positions[i-1][2],2));
-      p = sqrt(pow(xy_positions[i-1][1] - xy_positions[i][1],2) + pow(xy_positions[i-1][2] - xy_positions[i][2],2));
+      r = sqrt(pow(polygon_point_list[i-1].point.x,2) + pow(polygon_point_list[i-1].point.y,2));
+      p = sqrt(pow(polygon_point_list[i-1].point.x - polygon_point_list[i].point.x,2) + pow(polygon_point_list[i-1].point.y - polygon_point_list[i].point.y,2));
       dmax = r*sin(scan_data_.angle_increment)/sin(lambda + scan_data_.angle_increment) + 3*scan_data_.angle_increment;
       if(dmax < p)
         j++;
       
-      clusters[i] = j;
+
+      polygon_point_list[i].cluster = j;
     }
     /* Filters scans that over a set threshold*/
-    if(scan_data_.ranges[i] > max_dist_laser)
-      clusters[i] = -1;
+    if(scan_data_.ranges[i] > max_dist_laser){
+      polygon_point_list[i].cluster = -1;
+    }
   }
 }
 
@@ -605,17 +611,28 @@ void tracking_lidar::static_map_filter()
   int i,m,n;
   uint32_t x_map,y_map;
   for(i=0; i < SCAN_SIZE;i++){
-    x_map = round(xy_positions[i][1]/map_data_.info.resolution) + (map_data_.info.width/2);
-    y_map = round(xy_positions[i][2]/map_data_.info.resolution) + (map_data_.info.height/2);
-    if(clusters[i] != -1)
+    x_map = (uint32_t) round(polygon_point_list[i].point.x/((int) map_data_.info.resolution)) + (int)(map_data_.info.width/2);
+    y_map = (uint32_t) round(polygon_point_list[i].point.y/((int) map_data_.info.resolution)) + (int)(map_data_.info.height/2);
+    if(polygon_point_list[i].cluster != -1)
     {
       for(m=-static_remove_dist; m <= static_remove_dist;m++)
         for(n=-static_remove_dist; n <= static_remove_dist;n++){
-          if(map_data_.data[(x_map+m) + (y_map+n-1)*map_data_.info.width] > 0){
-            clusters[i] = -1;
+          if((x_map+m) < map_data_.info.height && (y_map+n) < map_data_.info.width){
+            if((0 > map_data_.info.height) && (y_map+n > 0))
+            {
+              if(map_data_.data[(x_map+m) + (y_map+n-1)*map_data_.info.width] > 0){
+                polygon_point_list[i].cluster = -1;
+              }
+            }else
+              polygon_point_list[i].cluster = -1;
+          }else
+            polygon_point_list[i].cluster = -1;  
+
+        if(polygon_point_list[i].cluster = -1)
+        {
             m = static_remove_dist+1;
             n = static_remove_dist+1;
-          }
+        }
         }
     }
   }
@@ -625,7 +642,7 @@ void tracking_lidar::static_map_filter()
 
 /* Extracts polygon shapes from lidar clusters*/
 void tracking_lidar::polygon_extraction(){
-  int i,j, current_cluster = clusters[0], m = 0,n,l;
+  int i,j, current_cluster = polygon_point_list[0].cluster, m = 0,n,l;
   int start_point = 0, end_point;
   geometry_msgs::Point32 point;
 
@@ -641,29 +658,29 @@ void tracking_lidar::polygon_extraction(){
 
 
   object_attributes_list[m].points.points.clear();
-  for(i=1; i < 800; i++){
-    polygon[i] = 0;
-    point.x = xy_positions[i][1];
-    point.y = xy_positions[i][2];
+  for(i=1; i < SCAN_SIZE; i++){
+    polygon_point_list[i].polygon_num = 0;
+    point.x = polygon_point_list[i].point.x;
+    point.y = polygon_point_list[i].point.y;
     point.z = 0;
     object_attributes_list[m].points.points.push_back(point);
-    if(clusters[i] != current_cluster){ 
+    if(polygon_point_list[i].cluster != current_cluster){ 
       end_point = i-1;
       if(current_cluster != -1 && end_point-start_point > min_size_cluster){
           l = end_point-start_point+1;
           if(l >= 3){
-            polygon[start_point] = 1;
+            polygon_point_list[start_point].polygon_num = 1;
             polygon_size[m]++;
-            polygon[end_point] = 1;
+            polygon_point_list[end_point].polygon_num = 1;
             polygon_size[m]++;
             extract_corners(start_point,end_point,end_point-start_point+1,m);
             
             for(j = start_point;j <= end_point; j++)
             {
-              if(polygon[j])
+              if(polygon_point_list[j].polygon_num)
               {
-                point.x = xy_positions[j][1];
-                point.y = xy_positions[j][2];
+                point.x = polygon_point_list[j].point.x;
+                point.y = polygon_point_list[j].point.y;
                 point.z = 0;
                 shapes[m].points.push_back(point);
               }
@@ -672,7 +689,7 @@ void tracking_lidar::polygon_extraction(){
             object_attributes_list[m].points.points.clear();
           }
       }
-      current_cluster = clusters[i];
+      current_cluster = polygon_point_list[i].cluster;
       start_point = i;
     }
   }
@@ -685,7 +702,7 @@ void tracking_lidar::extract_corners(int startpoint,int endpoint, int length,int
     return;
   
   int max_itteration = ceil(log2(float(length)));
-  float distance_start =  sqrt(pow(xy_positions[startpoint][1] - xy_positions[startpoint + length - 1][1],2) + pow(xy_positions[startpoint][2] - xy_positions[startpoint + length - 1][2],2));
+  float distance_start =  sqrt(pow(polygon_point_list[startpoint].point.x - polygon_point_list[startpoint + length - 1].point.x,2) + pow(polygon_point_list[startpoint].point.y - polygon_point_list[startpoint + length - 1].point.y,2));
   int bestpoint = startpoint;
   float bestdist = distance_start;
   int *best_point = &bestpoint;
@@ -694,9 +711,9 @@ void tracking_lidar::extract_corners(int startpoint,int endpoint, int length,int
   search_longest(startpoint, startpoint+length-1,startpoint+j-1, length, distance_start, 1, max_itteration, best_point, best_dist);
   if((*best_dist) > distance_start*polygon_tolerance)
   { 
-    if(polygon[*best_point] == 0)
+    if(polygon_point_list[*best_point].polygon_num == 0)
     {   
-      polygon[*best_point] = 1;
+      polygon_point_list[*best_point].polygon_num = 1;
       polygon_size[shape_nr]++;
       extract_corners(startpoint,*best_point,*best_point-startpoint+1,shape_nr);
       extract_corners(*best_point,endpoint,endpoint-*best_point+1,shape_nr);
@@ -714,10 +731,10 @@ void tracking_lidar::search_longest(int startpoint,int end_point, int current_po
 
   float distance_1, distance_2, distance_total;
   int j;
-
+  
   itteration++;
-  distance_1 =  sqrt(pow(xy_positions[startpoint][1] - xy_positions[current_point][1],2) + pow(xy_positions[startpoint][2] - xy_positions[current_point][2],2));
-  distance_2 =  sqrt(pow(xy_positions[current_point][1] - xy_positions[end_point][1],2) + pow(xy_positions[current_point][2] - xy_positions[end_point][2],2));
+  distance_1 =  sqrt(pow(polygon_point_list[startpoint].point.x - polygon_point_list[current_point].point.x,2) + pow(polygon_point_list[startpoint].point.y - polygon_point_list[current_point].point.y,2));
+  distance_2 =  sqrt(pow(polygon_point_list[current_point].point.x - polygon_point_list[end_point].point.x,2) + pow(polygon_point_list[current_point].point.y - polygon_point_list[end_point].point.y,2));
   distance_total = distance_1 + distance_2;
   if(distance_total > *best_dist){
     *best_point = current_point;
@@ -784,3 +801,4 @@ void tracking_lidar::polygon_attribute_extraction()
   }
 }
 
+// ------------------------------------------ Shape Extraction -----------------------------------------------------------------------

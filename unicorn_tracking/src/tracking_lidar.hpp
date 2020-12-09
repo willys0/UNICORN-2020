@@ -105,23 +105,20 @@ private:
 
 
 	
-	float xy_positions[SCAN_SIZE][2];
-  	int clusters[SCAN_SIZE];
-	int polygon[SCAN_SIZE];
+	//float xy_positions[SCAN_SIZE][2];
+  	//int clusters[SCAN_SIZE];
+	//int polygon[SCAN_SIZE];
 	int polygon_size[MAX_OBJECTS];
 	
-	/*
 	struct polygon_points{
-		float x;
-		float y;
+		geometry_msgs::Point point;
 		int cluster; 
 		int polygon_num;
 	}typedef polygon_points;
-	std::vector<polygon_points> polygon_points;
-	*/
+	std::vector<polygon_points> polygon_point_list;
+	
 	double roll, pitch, yaw;
 	double x,y,z;
-	uint32_t mapx,mapy;
 
 	struct object_attributes{
 		int sides_amount;
