@@ -112,6 +112,8 @@ private:
 	
 	struct polygon_points{
 		geometry_msgs::Point point;
+		float range;
+		float angle;
 		int cluster; 
 		int polygon_num;
 	}typedef polygon_points;

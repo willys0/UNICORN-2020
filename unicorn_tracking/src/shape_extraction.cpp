@@ -4,7 +4,9 @@
 
 shape_extraction::shape_extraction()
 {
+  // Roscore
 
+  // Point to variables
 
 }
 

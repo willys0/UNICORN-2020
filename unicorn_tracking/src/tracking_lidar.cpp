@@ -552,7 +552,7 @@ void tracking_lidar::calculateVel(int objectnr, int trackernr,float *sum)
 void tracking_lidar::adaptive_breaK_point()
 {
   int i,j = 0;
-  float current_angle,r,p,dmax;
+  float current_angle,r,p,dmax, x_t, y_t;
   double roll_map, pitch_map, yaw_map;
   geometry_msgs::Point point;
   polygon_points clustered_point;
@@ -567,12 +567,18 @@ void tracking_lidar::adaptive_breaK_point()
     current_angle = float(i)*scan_data_.angle_increment+scan_data_.angle_min;
 
     // Calculate xy position
-    point.x = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw));
-    point.y = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw));
+    //point.x = (scan_data_.ranges[i])*(cos(current_angle)*cos(yaw) + sin(current_angle)*sin(yaw));
+    //point.y = (scan_data_.ranges[i])*(sin(current_angle)*cos(yaw) - cos(current_angle)*sin(yaw));
     point.z = 0;
-
+    point.x = (scan_data_.ranges[i])*cos(current_angle);
+    point.y  = (scan_data_.ranges[i])*sin(current_angle);
 
     tf2::doTransform(point,point,Lidar2base);
+
+    x_t = point.x;
+    y_t = point.y;
+    point.x = x_t*cos(yaw) + y_t*sin(yaw);
+    point.y = y_t*cos(yaw) - x_t*sin(yaw);
 
     point.x += x;
     point.y += y;
@@ -581,7 +587,10 @@ void tracking_lidar::adaptive_breaK_point()
 
     // transform to map
     tf2::doTransform(point,point,odom2map);
-    
+
+    polygon_point_list[i].range = scan_data_.ranges[i];
+    polygon_point_list[i].angle = current_angle;
+
     polygon_point_list[i].point.x = point.x;
     polygon_point_list[i].point.y = point.y;
     if(i == 0)
