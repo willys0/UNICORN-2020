@@ -53,9 +53,10 @@ class DockingController {
             max_tf_lookup_time_ = max_tf_time;
         }
 
-        void setMinObjectDistances(double min_distance_infront, double min_distance_behind) {
+        void setMinObjectDistances(double min_distance_infront, double min_distance_behind, double min_dist_to_wall) {
             min_distance_infront_ = min_distance_infront;
             min_distance_behind_ = min_distance_behind;
+            min_dist_to_wall_ = min_dist_to_wall;
         }
 
         void setRearLidarRotationMissalignment(double rotation_offset) {
@@ -135,6 +136,7 @@ class DockingController {
 
         double min_distance_infront_;
         double min_distance_behind_;
+        double min_dist_to_wall_;
 
         double rear_lidar_angle_;
         double front_lidar_angle_;
