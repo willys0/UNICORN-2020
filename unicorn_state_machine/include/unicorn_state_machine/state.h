@@ -3,6 +3,8 @@
 
 #include <ros/ros.h>
 
+#include <unicorn_state_machine/goal.h>
+
 class State {
     public:
         /** @brief Default Constructor to initialise the base state class
@@ -28,9 +30,17 @@ class State {
          */
         virtual int stateIdentifier() const = 0;
 
+        static void setGoals(std::vector<struct Goal> goals) { goals_ = goals; }
+
+        static void addGoal(struct Goal goal) { goals_.insert(goals_.begin(), goal); }
+
+        static std::vector<struct Goal> getGoals() { return goals_;}
+
 
     protected:
         ros::NodeHandle nh_;
+
+        static std::vector<struct Goal> goals_;
 
 };
 
