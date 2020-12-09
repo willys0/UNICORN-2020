@@ -67,7 +67,10 @@
 
 	</group>
 
-	<include file="$(find unicorn_state_machine)/launch/state_machine.launch" />
+	<include file="$(find unicorn_state_machine)/launch/state_machine.launch">
+		<arg unless="$(arg sim)" name="robot_base_frame" value="base_link" />
+		<arg if="$(arg sim)" name="robot_base_frame" value="chassis_link" />
+	</include>
 
 	<!--include unless="$(arg sim)" file="$(find unicorn_intention)/launch/intention.launch"-->
 	<include file="$(find unicorn_intention)/launch/intention.launch" >

@@ -27,14 +27,17 @@ bool toggleRunningCb(std_srvs::SetBool::Request&  req,
 
 bool stampGoalCb(unicorn_state_machine::StampGoal::Request&  req,
                  unicorn_state_machine::StampGoal::Response& resp,
-                 StateMachine* sm) {
+                 StateMachine* sm,
+                 const std::string& base_frame) {
 
 
     tf2_ros::Buffer tf_buffer;
     tf2_ros::TransformListener tf_listener(tf_buffer);
 
+    const std::string world_frame("map");
+
     try {
-        geometry_msgs::TransformStamped robot_transform = tf_buffer.lookupTransform("map", "chassis_link", ros::Time(0), ros::Duration(1.0));
+        geometry_msgs::TransformStamped robot_transform = tf_buffer.lookupTransform(world_frame, base_frame, ros::Time(0), ros::Duration(1.0));
 
         geometry_msgs::Pose pose;
         pose.position.x = robot_transform.transform.translation.x;
@@ -45,10 +48,11 @@ bool stampGoalCb(unicorn_state_machine::StampGoal::Request&  req,
         struct Goal goal { pose, (LiftCommand)req.goal_type };
 
         sm->addGoal(goal);
+        resp.message = std::string("Goal stamped.");
         resp.success = true;
     }
     catch (tf2::TransformException& ex){
-        resp.message = std::string("Failed to lookup transform");
+        resp.message = std::string("Failed to lookup transform from " + world_frame + " to "  + base_frame);
         resp.success = false;
     }
 
@@ -112,17 +116,20 @@ int main(int argc, char** argv) {
 
     StateMachine state_machine;
 
-    ros::ServiceServer run_service = nh.advertiseService<std_srvs::SetBoolRequest, std_srvs::SetBoolResponse>("set_running", boost::bind(&toggleRunningCb, _1, _2, &state_machine));
-
-    ros::ServiceServer stamp_service = nh.advertiseService<unicorn_state_machine::StampGoalRequest, unicorn_state_machine::StampGoalResponse>("stamp_goal", boost::bind(&stampGoalCb, _1, _2, &state_machine));
-
     std::vector<struct Goal> goals;
     bool publish_poses;
     bool autostart;
+    std::string base_frame;
 
     ros::Publisher pose_pub;
     nh.param("publish_poses", publish_poses, false);
     nh.param("autostart", autostart, false);
+    nh.param("robot_base_frame", base_frame, std::string("base_link"));
+
+
+    ros::ServiceServer run_service = nh.advertiseService<std_srvs::SetBoolRequest, std_srvs::SetBoolResponse>("set_running", boost::bind(&toggleRunningCb, _1, _2, &state_machine));
+
+    ros::ServiceServer stamp_service = nh.advertiseService<unicorn_state_machine::StampGoalRequest, unicorn_state_machine::StampGoalResponse>("stamp_goal", boost::bind(&stampGoalCb, _1, _2, &state_machine, base_frame));
 
     parseGoalYaml(nh, goals);
 
