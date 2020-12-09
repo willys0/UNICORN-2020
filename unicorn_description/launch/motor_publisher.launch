@@ -2,11 +2,11 @@
 <!-- packages needed: sudo apt-get install ros-kinetic-gazebo-ros-pkgs ros-kinetic-gazebo-ros-control -->
 <!-- sudo apt install ros-kinetic-effort-controllers -->
 <launch>
-    
-	<!-- urdf xml robot description loaded on the Parameter Server-->
+
+	<!-- urdf xml robot description loaded on the Parameter Server
 	<param name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_sim.urdf.xacro'" />
-	<node name="urdf_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -model unicorn -param robot_description -z 0.6"/> <!-- 5.5 -2.6 0.2 -1.5707 -->
-	  
+	<node name="urdf_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -model unicorn -param robot_description -z 0.6"/>--> <!-- 5.5 -2.6 0.2 -1.5707 -->
+
 	  <!-- Load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find unicorn_description)/config/robot_control.yaml" command="load"/>
 	<!-- load the controllers -->

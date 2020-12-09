@@ -5,16 +5,16 @@ unicorn:
   # Publish all joint states -----------------------------------
   joint_state_controller:
     type: joint_state_controller/JointStateController
-    publish_rate: 50  
+    publish_rate: 50
 
   # Position Controllers ---------------------------------------
   lift_vertical_controller:
-    type: effort_controllers/JointTrajectoryController
-    joint: 
-    - lift_vertical_joint
-    - lift_horizontal_joint
-    
-  # lift_horizontal_controller:
-  #   type: effort_controllers/JointTrajectoryController
-  #   joint: lift_horizontal_joint
-  #   pid: {p: 100.0, i: 0.01, d: 10.0}
+    type: effort_controllers/JointPositionController
+    joint: lift_vertical_joint
+    pid: {p: 200.0, i: 0.01, d: 10.0}
+
+
+  lift_horizontal_controller:
+    type: effort_controllers/JointPositionController #JointTrajectoryController   
+    joint: lift_horizontal_joint
+    pid: {p: 100.0, i: 0.01, d: 10.0}
