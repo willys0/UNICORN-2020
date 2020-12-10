@@ -5,6 +5,10 @@
 
 #include <unicorn_state_machine/goal.h>
 
+#ifndef RETURN_ON_ERROR
+#define RETURN_ON_ERROR() ({if(error_){return new ErrorState("Forced error", nh_);}})
+#endif
+
 class State {
     public:
         /** @brief Default Constructor to initialise the base state class
@@ -30,6 +34,9 @@ class State {
          */
         virtual int stateIdentifier() const = 0;
 
+        static void forceError() { error_ = true; }
+        static void removeError() { error_ = false; }
+
         static void setGoals(std::vector<struct Goal> goals) { goals_ = goals; }
 
         static void addGoal(struct Goal goal) { goals_.insert(goals_.begin(), goal); }
@@ -40,9 +47,12 @@ class State {
     protected:
         ros::NodeHandle nh_;
 
+        static bool error_;
+
         static std::vector<struct Goal> goals_;
 
 };
 
+#include <unicorn_state_machine/error_state.h>
 
 #endif // __STATE_H_

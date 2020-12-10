@@ -17,6 +17,7 @@ State* IdleState::run() {
     ROS_INFO("[IdleState]");
 
     while(ros::ok() && goals_.empty()) {
+        RETURN_ON_ERROR();
         ROS_INFO("[IdleState] No goals, sleeping for a while...");
         ros::Duration(2.0).sleep();
     }

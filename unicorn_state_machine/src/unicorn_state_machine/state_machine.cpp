@@ -87,3 +87,11 @@ void StateMachine::pause() {
 void StateMachine::resume() {
     paused_ = false;
 }
+
+void StateMachine::forceStop() {
+    State::forceError();
+}
+
+void StateMachine::setOK() {
+    State::removeError();
+}

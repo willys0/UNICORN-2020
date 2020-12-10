@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 
 #include <unicorn_state_machine/goal.h>
+#include <unicorn_state_machine/state.h>
 
 class StateMachine {
     public:
@@ -17,10 +18,17 @@ class StateMachine {
         void pause();
         void resume();
 
+        void forceStop();
+        void setOK();
+
         bool isRunning() { return !paused_; }
 
     private:
+        ros::NodeHandle nh_;
+
         std::vector<struct Goal> goals_;
+
+        State* current_state_;
 
         ros::Publisher state_pub_;
         ros::Publisher pose_pub_;

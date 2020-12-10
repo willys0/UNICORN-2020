@@ -18,7 +18,9 @@ State* LiftState::run() {
 
     ROS_INFO("[LiftState] Waiting for lift action server...");
     LiftActionClient client("/lift/lift_action", true);
-    client.waitForServer();
+    while(ros::ok() && !client.waitForServer(ros::Duration(0.5))) {
+        RETURN_ON_ERROR();
+    }
 
     unicorn_roborio_bridge::RunLiftGoal goal;
 
@@ -33,7 +35,9 @@ State* LiftState::run() {
 
     // Call the lift with the correct lift_cmd
     client.sendGoal(goal);
-    client.waitForResult();
+    while(ros::ok() && !client.waitForResult(ros::Duration(0.5))) {
+        RETURN_ON_ERROR();
+    }
 
     if(client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
         return new UndockState(0, nh_);

@@ -26,12 +26,16 @@ State* NavigatingState::run() {
     mb_goal.target_pose = ps;
 
     ROS_INFO("[NavigatingState] Waiting for move_base server...");
-    movebase_client_.waitForServer();
+    while(ros::ok() && !movebase_client_.waitForServer(ros::Duration(0.5))) {
+        RETURN_ON_ERROR();
+    }
 
     ROS_INFO("[NavigatingState] Sending goal to move_base");
     movebase_client_.sendGoal(mb_goal);
     ROS_INFO("[NavigatingState] Waiting for move_base result");
-    movebase_client_.waitForResult();
+    while(ros::ok() && !movebase_client_.waitForResult(ros::Duration(0.5))) {
+        RETURN_ON_ERROR();
+    }
 
     ROS_INFO("[NavigatingState] Finished navigation");
     if(lift_cmd_ == 0) {

@@ -1,5 +1,7 @@
 #include <ros/ros.h>
 
+#include <boost/thread/thread.hpp>
+
 #include <unicorn_state_machine/state_machine.h>
 #include <unicorn_state_machine/goal.h>
 
@@ -7,6 +9,7 @@
 #include <geometry_msgs/TransformStamped.h>
 
 #include <std_srvs/SetBool.h>
+#include <std_srvs/Trigger.h>
 #include <unicorn_state_machine/StampGoal.h>
 
 #include <tf2_ros/transform_listener.h>
@@ -21,6 +24,17 @@ bool toggleRunningCb(std_srvs::SetBool::Request&  req,
         sm->resume();
     else
         sm->pause();
+
+    return true;
+}
+
+bool forceStopCb(std_srvs::SetBool::Request&  req,
+                 std_srvs::SetBool::Response& resp,
+                 StateMachine* sm) {
+    if(req.data)
+        sm->forceStop();
+    else
+        sm->setOK();
 
     return true;
 }
@@ -112,7 +126,7 @@ int main(int argc, char** argv) {
 
     ros::NodeHandle nh("~");
 
-    ros::AsyncSpinner spinner(1);
+    //ros::AsyncSpinner spinner(1);
 
     StateMachine state_machine;
 
@@ -131,6 +145,9 @@ int main(int argc, char** argv) {
 
     ros::ServiceServer stamp_service = nh.advertiseService<unicorn_state_machine::StampGoalRequest, unicorn_state_machine::StampGoalResponse>("stamp_goal", boost::bind(&stampGoalCb, _1, _2, &state_machine, base_frame));
 
+    ros::ServiceServer stop_service =
+        nh.advertiseService<std_srvs::SetBoolRequest, std_srvs::SetBoolResponse>("force_stop", boost::bind(&forceStopCb, _1, _2, &state_machine));
+
     parseGoalYaml(nh, goals);
 
     for(int i = 0; i < goals.size(); i++) {
@@ -144,15 +161,18 @@ int main(int argc, char** argv) {
 
     state_machine.setGoals(goals);
 
-    spinner.start();
+    //spinner.start();
 
     if(autostart)
         state_machine.resume();
 
-    state_machine.start(nh, publish_poses);
+    //state_machine.start(nh, publish_poses);
+    boost::thread t(boost::bind(&StateMachine::start, &state_machine, nh, publish_poses));
 
-    spinner.stop();
+    ros::spin();
+    //spinner.stop();
 
+    t.join();
 
     return 0;
 }
