@@ -291,7 +291,7 @@
     <origin xyz="0.05 0 0.137" rpy="${M_PI2} 0 ${-M_PI2}" />
     <axis xyz="0 0 -1" rpy="0 0 0"  />
     <limit lower="0.17" upper="0" effort="100" velocity="0" />
-    <joint_properties damping="1000" friction="1000" />
+    <joint_properties damping="1000" friction="100" />
   </joint>
 
 
@@ -300,8 +300,8 @@
     <parent link="lift_horizontal_link" />
     <child link="lift_vertical_link" />
     <axis xyz="0 1 0" />
-    <limit lower="0" upper="0.16" effort="50" velocity="0" />
-    <joint_properties damping="1000" friction="1000" />
+    <limit lower="0" upper="0.16" effort="100" velocity="0" />
+    <joint_properties damping="1000" friction="100" />
   </joint>
 
 
@@ -477,10 +477,10 @@
       <mu2 value="10000.0" />
       <kp value="100000.0" />
       <kd value="10000.0" />
-      <dampingFactor value="100" />
+      <dampingFactor value="50" />
       <fdir1 value="1 0 0" />
       <material>Gazebo/Black</material>
-      <turnGravityOff>true</turnGravityOff>
+      <turnGravityOff>false</turnGravityOff>
   </gazebo>
 
   <gazebo reference="lift_horizontal_joint">
