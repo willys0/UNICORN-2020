@@ -19,6 +19,7 @@ enum DockStatus { RUNNING, SUCCESS, FAILED };
 
 double retry_offset;
 
+ros::Publisher err_pub;
 geometry_msgs::Point desired_offset;
 
 int max_retries;
@@ -27,18 +28,36 @@ double thresh_x;
 double thresh_y;
 double thresh_th;
 
+double max_docking_speed;
+double max_undocking_speed;
+double max_rotation_speed;
 
-void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, uint32_t level) {
+
+void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, uint32_t level, DockingController* controller) {
     thresh_x = config.x_error_thresh;
     thresh_y = config.y_error_thresh;
     thresh_th = config.th_error_thresh;
+
+    max_docking_speed = config.max_docking_speed;
+    max_undocking_speed = config.max_undocking_speed;
+    max_rotation_speed = config.max_rotation_speed;
+
+    controller->setDesiredRotationFunctionParameters(config.a, config.b, config.c);
+    controller->setMaxTfLookupTime(config.max_tf_lookup_time);
 }
 
-DockStatus getDockingVelocity(DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
+DockStatus getDockingVelocity(ros::NodeHandle nh, DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
     controller->computeVelocity(out_velocity);
 
-    if(fabs(controller->xError()) <= thresholds.x) {
-        if(fabs(controller->yError()) > thresholds.y || fabs(controller->thError()) > thresholds.z) {
+    geometry_msgs::Vector3 pid_errors;
+
+    pid_errors.x = fabs(controller->xError());
+    pid_errors.y = fabs(controller->yError());
+    pid_errors.z = fabs(controller->thError());
+    err_pub.publish(pid_errors);
+
+    if(pid_errors.x <= thresholds.x) {
+        if(pid_errors.y > thresholds.y || pid_errors.z > thresholds.z) {
             return DockStatus::FAILED;
         }
         else {
@@ -67,7 +86,7 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
     ros::Publisher vel_pub;
     geometry_msgs::Twist move_msg;
 
-    int remaining_retries = 10;
+    int remaining_retries = max_retries;
 
     DockStatus dock_status;
 
@@ -102,9 +121,9 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
         }
 
         // Call the docking controller to get velocity
-        dock_status = getDockingVelocity(controller, as, thresh, move_msg);
+        dock_status = getDockingVelocity(nh, controller, as, thresh, move_msg);
 
-        if(dock_status == DockStatus::SUCCESS) {
+        if(dock_status == DockStatus::SUCCESS && docking == true) {
             getDockingResultMsg(controller, true, rslt);
             as->setSucceeded(rslt);
 
@@ -118,6 +137,8 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
                 if(docking) {
                     offset.x = retry_offset;
                     thresh.x = thresh_x * 4;
+
+                    ROS_INFO("[Docking Controller] Failed to dock within acceptable error threshold, undocking to try again (remaining retries: %d)...", remaining_retries);
                 }
                 else {
                     offset.x = desired_offset.x;
@@ -140,6 +161,22 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
 
                 break;
             }
+        }
+
+        // cap the linear speed 
+        if(move_msg.linear.x > max_docking_speed) {
+            move_msg.linear.x = max_docking_speed;
+        }
+        else if(move_msg.linear.x < -max_docking_speed) {
+            move_msg.linear.x = -max_docking_speed;
+        }
+
+        // cap the angular speed 
+        if(move_msg.angular.z > max_rotation_speed) {
+            move_msg.angular.z = max_rotation_speed;
+        }
+        else if(move_msg.angular.z < -max_rotation_speed) {
+            move_msg.angular.z = -max_rotation_speed;
         }
 
         vel_pub.publish(move_msg);
@@ -195,7 +232,7 @@ void undock(ros::NodeHandle nh, DockingController* controller, DockActionServer*
         }
 
         // Call the docking controller to get velocity
-        dock_status = getDockingVelocity(controller, as, thresh, move_msg);
+        dock_status = getDockingVelocity(nh, controller, as, thresh, move_msg);
 
         if(dock_status == DockStatus::SUCCESS) {
             getDockingResultMsg(controller, true, rslt);
@@ -211,6 +248,22 @@ void undock(ros::NodeHandle nh, DockingController* controller, DockActionServer*
             ROS_INFO("[Docking Controller] Undock action failed with errors x: %f, y: %f, th: %f!", controller->xError(), controller->yError(), controller->thError());
 
             break;
+        }
+
+        // cap the linear speed 
+        if(move_msg.linear.x > max_undocking_speed) {
+            move_msg.linear.x = max_undocking_speed;
+        }
+        else if(move_msg.linear.x < -max_undocking_speed) {
+            move_msg.linear.x = -max_undocking_speed;
+        }
+
+        // cap the angular speed 
+        if(move_msg.angular.z > max_rotation_speed) {
+            move_msg.angular.z = max_rotation_speed;
+        }
+        else if(move_msg.angular.z < -max_rotation_speed) {
+            move_msg.angular.z = -max_rotation_speed;
         }
 
         vel_pub.publish(move_msg);
@@ -250,9 +303,7 @@ int main(int argc, char **argv) {
 
     ros::NodeHandle nh("~");
 
-    int n_pitch_avg;
     // load settings
-    nh.param("nr_for_pitch_average", n_pitch_avg , 15);
     nh.param("retry_error_times", max_error_times, 50);
     nh.param("max_retries", max_retries, 3);
     nh.param("thresh_x", thresh_x, 0.01);
@@ -265,11 +316,14 @@ int main(int argc, char **argv) {
     nh.param("offset/th",desired_offset.z, 0.0);
     ROS_INFO("Setting dock offset to x: %.2f, y: %.2f, th: %.2f", desired_offset.x, desired_offset.y, desired_offset.z);
 
+    err_pub = nh.advertise<geometry_msgs::Vector3>("errors", 1);
+
     dynamic_reconfigure::Server<unicorn_docking::DockingControllerConfig> reconfig_server;
 
-    reconfig_server.setCallback(boost::bind(&dynamicReconfigCallback, _1, _2));
 
-    DockingController controller(n_pitch_avg);
+    DockingController controller;
+
+    reconfig_server.setCallback(boost::bind(&dynamicReconfigCallback, _1, _2, &controller));
 
     DockActionServer server(nh, "dock_action", boost::bind(&execute_action, _1, &server, &controller, nh), false);
 

@@ -12,7 +12,7 @@ class ErrorState : public State {
 
         virtual State* run() override;
 
-        virtual int stateIdentifier() const override { return -1; }
+        virtual int stateIdentifier() const override { return 6; }
 
         std::string getErrorMsg() const { return error_msg_; }
 

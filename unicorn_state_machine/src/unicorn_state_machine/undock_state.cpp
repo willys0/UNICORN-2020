@@ -20,13 +20,17 @@ State* UndockState::run() {
 
     ROS_INFO("[UndockState] Waiting for dock action server...");
     DockActionClient client("/dock", true);
-    client.waitForServer();
+    while(ros::ok() && !client.waitForServer(ros::Duration(0.5))) {
+        RETURN_ON_ERROR();
+    }
 
     // TODO: Call the docking controller to initiate an undock
     unicorn_docking::DockGoal goal;
     goal.undock = true;
     client.sendGoal(goal);
-    client.waitForResult();
+    while(ros::ok() && !client.waitForResult(ros::Duration(0.5))) {
+        RETURN_ON_ERROR();
+    }
 
     // TODO: If failed to pickup or dropoff a bin, go to docking state
     // return new DockingState(lift_cmd_, nh_);
