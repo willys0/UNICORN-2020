@@ -11,6 +11,7 @@ UwbInterface::UwbInterface(ros::NodeHandle nh) :
 void UwbInterface::setUwbPosition(const geometry_msgs::Point& pos) {
     uwb_pose_msg_.header.stamp = ros::Time::now();
     uwb_pose_msg_.header.seq++;
+    uwb_pose_msg_.header.frame_id = "chassis_link";
 
     uwb_pose_msg_.pose.pose.position = pos;
     uwb_pose_msg_.pose.pose.position.x /= 1000.0;
@@ -22,8 +23,8 @@ void UwbInterface::setUwbPosition(const geometry_msgs::Point& pos) {
 void UwbInterface::publish() {
     // Should not be able to get zeros from UWB. If we get it anyway, something is not correct
     // so do not publish the message.
-    if(uwb_pose_msg_.pose.pose.position.x != 0.0 ||
-       uwb_pose_msg_.pose.pose.position.y != 0.0 ||
+    if(uwb_pose_msg_.pose.pose.position.x != 0.0 &&
+       uwb_pose_msg_.pose.pose.position.y != 0.0 &&
        uwb_pose_msg_.pose.pose.position.z != 0.0)
     {
         uwb_pub_.publish(uwb_pose_msg_);

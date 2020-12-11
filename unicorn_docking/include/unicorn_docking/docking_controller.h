@@ -38,20 +38,6 @@ class DockingController {
 
         bool computeVelocity(geometry_msgs::Twist& msg_out);
 
-        double getPitchComponent();
-
-        double getLateralComponent();
-
-        double getDistAlongTagNorm();
-
-        double getDesiredRotation();
-
-        double getRotationToTag();
-
-        double fuseDistances(double apriltag_dist, double lidar_dist, double lidar_angle);
-
-        double fuseAngles(double apriltag_angle, double lidar_angle, double apriltag_dist);
-
         DockState getState() { return state_; }
         void setState(DockState state) { state_ = state; }
 
@@ -67,26 +53,58 @@ class DockingController {
             max_tf_lookup_time_ = max_tf_time;
         }
 
+        void setMinObjectDistances(double min_distance_infront, double min_distance_behind, double min_dist_to_wall) {
+            min_distance_infront_ = min_distance_infront;
+            min_distance_behind_ = min_distance_behind;
+            min_dist_to_wall_ = min_dist_to_wall;
+        }
+
+        void setRearLidarRotationMissalignment(double rotation_offset) {
+            lidar_rotational_missalignment_ = rotation_offset;
+        }
+
+        void setLidarContributionParameters(double lidar_contrib_factor, double lidar_contrib_offset) {
+            lidar_contrib_factor_ = lidar_contrib_factor;
+            lidar_contrib_offset_ = lidar_contrib_offset;
+
+        }
+
         double xError() { return err_x_; }
         double yError() { return err_y_; }
         double thError() { return err_th_; }
 
     protected:
+        double getPitchComponent();
+
+        double getLateralComponent();
+
+        double getDistAlongTagNorm();
+
+        double getDesiredRotation();
+
+        bool getRotationToTag(double& rotation_to_tag);
+
+        double getDistanceToClosestObject(const sensor_msgs::LaserScan& laser_scan, double laser_scan_angle);
+
+        double fuseDistances(double apriltag_dist, double lidar_dist, double lidar_angle);
+
+        double fuseAngles(double apriltag_angle, double lidar_angle, double apriltag_dist);
+
         void apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg);
 
-        void lidarCb(const sensor_msgs::LaserScanConstPtr& msg);
+        void rearLidarCb(const sensor_msgs::LaserScanConstPtr& msg);
+
+        void frontLidarCb(const sensor_msgs::LaserScanConstPtr& msg);
 
     private:
         ros::NodeHandle nh_;
 
         ros::Subscriber apriltag_sub_;
         ros::Subscriber lidar_sub_;
+        ros::Subscriber front_lidar_sub_;
 
         ros::Publisher  d_pub_;
         ros::Publisher  n_pub_;
-        ros::Publisher  desired_rot_pub_;
-        ros::Publisher  rot_to_tag_pub_;
-        ros::Publisher  tag_pitch_pub_;
 
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;
@@ -116,6 +134,19 @@ class DockingController {
 
         double max_tf_lookup_time_ = 5.0;
 
+        double min_distance_infront_;
+        double min_distance_behind_;
+        double min_dist_to_wall_;
+
+        double rear_lidar_angle_;
+        double front_lidar_angle_;
+        sensor_msgs::LaserScan front_lidar_scan_;
+        sensor_msgs::LaserScan rear_lidar_scan_;
+        double max_time_since_lidar_scan_;
+        double lidar_rotational_missalignment_;
+
+        double lidar_contrib_factor_;
+        double lidar_contrib_offset_;
 
         ros::Time last_time_;
         ros::Time tag_last_seen_;

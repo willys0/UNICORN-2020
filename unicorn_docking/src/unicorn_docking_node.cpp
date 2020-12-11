@@ -15,7 +15,7 @@
 
 typedef actionlib::SimpleActionServer<unicorn_docking::DockAction> DockActionServer;
 
-enum DockStatus { RUNNING, SUCCESS, FAILED };
+enum DockStatus { RUNNING, SUCCESS, FAILED, ERROR };
 
 double retry_offset;
 
@@ -34,6 +34,11 @@ double max_rotation_speed;
 
 
 void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, uint32_t level, DockingController* controller) {
+    desired_offset.x = config.x_desired_offset;
+    desired_offset.y = config.y_desired_offset;
+    desired_offset.z = config.th_desired_offset;
+    retry_offset = config.x_desired_retry_offset;
+
     thresh_x = config.x_error_thresh;
     thresh_y = config.y_error_thresh;
     thresh_th = config.th_error_thresh;
@@ -44,10 +49,34 @@ void dynamicReconfigCallback(unicorn_docking::DockingControllerConfig& config, u
 
     controller->setDesiredRotationFunctionParameters(config.a, config.b, config.c);
     controller->setMaxTfLookupTime(config.max_tf_lookup_time);
+    controller->setMinObjectDistances(config.min_dist_to_object_infront,config.min_dist_to_object_behind, config.min_dist_to_wall);
+    controller->setRearLidarRotationMissalignment(config.rear_lidar_angle_offset);
+    controller->setLidarContributionParameters(config.lidar_contrib_factor, config.lidar_contrib_offset);
 }
 
 DockStatus getDockingVelocity(ros::NodeHandle nh, DockingController* controller, DockActionServer* as, geometry_msgs::Point thresholds, geometry_msgs::Twist& out_velocity) {
-    controller->computeVelocity(out_velocity);
+    bool success;
+    success = controller->computeVelocity(out_velocity);
+
+    if(success == false) {
+        return DockStatus::ERROR;
+    }
+
+    // cap the linear speed 
+    if(out_velocity.linear.x > max_docking_speed) {
+        out_velocity.linear.x = max_docking_speed;
+    }
+    else if(out_velocity.linear.x < -max_docking_speed) {
+        out_velocity.linear.x = -max_docking_speed;
+    }
+
+    // cap the angular speed 
+    if(out_velocity.angular.z > max_rotation_speed) {
+        out_velocity.angular.z = max_rotation_speed;
+    }
+    else if(out_velocity.angular.z < -max_rotation_speed) {
+        out_velocity.angular.z = -max_rotation_speed;
+    }
 
     geometry_msgs::Vector3 pid_errors;
 
@@ -104,6 +133,7 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
 
     bool docking = true;
     int error_times = 0;
+    int sensor_error_times = 0;
 
     controller->reset();
     controller->setDesiredOffset(desired_offset);
@@ -162,21 +192,14 @@ void dock(ros::NodeHandle nh, DockingController* controller, DockActionServer* a
                 break;
             }
         }
+        else if(dock_status == DockStatus::ERROR && sensor_error_times++ > max_error_times){
+                // Error during docking, not good!
+                getDockingResultMsg(controller, false, rslt);
+                as->setPreempted(rslt);
 
-        // cap the linear speed 
-        if(move_msg.linear.x > max_docking_speed) {
-            move_msg.linear.x = max_docking_speed;
-        }
-        else if(move_msg.linear.x < -max_docking_speed) {
-            move_msg.linear.x = -max_docking_speed;
-        }
+                ROS_INFO("[Docking Controller] Dock action failed due to outdated sensor data or transform error after %d retries with errors x: %f, y: %f, th: %f!", max_retries, controller->xError(), controller->yError(), controller->thError());
 
-        // cap the angular speed 
-        if(move_msg.angular.z > max_rotation_speed) {
-            move_msg.angular.z = max_rotation_speed;
-        }
-        else if(move_msg.angular.z < -max_rotation_speed) {
-            move_msg.angular.z = -max_rotation_speed;
+                break;
         }
 
         vel_pub.publish(move_msg);
@@ -216,6 +239,8 @@ void undock(ros::NodeHandle nh, DockingController* controller, DockActionServer*
     thresh.y = thresh_y;
     thresh.z = thresh_th;
 
+    int sensor_error_times = 0;
+
     controller->reset();
     controller->setDesiredOffset(offset);
     controller->setState(DockingController::DockState::DOCKING);
@@ -249,23 +274,15 @@ void undock(ros::NodeHandle nh, DockingController* controller, DockActionServer*
 
             break;
         }
+        else if(dock_status == DockStatus::ERROR && sensor_error_times++ > max_error_times) {
+                // Error during docking, not good!
+                getDockingResultMsg(controller, false, rslt);
+                as->setPreempted(rslt);
 
-        // cap the linear speed 
-        if(move_msg.linear.x > max_undocking_speed) {
-            move_msg.linear.x = max_undocking_speed;
-        }
-        else if(move_msg.linear.x < -max_undocking_speed) {
-            move_msg.linear.x = -max_undocking_speed;
-        }
+                ROS_INFO("[Docking Controller] Undock action failed due to outdated sensor data or transform error, error with errors x: %f, y: %f, th: %f!",controller->xError(), controller->yError(), controller->thError());
 
-        // cap the angular speed 
-        if(move_msg.angular.z > max_rotation_speed) {
-            move_msg.angular.z = max_rotation_speed;
+                break;
         }
-        else if(move_msg.angular.z < -max_rotation_speed) {
-            move_msg.angular.z = -max_rotation_speed;
-        }
-
         vel_pub.publish(move_msg);
 
         getDockingFeedbackMsg(controller, fbk);
@@ -306,15 +323,7 @@ int main(int argc, char **argv) {
     // load settings
     nh.param("retry_error_times", max_error_times, 50);
     nh.param("max_retries", max_retries, 3);
-    nh.param("thresh_x", thresh_x, 0.01);
-    nh.param("thresh_y", thresh_y, 0.01);
-    nh.param("thresh_th", thresh_th, 0.01);
 
-    nh.param("retry_offset", retry_offset, 0.6);
-    nh.param("offset/x",desired_offset.x, 0.2);
-    nh.param("offset/y",desired_offset.y, 0.0);
-    nh.param("offset/th",desired_offset.z, 0.0);
-    ROS_INFO("Setting dock offset to x: %.2f, y: %.2f, th: %.2f", desired_offset.x, desired_offset.y, desired_offset.z);
 
     err_pub = nh.advertise<geometry_msgs::Vector3>("errors", 1);
 
