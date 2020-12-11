@@ -51,6 +51,8 @@ void StateMachine::start(ros::NodeHandle nh, bool publish_poses) {
         pose_pub_ = nh.advertise<geometry_msgs::PoseArray>("goal_poses", 1, true);
     }
 
+    paused_ = false;
+
     while(ros::ok()) {
         state_msg.data = currentState->stateIdentifier();
         state_pub_.publish(state_msg);
@@ -90,6 +92,7 @@ void StateMachine::resume() {
 
 void StateMachine::forceStop() {
     State::forceError();
+    pause();
 }
 
 void StateMachine::setOK() {
