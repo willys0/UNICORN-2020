@@ -20,7 +20,7 @@
 
   <xacro:property name="M_PI" value="3.1415926535897931" />
   <xacro:property name="M_PI2" value="1.57079632679" />
-  <!-- base --><!-- 
+  <!-- base --><!--
     <xacro:property name="base_x_size" value="0.72" />
   <xacro:property name="base_y_size" value="0.55" />
   <xacro:property name="base_z_size" value="0.6" />
@@ -55,34 +55,22 @@
   <xacro:arg name="zed_meshfile" default="package://unicorn_description/meshes/zed_link.STL" />
 
   <!-- Real Sense -->
-  <xacro:arg name="real_base" default="-0.4065 ${-0.03882+0.015} 0.33658" />
+  <xacro:arg name="real_base" default="${-0.4065-0.025} ${-0.03882+0.015} 0.33658" />
   <xacro:arg name="real_rgb_xyz" default="0 0.015 0" />
-  <xacro:arg name="real_depth_xyz" default="0 0 0" /> 
+  <xacro:arg name="real_depth_xyz" default="0 0 0" />
 
   <xacro:arg name="real_rpy" default="0 0 ${M_PI}" />
   <xacro:arg name="real_optical_rpy" default="${-M_PI2} 0 ${-M_PI2}" />
   <xacro:arg name="real_depth_rpy" default="${-M_PI2} 0 ${-M_PI2}" />
   <xacro:arg name="realsense_meshfile" default="package://unicorn_description/meshes/real_sense.STL" />
-  
+
+
+  <!-- Lift -->
+
 
  <!-- Main Body-base -->
   <link
     name="chassis_link">
-    <!--  
-    <inertial>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <mass
-        value="15" />
-      <inertia
-        ixx="1"
-        ixy="0"
-        ixz="3"
-        iyy="3"
-        iyz="3"
-        izz="1" />
-    </inertial>-->
     <visual>
       <origin
         xyz="0 0 0"
@@ -97,22 +85,6 @@
           rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
       </material>
     </visual>
-    <!-- 
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="0 0 0" />
-      <geometry>
-        <mesh
-          filename="package://unicorn_description/meshes/chassis_link.STL" />
-        <surface>
-         <friction>
-           <ode><mu>0.4</mu><mu2>0.4</mu2></ode>
-         </friction>
-      </surface>
-      </geometry>
-    </collision>-->
-    
   </link>
 
 <!-- Lift -->
@@ -123,7 +95,7 @@
         xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="4" />
+        value="10" />
       <inertia
         ixx="1"
         ixy="0"
@@ -146,6 +118,14 @@
           rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
       </material>
     </visual>
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.5</mu>
+            <mu2>0.5</mu2>
+          </ode>
+        </friction>
+      </surface>
     <collision>
       <origin
         xyz="0 0 0"
@@ -156,7 +136,7 @@
       </geometry>
     </collision>
   </link>
-  
+
   <joint
     name="lift_joint"
     type="fixed">
@@ -173,9 +153,133 @@
   </joint>
 
 
+
+  <link
+    name="lift_horizontal_link">
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://unicorn_description/meshes/lift_horizontal_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.898039215686275 0.917647058823529 0.929411764705882 1" />
+      </material>
+    </visual>
+      <surface>
+        <friction>
+          <ode>
+            <mu>0.5</mu>
+            <mu2>0.5</mu2>
+          </ode>
+        </friction>
+      </surface>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://unicorn_description/meshes/lift_horizontal_link.STL" />
+      </geometry>
+    </collision>
+    <inertial>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <mass
+        value="1.50791731426345" />
+      <inertia
+        ixx="0.00998369504134607"
+        ixy="1.05918049885466E-06"
+        ixz="-3.20101525315815E-06"
+        iyy="0.0148024039374132"
+        iyz="1.02762580499191E-05"
+        izz="0.0197484509547163" />
+    </inertial>
+  </link>
+
+
+  <link
+    name="lift_vertical_link">
+    <inertial>
+      <origin
+        xyz="-0.0046764 0.62992 -0.22573"
+        rpy="0 0 0" />
+      <mass
+        value="0.61742" />
+      <inertia
+        ixx="0.00029455"
+        ixy="9.8754E-10"
+        ixz="2.0681E-19"
+        iyy="0.00411"
+        iyz="3.0422E-05"
+        izz="0.0043679" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://unicorn_description/meshes/lift_vertical_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 0.69412 0.27843 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://unicorn_description/meshes/lift_vertical_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="lift_horizontal_joint" type="prismatic">
+    <parent  link="lift_link" />
+    <child  link="lift_horizontal_link" />
+    <origin xyz="0.05 0 0.137" rpy="${M_PI2} 0 ${-M_PI2}" />
+    <axis xyz="0 0.0024714 -1" rpy="0 0 0"  />
+    <limit lower="0.17" upper="0" effort="100" velocity="100" />
+    <joint_properties damping="1000" friction="0.5" />
+  </joint>
+
+
+  <joint
+    name="lift_vertical_joint"
+    type="prismatic">
+    <origin
+      xyz="0 -0.16 0"
+      rpy="0 0 0" />
+    <parent
+      link="lift_horizontal_link" />
+    <child
+      link="lift_vertical_link" />
+    <axis
+      xyz="0 1 0" />
+    <limit
+      lower="0"
+      upper="0.16"
+      effort="100"
+      velocity="0.4" />
+      <joint_properties damping="10" friction="0.5" />
+  </joint>
+
+
+
   <wheel fb="back" lr="left" parent="lift_link"  translateY="0.24" translateX="0" translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
   <wheel fb="back" lr="right" parent="lift_link" translateY="-0.24" translateX="0 " translateZ="0.1225" wheel_radius="0.1225" wheel_height="0.032" flip="1"/>
-  
+
 
   <!-- others wheels -->
   <swivel_wheel fb="front" lr="left" parent="chassis_link" translateY="0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
@@ -191,7 +295,7 @@
     <parent link="chassis_link" />
     <child link="base_laser" />
   </joint>
-  
+
 
    <!-- Back Lidar -->
   <lidar_gazebo frame="rear_laser" topic="rearLidar/scan" simulation="$(arg sim)" sample_size="11" min_angle="-0.698131701" max_angle="0.698131701" robot_namespace="$(arg robot_namespace)" filename="$(arg rearlidar_meshfile)"/>
@@ -202,63 +306,100 @@
     <child link="rear_laser" />
   </joint>
 
-  <!-- Zed Camera -->
-    <stereo_camera frame_rgb="zed_camera" frame_depth="zed_depth" cameraName="zed" simulation="$(arg sim)" filename="$(arg zed_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
 
-    <joint name="zed_camera_rgb_joint" type="fixed"> 
-      <origin xyz="$(arg zed_xyz)" rpy="$(arg zed_rpy)"/>
-      <parent link="chassis_link"/>  
-      <child link="zed_camera"/>
+  <!-- Zed Camera -->
+<!-- Camera Center -->
+    <joint name="zed_camera_center_joint" type="fixed">
+        <parent link="chassis_link"/>
+        <child link="zed_camera_center"/>
+        <origin xyz="$(arg zed_xyz)" rpy="0 0 0" />
     </joint>
+
+    <link name="zed_camera_center">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <mesh filename="$(arg zed_meshfile)" />
+            </geometry>
+        </visual>
+    </link>
+
+<!-- Left Camera -->
+    <joint name="zed_left_camera_joint" type="fixed">
+        <parent link="zed_camera_center"/>
+        <child link="zed_left_camera_frame"/>
+        <origin xyz="0 0.06 0" rpy="0 0 0" />
+    </joint>
+
+    <link name="zed_left_camera_frame" />
+
+    <joint name="zed_left_camera_optical_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="-${M_PI/2} 0.0 -${M_PI/2}"/>
+        <parent link="zed_left_camera_frame"/>
+        <child link="zed_left_camera_optical_frame"/>
+    </joint>
+
+    <link name="zed_left_camera_optical_frame"/>
+
+<!-- Right Camera -->
+    <joint name="zed_right_camera_joint" type="fixed">
+        <parent link="zed_camera_center"/>
+        <child link="zed_right_camera_frame"/>
+        <origin xyz="0 -0.06 0" rpy="0 0 0" />
+    </joint>
+
+    <link name="zed_right_camera_frame" />
+
+    <joint name="zed_right_camera_optical_joint" type="fixed">
+        <origin xyz="0 0 0" rpy="-${M_PI/2} 0.0 -${M_PI/2}"/>
+        <parent link="zed_right_camera_frame"/>
+        <child link="zed_right_camera_optical_frame"/>
+    </joint>
+
+    <link name="zed_right_camera_optical_frame"/>
+<!---->
+<xacro:if value="$(arg sim)">
+    <stereo_camera frame_rgb="zed_camera_center" frame_depth="zed_depth_dummy_frame_sim_only" cameraName="zed"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+
+    <link name="zed_depth_dummy_frame_sim_only"></link>
 
     <joint name="zed_camera_depth_joint" type="fixed">
       <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
-      <parent link="zed_camera"/>
-      <child link="zed_depth"/>
+      <parent link="zed_camera_center"/>
+      <child link="zed_depth_dummy_frame_sim_only"/>
     </joint>
-
-
+</xacro:if>
 
 
   <!-- realsense Camera -->
-
-
-
 <!-- Links only needed in simulation, created by realsense software otherwise-->
 
   <link
     name="realsense_link">
+      <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+          <mesh filename="$(arg realsense_meshfile)" />
+      </geometry>
+    </visual>
   </link>
 
-  <joint name="realsense_joint" type="fixed"> 
+  <joint name="realsense_joint" type="fixed">
     <origin xyz="$(arg real_base)" rpy="$(arg real_rpy)"/>
-    <parent link="chassis_link"/>  
+    <parent link="chassis_link"/>
     <child link="realsense_link"/>
   </joint>
 
 
-<xacro:if value="$(arg sim)">
-  <link
-    name="realsense_model_dummy_link">
-    <visual>
-        <origin xyz="0 0 0" rpy="0 0 0"/>
-        <geometry>
-            <mesh filename="$(arg realsense_meshfile)" />
-        </geometry>
-      </visual>
-  </link>
 
-
-  <joint name="realsense_model_joint" type="fixed"> 
-    <origin xyz="$(arg real_rgb_xyz)" rpy="0 0 0"/>
-    <parent link="realsense_link"/>  
-    <child link="realsense_model_dummy_link"/>
-  </joint>
-</xacro:if> 
-  
 <xacro:if value="$(arg sim)">
-  <stereo_camera frame_rgb="realsense_color_frame" frame_depth="realsense_depth_frame" cameraName="realsense" simulation="$(arg sim)" filename="$(arg realsense_meshfile)"  topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
-  
+  <stereo_camera frame_rgb="realsense_color_frame" frame_depth="realsense_depth_dummy_frame_sim_only" cameraName="realsense" topic="pointcloud" robot_namespace="$(arg robot_namespace)"/>
+
+  <link name="realsense_color_frame"> </link>
+
+  <link name="realsense_depth_frame"></link>
+
+   <link name="realsense_depth_dummy_frame_sim_only"></link>
 
   <link
     name="realsense_depth_optical_frame">
@@ -269,9 +410,9 @@
   </link>
 
 
-  <joint name="realsense_gb_joint" type="fixed"> 
+  <joint name="realsense_gb_joint" type="fixed">
     <origin xyz="$(arg real_rgb_xyz)" rpy="0 0 0"/>
-    <parent link="realsense_link"/>  
+    <parent link="realsense_link"/>
     <child link="realsense_color_frame"/>
   </joint>
 
@@ -281,9 +422,15 @@
     <child link="realsense_depth_frame"/>
   </joint>
 
-  <joint name="realsense_optical_color_joint" type="fixed"> 
+  <joint name="realsense_depth_dummy_joint" type="fixed">
+    <origin xyz="$(arg real_depth_xyz)" rpy="-${M_PI/2} 0.0 -${M_PI/2}"/>
+    <parent link="realsense_link"/>
+    <child link="realsense_depth_dummy_frame_sim_only"/>
+  </joint>
+
+  <joint name="realsense_optical_color_joint" type="fixed">
     <origin xyz="0 0 0" rpy="$(arg real_optical_rpy)"/>
-    <parent link="realsense_color_frame"/>  
+    <parent link="realsense_color_frame"/>
     <child link="realsense_color_optical_frame"/>
   </joint>
 
@@ -292,32 +439,63 @@
     <parent link="realsense_depth_frame"/>
     <child link="realsense_depth_optical_frame"/>
   </joint>
-</xacro:if> 
+</xacro:if>
 
 
 
-<xacro:if value="$(arg sim)">
-  <!-- GPS -->
-  <gazebo>
-    <plugin name="novatel_gps_sim" filename="libhector_gazebo_ros_gps.so">
-      <alwaysOn>true</alwaysOn>
-      <updateRate>5</updateRate>
-      <frameId>odom_chassis</frameId>
-      <bodyName>chassis_link</bodyName>
-      <topicName>gps</topicName>
-      <velocityTopicName>gps_velocity</velocityTopicName>
-      <drift>5.0 5.0 5.0</drift>
-      <gaussianNoise>0.1 0.1 0.1</gaussianNoise>
-      <velocityDrift>0 0 0</velocityDrift>
-      <velocityGaussianNoise>0.1 0.1 0.1</velocityGaussianNoise>
-    </plugin>
+  <gazebo reference="lift_vertical_joint">
+      <mu1 value="10000.0" />
+      <mu2 value="10000.0" />
+      <kp value="100000.0" />
+      <kd value="10000.0" />
+      <dampingFactor value="0.5" />
+      <fdir1 value="1 0 0" />
+      <material>Gazebo/Black</material>
+      <turnGravityOff>false</turnGravityOff>
   </gazebo>
-</xacro:if> 
- 
-  
+
+  <gazebo reference="lift_horizontal_joint">
+      <mu1 value="10000.0" />
+      <mu2 value="10000.0" />
+      <kp value="100000.0" />
+      <kd value="10000.0" />
+      <dampingFactor value="0.5" />
+      <fdir1 value="1 0 0" />
+      <material>Gazebo/Black</material>
+      <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+
+  <transmission name="lift_h_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="lift_horizontal_joint">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="lift_h_motor">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>5</mechanicalReduction>
+      </actuator>
+  </transmission>
+
+
+  <transmission name="lift_v_trans">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="lift_vertical_joint">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="lift_v_motor">
+        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>5</mechanicalReduction>
+      </actuator>
+  </transmission>
+<gazebo>
+  <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+    <robotNamespace>/unicorn</robotNamespace>
+  </plugin>
+</gazebo>
 <xacro:if value="$(arg sim)">
   <!-- GAZEBO STUFF -->
   <gazebo>
+     <!-- Husqvarna Wheel encoders -->
     <plugin name="automower_gazebo_controller" filename="libam_gazebo_controller_2wd.so">
       <alwaysOn>true</alwaysOn>
       <updateRate>50.0</updateRate>
@@ -344,16 +522,25 @@
       <headingGaussianNoise>1.00</headingGaussianNoise>
     </plugin>
 
-
-    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so" />
-
+    <!-- Fake UWB -->
+    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>50.0</updateRate>
+        <bodyName>chassis_link</bodyName>
+        <topicName>uwb</topicName>
+        <gaussianNoise>0.1</gaussianNoise>
+        <frameName>map</frameName>
+        <xyzOffset>0 0 0</xyzOffset>
+        <rpyOffset>0 0 0</rpyOffset>
+      </plugin>
+    <!-- Fake Imu -->
     <plugin name="imu_plugin" filename="libhector_gazebo_ros_imu.so">
       <alwaysOn>true</alwaysOn>
       <bodyName>zed_camera</bodyName>
       <topicName>zed/imu</topicName>
       <serviceName>imu_service</serviceName>
       <updateRate>100.0</updateRate>
-      <rpyOffsets>0 0 0</rpyOffsets> 
+      <rpyOffsets>0 0 0</rpyOffsets>
   <!---->
         <gaussianNoise>0.1</gaussianNoise>
         <accelDrift>0.1 0.1 0.1</accelDrift>
@@ -363,21 +550,25 @@
         <headingDrift>0.1</headingDrift>
         <headingGaussianNoise>1.00</headingGaussianNoise>
   <!-- deprecated
-      <gaussianNoise>0.0</gaussianNoise>  
+      <gaussianNoise>0.0</gaussianNoise>
         <accelDrift>0.0 0.0 0.0</accelDrift>
         <accelGaussianNoise>0.0 0.0 0.0</accelGaussianNoise>
         <rateDrift>0.0 0.0 0.0</rateDrift>
         <rateGaussianNoise>0.0 0.0 0.0</rateGaussianNoise>
         <headingDrift>0.0</headingDrift>
         <headingGaussianNoise>0.00</headingGaussianNoise>-->
-    </plugin> 
+    </plugin>
+    <!-- Joint controll plugin -->
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/unicorn</robotNamespace>
+    </plugin>
 
-
+    <!-- gazebo wheel encoders -->
     <plugin name="am_gazebo_wheelencoder" filename="libam_gazebo_wheelencoder.so">
   </plugin>
 
   </gazebo>
-</xacro:if> 
+</xacro:if>
 
 
 

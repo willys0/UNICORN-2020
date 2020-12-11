@@ -11,6 +11,9 @@ class R2100Interface {
 
         void setLidarScanRanges(const std::vector<float>& ranges);
 
+        void publish();
+        void startTimer();
+
     protected:
         void initLidarMsg();
 

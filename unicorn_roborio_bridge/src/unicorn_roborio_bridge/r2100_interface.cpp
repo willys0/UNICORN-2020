@@ -6,8 +6,6 @@ R2100Interface::R2100Interface(ros::NodeHandle nh) :
     initLidarMsg();
 
     lidar_pub_ = nh.advertise<sensor_msgs::LaserScan>("/rearLidar/scan", 10);
-
-    lidar_pub_timer_ = nh.createTimer(ros::Duration(1.0 / lidar_pub_freq_), &R2100Interface::lidarPubTimeout, this);
 }
 
 void R2100Interface::setLidarScanRanges(const std::vector<float>& ranges) {
@@ -19,6 +17,15 @@ void R2100Interface::setLidarScanRanges(const std::vector<float>& ranges) {
     lidar_scan_msg_.header.stamp = ros::Time::now();
     lidar_scan_msg_.header.seq++;
    
+}
+
+void R2100Interface::publish() {
+    lidar_pub_.publish(lidar_scan_msg_);
+}
+
+
+void R2100Interface::startTimer() {
+    lidar_pub_timer_ = nh_.createTimer(ros::Duration(1.0 / lidar_pub_freq_), &R2100Interface::lidarPubTimeout, this);
 }
 
 void R2100Interface::initLidarMsg() {
@@ -51,5 +58,5 @@ void R2100Interface::initLidarMsg() {
 }
 
 void R2100Interface::lidarPubTimeout(const ros::TimerEvent& e) {
-    lidar_pub_.publish(lidar_scan_msg_);
+    publish();
 }

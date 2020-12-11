@@ -1,0 +1,20 @@
+
+# http://gazebosim.org/tutorials/?tut=ros_control
+
+unicorn:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 50  
+
+  # Position Controllers ---------------------------------------
+  lift_vertical_controller:
+    type: effort_controllers/JointTrajectoryController
+    joint: 
+    - lift_vertical_joint
+    - lift_horizontal_joint
+    
+  # lift_horizontal_controller:
+  #   type: effort_controllers/JointTrajectoryController
+  #   joint: lift_horizontal_joint
+  #   pid: {p: 100.0, i: 0.01, d: 10.0}
