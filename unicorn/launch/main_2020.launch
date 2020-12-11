@@ -12,7 +12,8 @@
 
 	<arg name="use_object_tracking" default="false" />
 
-	<arg name="sim" 				default="false" />
+	<arg name="sim" 						default="false" />
+	<arg name="use_simlift" 		default="false" />
 
 
 	<include file="$(find unicorn)/launch/components/control.launch" >
@@ -80,10 +81,14 @@
 	<!-- publish all the frames to TF -->
 
 	<group if="$(arg sim)">
-		<include file="$(find unicorn_simulator)/launch/gazebo.launch" />
+		<include file="$(find unicorn_simulator)/launch/gazebo.launch" >
+		<arg name="use_simlift" value="$(arg use_simlift)" />
+		</include>
 	</group>
 
 	<param unless="$(arg sim)" name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target.urdf.xacro'" />
+
+
 
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="state_publisher">
 		<param name="publish_frequency" value="100"/>
