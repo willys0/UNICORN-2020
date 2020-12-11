@@ -3,7 +3,7 @@
 
 association::association()
 {
-
+  
 
 }
 
@@ -44,11 +44,11 @@ void association::associate(const std::vector<shape_extraction::object_attribute
       trackers[i].age++;
       trackers[i].last_seen++;
 
-      dt = time - trackers[i].time;  
+      dt = time - trackers[i].time; 
       for(j=0; j<objects_size; j++)
       {
         if(object_attributes_list[j].polygon.points.size() >= 1){
-          calculateVel(object_attributes_list[j], i,sum);
+          
           s1 = sim_adj_angle*abs((trackers[i].average_angle) - (object_attributes_list[j].average_angle));
           s2 = sim_adj_dist*abs((trackers[i].longest_size) - (object_attributes_list[j].longest_size));
           s3 = sim_adj_side*abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount));  
@@ -57,8 +57,12 @@ void association::associate(const std::vector<shape_extraction::object_attribute
           s4 = sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (point.x));
           s5 = sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (point.y));
 
+          calculateVel(object_attributes_list[j], i,sum,odometryData, BaseLaser2BaseFrame);
 
-          //s6 = sim_adj_posdiff*abs(s6);
+          if(sum[0] < 0.00001)
+              sum[0] = 1;
+
+          s6 = sim_adj_posdiff*abs(sum[0]);
           s6 = sim_adj_posdiff;
           if(s1 > s2)
           {
@@ -83,7 +87,9 @@ void association::associate(const std::vector<shape_extraction::object_attribute
           if(!isnan(similarity))
             object_match_ratio[i][j] = double(similarity); 
 
-          //ROS_INFO("Test _ sim %d - components %d %d %d %d %d ",similarity,s5,s4);
+          ROS_INFO("Test sim %f - Tracker %d object %d , sim_prev %f velx %f vely %f, change yaw %f change x %f change y %f",similarity,i,j,sum[0],sum[1],sum[2],yaw_change, odom_change_x,odom_change_y);
+          //ROS_INFO("Size cluster %d - size tracker cluster %d ",(int)object_attributes_list[j].polygon.points.size(), (int)trackers[i].cluster.points.size());
+          //ROS_INFO("last seen %d age %d",trackers[i].last_seen, trackers[i].age);
         }
       }  
     }
@@ -115,7 +121,7 @@ void association::associate(const std::vector<shape_extraction::object_attribute
       
 
       
-      calculateVel(object_attributes_list[j], m,sum);
+      calculateVel(object_attributes_list[j], m,sum,odometryData, BaseLaser2BaseFrame);
       x_dot = sum[1];
       y_dot = sum[2];
       if(isnan(x_dot))
@@ -124,8 +130,8 @@ void association::associate(const std::vector<shape_extraction::object_attribute
         y_dot = 0;
 
       geometry_msgs::Point point = transform_point(object_attributes_list[j].position, odometryData,BaseLaser2BaseFrame);
-      x_dot = (trackers[m].tracker.x_hat(0)-point.x)/float(dt);
-      y_dot = (trackers[m].tracker.x_hat(2)-point.y)/float(dt);
+      //x_dot = (trackers[m].tracker.x_hat(0)-point.x)/float(dt);
+      //y_dot = (trackers[m].tracker.x_hat(2)-point.y)/float(dt);
 
       
       trackers[m].tracker.y << point.x, x_dot, point.y,y_dot; 
@@ -143,6 +149,8 @@ void association::associate(const std::vector<shape_extraction::object_attribute
         point32.z = point.z;
         trackers[m].points.points.push_back(point32);
       }
+      trackers[m].cluster.points.clear();
+      trackers[m].cluster = object_attributes_list[j].polygon;
       //trackers[m].points = object_attributes_list[j].polygon;
       trackers[m].time = time;
     }else{
@@ -195,6 +203,71 @@ void association::associate(const std::vector<shape_extraction::object_attribute
 
 
 /* Estimates the movment between an object a a tracker*/
+void association::calculateVel(shape_extraction::object_attributes object, int trackernr,float *sum, const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame)
+{
+  int i,j;
+
+  float x_t,y_t,x_o,y_o,distance;
+
+  geometry_msgs::Polygon points;
+  geometry_msgs::Point32 point1;
+  geometry_msgs::Point point;
+  
+  point1.z = 100;
+  point1.x = 0;
+  point1.y = 0;
+  sum[0] = 0;
+  sum[1] = 0;
+  sum[2] = 0;
+
+  // Checks minimum movent between each point recorded in the tracker and the repective object
+  for(j=0;j < (int)(trackers[trackernr].cluster.points.size()); j++)
+  {
+    x_t = trackers[trackernr].cluster.points[j].x*cos(-yaw_change) + trackers[trackernr].cluster.points[j].y*sin(-yaw_change) - odom_change_x;
+    y_t = trackers[trackernr].cluster.points[j].y*cos(-yaw_change) - trackers[trackernr].cluster.points[j].x*sin(-yaw_change) - odom_change_y;
+    point1.z = 10;
+    point1.x = 0;
+    point1.y = 0;
+
+    //ROS_INFO("Point %d ",j,trackers[trackernr].cluster.points.x,trackers[trackernr].cluster.points.y);
+    for(i=0;i < (int)(object.polygon.points.size());i++)
+    {
+      x_o = object.polygon.points[i].x;
+      y_o = object.polygon.points[i].y;
+      distance = sqrt(pow(x_o-x_t,2)+pow(y_o-y_t,2));
+      // new positon
+      if(distance < point1.z || i == 0){
+         point1.z = distance;
+         point1.x = x_o-x_t;
+         point1.y = y_o-y_t;
+      }
+    }
+    if(point1.z < 10)
+      points.points.push_back(point1);
+
+  }
+  j=1;
+  for(i=0;i<(int)(points.points.size());i++)
+    if(points.points[i].z < 10)
+    {
+      j++;
+      sum[0] += points.points[i].z;
+      sum[1] += points.points[i].x;
+      sum[2] += points.points[i].y;
+    }
+
+  sum[0] /= j;
+  sum[1] /= j;
+  /**/
+  point.x = sum[1];
+  point.y = sum[2];
+  point.z = 0;
+  point = transform_point(point, odometryData,BaseLaser2BaseFrame);
+
+  sum[1] = point.x - BaseLaser2BaseFrame.transform.translation.x - odometryData.pose.pose.position.x;
+  sum[2] = point.y - BaseLaser2BaseFrame.transform.translation.y - odometryData.pose.pose.position.y;
+}
+/* 
 void association::calculateVel(shape_extraction::object_attributes object, int trackernr,float *sum)
 {
   int i,j;
@@ -211,7 +284,7 @@ void association::calculateVel(shape_extraction::object_attributes object, int t
   sum[1] = 0;
   sum[2] = 0;
 
-  /* Checks minimum movent between each point recorded in the tracker and the repective object*/
+  // Checks minimum movent between each point recorded in the tracker and the repective object
   for(j=0;j < (int)(trackers[trackernr].points.points.size()); j++)
   {
     x_t = trackers[trackernr].points.points[j].x;
@@ -247,7 +320,7 @@ void association::calculateVel(shape_extraction::object_attributes object, int t
   sum[0] /= j;
   sum[1] /= j;
   sum[2] /= j;
-}
+}*/
 
 
 /* Initiates all trackers */
@@ -282,7 +355,8 @@ void association::initiate_Trackers(shape_extraction::object_attributes object,d
   new_trackers.color[2] = float(rand() % 80 + 20)/100;
   new_trackers.color[3] = float(rand() % 80 + 20)/100;
   new_trackers.points.points.clear();
-
+  new_trackers.cluster.points.clear();
+  new_trackers.cluster = object.polygon;
   int i;
   for(i = 0; i < object.polygon.points.size(); i++)
   {
@@ -372,6 +446,35 @@ geometry_msgs::Point association::transform_point(geometry_msgs::Point position,
 
 }
 
+/* Estimates change in obometry from reliable pdometry changes*/
+void association::calculateOdometryChange(const nav_msgs::Odometry& odometryData_new)
+{
+  double roll,pitch,yaw_old, yaw_new,x_old,x_new,y_old,y_new;
+  if(OdometryChange_initiated)
+  {
+    odometryData = odometryData_new;
+    OdometryChange_initiated = true;
+  }else
+  {
+    tf::Quaternion q(odometryData_new.pose.pose.orientation.x,odometryData_new.pose.pose.orientation.y,odometryData_new.pose.pose.orientation.z,odometryData_new.pose.pose.orientation.w);
+    tf::Quaternion r(odometryData.pose.pose.orientation.x,odometryData.pose.pose.orientation.y,odometryData.pose.pose.orientation.z,odometryData.pose.pose.orientation.w);
+    tf::Matrix3x3 m(q);
+    tf::Matrix3x3 n(r);
+    m.getRPY(roll,pitch,yaw_new);
+    n.getRPY(roll,pitch,yaw_old);
+    y_old = odometryData.pose.pose.position.y;
+    y_new = odometryData_new.pose.pose.position.y;
+    
+    x_old = odometryData.pose.pose.position.x;
+    x_new = odometryData_new.pose.pose.position.x;
+
+    odom_change_x = x_new - x_old;
+	  odom_change_y = y_new - y_old;
+	  yaw_change = yaw_new - yaw_old;
+    odometryData = odometryData_new;
+  } 
+  
+}
 
 /*
 using namespace gs;

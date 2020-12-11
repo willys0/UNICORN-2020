@@ -109,8 +109,7 @@ private:
 	
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
-	nav_msgs::Odometry wheel_odometry_data_;
-	nav_msgs::Odometry wheel_odometry_data_prev;
+	nav_msgs::Odometry wheel_odometry_data;
 	nav_msgs::OccupancyGrid map_data_;
 	sensor_msgs::LaserScan scan_data_;
 	sensor_msgs::LaserScan scan_data_old;
@@ -178,6 +177,11 @@ private:
   	}typedef tracker_attributes;
 //KalmanFilter tracker;
   	tracker_attributes trackers[MAXTRACKS];
+
+	bool wheel_received = false;
+	bool map_received = false;
+	bool odom_received = false;
+	bool scan_received = false;
 
 
 

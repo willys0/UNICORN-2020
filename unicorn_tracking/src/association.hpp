@@ -17,8 +17,6 @@
 #include "Hungarian/Hungarian.h"
 #include "shape_extraction.hpp"
 
-#include "ICP/ICP.h"
-
 
 #define MAX_OBJECTS 100
 
@@ -41,8 +39,10 @@ public:
 	
 	void estimate_new_position(double time);
 	void update_position();
-	//void estimate_odometry(const sensor_msgs::LaserScan& scan_new, const sensor_msgs::LaserScan& scan_old);
 
+	void calculateOdometryChange(const nav_msgs::Odometry& odometryData_new);
+	
+	//void estimate_odometry(const sensor_msgs::LaserScan& scan_new, const sensor_msgs::LaserScan& scan_old);
 
 	//tracker multitracker;/*
 	struct tracker_attributes{
@@ -54,12 +54,13 @@ public:
 		float average_angle;
 		double time;
 		float color[4];
+		geometry_msgs::Polygon cluster;
 		geometry_msgs::Polygon points;
 		KalmanFilter tracker;
   	}typedef tracker_attributes;
 
 	std::vector<tracker_attributes> trackers;
-
+	
 
 	float sim_adj_dist = 1.0;
 	float sim_adj_angle = 1.0;
@@ -76,11 +77,14 @@ public:
 private:
 	//void association::transform_polygon(geometry_msgs::Polygon polygon_in, geometry_msgs::Polygon polygon_out, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame);
 	geometry_msgs::Point transform_point(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame);
-	void calculateVel(shape_extraction::object_attributes object, int trackernr,float *sum);
+	void calculateVel(shape_extraction::object_attributes object, int trackernr,float *sum, const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame);
 	void initiate_Trackers(shape_extraction::object_attributes object,double time, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame);
 
-
-
+	bool OdometryChange_initiated = false;
+	nav_msgs::Odometry odometryData;
+	double odom_change_x = 0;
+	double odom_change_y = 0;
+	double yaw_change = 0;
 };
 
 #endif

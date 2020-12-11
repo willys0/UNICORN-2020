@@ -1,9 +1,7 @@
 #include "tracking_lidar.hpp"
 
 
-static bool map_received = false;
-static bool odom_received = false;
-static bool scan_received = false;
+
 
 
 /* Makes Variables reconfigurable */
@@ -255,8 +253,9 @@ void tracking_lidar::odomCallback(const nav_msgs::Odometry& odometry)
 
 void tracking_lidar::wheelodomCallback(const nav_msgs::Odometry& odometry)
 {
-  wheel_odometry_data_ = odometry;
 
+  wheel_odometry_data = odometry;
+  wheel_received = true;
 
 }
 
@@ -280,7 +279,7 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
     scan_data_ = scan;
     scan_received = true;
 
-    if(map_received && odom_received && scan_received){
+    if(map_received && odom_received && scan_received && wheel_received){
       
 
       shape_interface.adaptive_break_point(scan);
@@ -293,15 +292,11 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       std::cout << "Test objects:" << std::endl;
       std::cout << shape_interface.object_attributes_list.size() << std::endl;
       shape_interface.polygon_attribute_extraction();
+      association_interface.calculateOdometryChange(wheel_odometry_data);
       //std::cout << "Angle:" << shape_interface.object_attributes_list[0].average_angle << "side:" << shape_interface.object_attributes_list[0].longest_size << "Sides:" << shape_interface.object_attributes_list[0].sides_amount  << std::endl;
       
       //association_interface.estimate_new_position(scan_data_.header.stamp.sec  + scan_data_.header.stamp.nsec*0.000000001);
       association_interface.associate(shape_interface.object_attributes_list, odometry_data_, Lidar2base, scan.header.stamp);
-
-      if(seq > 0)
-      {
-
-      }
 
       /*
       adaptive_breaK_point();
@@ -315,8 +310,13 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       estimate_new_position();
       association();
       update_position();*/
+
+
+        
+
       object_publisher();
+      wheel_received = false;
       scan_received = false; 
-      wheel_odometry_data_prev = wheel_odometry_data_;
+      
     }
 }
