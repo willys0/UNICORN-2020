@@ -92,6 +92,11 @@
 	</include>
 
 
+	<!-- launch docking node -->
+	<include if="$(arg sim)" file="$(find unicorn_docking)/launch/docking_sim.launch"/>
+	<include unless="$(arg sim)" file="$(find unicorn_docking)/launch/docking.launch"/>
+
+
 	<!-- load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
 

@@ -5,6 +5,9 @@
   <arg name="remove_duplicates" default="true" />
   <arg name="docking_config" default="$(find unicorn_docking)/config/docking.yaml" />
   <arg name="pid_config" default="$(find unicorn_docking)/config/pid_gains.yaml" />
+  <arg name="dyn_reconfigure_config" default="$(find unicorn_docking)/config/reconfigurable.yaml" />
+
+  <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load /unicorn_docking_node $(arg dyn_reconfigure_config)" />
 
   <node pkg="unicorn_docking" type="unicorn_docking_node" name="unicorn_docking_node" output="screen">
     <remap from="/cmd_vel" to="/unicorn/cmd_vel" />
