@@ -468,10 +468,10 @@
   <transmission name="lift_h_trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="lift_horizontal_joint">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       </joint>
       <actuator name="lift_h_motor">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
         <mechanicalReduction>5</mechanicalReduction>
       </actuator>
   </transmission>
@@ -480,10 +480,10 @@
   <transmission name="lift_v_trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="lift_vertical_joint">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
       </joint>
       <actuator name="lift_v_motor">
-        <hardwareInterface>EffortJointInterface</hardwareInterface>
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
         <mechanicalReduction>5</mechanicalReduction>
       </actuator>
   </transmission>
