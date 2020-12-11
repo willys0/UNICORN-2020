@@ -14,6 +14,17 @@
 
 	<arg name="sim" 				default="false" />
 
+	<arg name="move_base_action_namespace" value="/move_base" />
+	<arg name="dock_action_namespace" value="/unicorn_docking_node/dock_action" />
+	<arg name="lift_action_namespace" value="/lift/lift_action" />
+
+	<!-- Remap various topics used by the nodes to their real names -->
+	<remap from="/move_base" to="$(arg move_base_action_namespace)" />
+	<remap from="/move_base/cancel" to="$(arg move_base_action_namespace)/cancel" />
+	<remap from="/dock" to="$(arg dock_action_namespace)" />
+	<remap from="/dock/cancel" to="$(arg dock_action_namespace)/cancel" />
+	<remap from="/lift/action" to="$(arg lift_action_namespace)" />
+	<remap from="/lift/action/cancel" to="$(arg lift_action_namespace)/cancel" />
 
 	<include file="$(find unicorn)/launch/components/control.launch" >
 		<arg name="sim" value="$(arg sim)" />

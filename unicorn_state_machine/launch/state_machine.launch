@@ -13,8 +13,5 @@
         <rosparam command="load" file="$(arg config_file)" />
 
         <param name="robot_base_frame" value="$(arg robot_base_frame)" />
-
-        <remap from="/dock" to="$(arg dock_action_namespace)" />
-        <remap from="/dock/cancel" to="$(arg dock_action_namespace)/cancel" />
     </node>
 </launch>
