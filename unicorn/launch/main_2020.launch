@@ -93,13 +93,8 @@
 
 
 	<!-- launch docking node -->
-	<group if="$(arg sim)">
-		<include file="$(find unicorn_docking)/launch/docking_sim.launch">
-	</group>
-
-	<group unless="$(arg sim)">
-		<include file="$(find unicorn_docking)/launch/docking.launch">
-	</group>
+	<include if="$(arg sim)" file="$(find unicorn_docking)/launch/docking_sim.launch"/>
+	<include unless="$(arg sim)" file="$(find unicorn_docking)/launch/docking.launch"/>
 
 
 	<!-- load joint controller configurations from YAML file to parameter server -->
