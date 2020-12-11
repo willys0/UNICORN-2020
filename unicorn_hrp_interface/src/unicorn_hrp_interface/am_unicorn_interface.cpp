@@ -31,12 +31,12 @@ void AmUnicornInterface::cmdVelCallback(const geometry_msgs::Twist& cmd_vel)
 }
 
 void AmUnicornInterface::amStatusCallback(const am_driver::SensorStatusConstPtr& msg) {
-  static std_srvs::SetBool req;
+  static std_srvs::SetBool srv;
   static actionlib_msgs::GoalID cancel_msg;
 
   if(msg->mowerInternalState != am_driver::SensorStatus::MOWER_INTERNAL_STATUS_PAUSED) {
-    req.data = true;
-    ros::service::call("/unicorn_state_machine_node/force_stop", req);
+    srv.request.data = true;
+    ros::service::call("/unicorn_state_machine_node/force_stop", srv);
 
     movebase_cancel_pub_.publish(cancel_msg);
     dock_cancel_pub_.publish(cancel_msg);
