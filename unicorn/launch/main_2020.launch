@@ -59,6 +59,16 @@
 	</group>
 
 
+	<!-- launch docking node -->
+	<group if="$(arg sim)">
+		<include file="$(find unicorn_docking)/launch/docking_sim.launch">
+	</group>
+
+	<group unless="$(arg sim)">
+		<include file="$(find unicorn_docking)/launch/docking.launch">
+	</group>
+
+
 	<!-- load joint controller configurations from YAML file to parameter server -->
 	<rosparam file="$(find am_control)/config/joint_position_control.yaml" command="load" />
 
