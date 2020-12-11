@@ -46,6 +46,10 @@ void AmUnicornInterface::amStatusCallback(const am_driver::SensorStatusConstPtr&
     dock_cancel_pub_.publish(cancel_msg);
     lift_cancel_pub_.publish(cancel_msg);
   }
+  else {
+    srv.request.data = false;
+    ros::service::call("/unicorn_state_machine_node/force_stop", srv);
+  }
 
   if(msg->sensorStatus & am_driver::SensorStatus::SENSOR_STATUS_LOOP_ON) {
     mode_msg.data = am_driver::Mode::MODE_LOOP_OFF;
