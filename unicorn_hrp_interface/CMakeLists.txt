@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   unicorn_roborio_bridge
   unicorn_state_machine
+  std_srvs
   actionlib
   actionlib_msgs
 )
