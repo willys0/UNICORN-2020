@@ -8,7 +8,7 @@ int main(int argc, char** argv){
     ROS_INFO("Started automower to unicorn interface");
 
     AmUnicornInterface am_unicorn_interface;
-    ros::Rate r(30.0);
+    ros::Rate r(100.0);
 
     while(ros::ok())
     {
