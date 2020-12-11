@@ -49,7 +49,7 @@ void AmUnicornInterface::amStatusCallback(const am_driver::SensorStatusConstPtr&
 
   if(msg->sensorStatus & am_driver::SensorStatus::SENSOR_STATUS_LOOP_ON) {
     mode_msg.data = am_driver::Mode::MODE_LOOP_OFF;
-    hrp_mode_pub_.publish(msg);
+    hrp_mode_pub_.publish(mode_msg);
   }
 }
 
