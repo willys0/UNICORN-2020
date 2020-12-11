@@ -4,6 +4,8 @@
 
 #include <std_srvs/SetBool.h>
 #include <actionlib_msgs/GoalID.h>
+#include <am_driver/Mode.h>
+#include <std_msgs/UInt16.h>
 
 AmUnicornInterface::AmUnicornInterface()
 {
@@ -11,6 +13,7 @@ AmUnicornInterface::AmUnicornInterface()
   unicorn_cmd_vel_pub_ = n_.advertise<geometry_msgs::Twist>("/cmd_vel", 0);
 
   hrp_status_sub_ = n_.subscribe("/sensor_status", 0, &AmUnicornInterface::amStatusCallback, this);
+  hrp_mode_pub_ = n_.advertise<std_msgs::UInt16>("/cmd_mode", 1, true);
 
   movebase_cancel_pub_ = n_.advertise<actionlib_msgs::GoalID>("/move_base/cancel", 1);
   dock_cancel_pub_ = n_.advertise<actionlib_msgs::GoalID>("/dock/cancel", 1);
@@ -33,6 +36,7 @@ void AmUnicornInterface::cmdVelCallback(const geometry_msgs::Twist& cmd_vel)
 void AmUnicornInterface::amStatusCallback(const am_driver::SensorStatusConstPtr& msg) {
   static std_srvs::SetBool srv;
   static actionlib_msgs::GoalID cancel_msg;
+  static std_msgs::UInt16 mode_msg;
 
   if(msg->mowerInternalState != am_driver::SensorStatus::MOWER_INTERNAL_STATUS_PAUSED) {
     srv.request.data = true;
@@ -41,6 +45,11 @@ void AmUnicornInterface::amStatusCallback(const am_driver::SensorStatusConstPtr&
     movebase_cancel_pub_.publish(cancel_msg);
     dock_cancel_pub_.publish(cancel_msg);
     lift_cancel_pub_.publish(cancel_msg);
+  }
+
+  if(msg->sensorStatus & am_driver::SensorStatus::SENSOR_STATUS_LOOP_ON) {
+    mode_msg.data = am_driver::Mode::MODE_LOOP_OFF;
+    hrp_mode_pub_.publish(msg);
   }
 }
 

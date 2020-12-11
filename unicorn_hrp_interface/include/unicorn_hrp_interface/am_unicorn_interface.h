@@ -24,6 +24,7 @@ class AmUnicornInterface
         ros::Publisher unicorn_cmd_vel_pub_;
 
         ros::Subscriber hrp_status_sub_;
+        ros::Publisher  hrp_mode_pub_;
 
         ros::Publisher movebase_cancel_pub_;
         ros::Publisher dock_cancel_pub_;
