@@ -5,14 +5,16 @@
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://bin_hanger/meshes/Bin_hanger.dae</uri>
+	    <scale>0.001 0.001 0.001</scale>
+            <uri>model://bin_hanger/meshes/Bin_hanger2.dae</uri>
           </mesh>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://bin_hanger/meshes/Bin_hanger.dae</uri>
+	    <scale>0.001 0.001 0.001</scale>
+            <uri>model://bin_hanger/meshes/Bin_hanger2.dae</uri>
           </mesh>
         </geometry>
         <material name="">
