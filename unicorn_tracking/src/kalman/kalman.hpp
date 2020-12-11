@@ -5,6 +5,9 @@
 * @date: 07/03/2018
 */
 
+#ifndef KALMAN_H
+#define KALMAN_H
+
 #include <Eigen/Dense>
 
 
@@ -94,3 +97,5 @@ private:
 
 	
 };
+
+#endif

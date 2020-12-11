@@ -7,11 +7,14 @@
 #include <nav_msgs/Odometry.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <geometry_msgs/Polygon.h>
+
 #include <costmap_converter/ObstacleArrayMsg.h>
 #include <costmap_converter/ObstacleMsg.h>
+
 #include <geometry_msgs/Point32.h>
 #include <geometry_msgs/Point.h>
 #include <geometry_msgs/Pose.h>
+
 #include <sensor_msgs/LaserScan.h>
 #include <tf2_ros/transform_listener.h>
 #include <tf2/LinearMath/Quaternion.h>
@@ -36,8 +39,10 @@
 #include <time.h>       /* time */
 
 /* Kalman */
-#include "kalman.hpp"
-#include "Hungarian.h"
+#include "kalman/kalman.hpp"
+#include "Hungarian/Hungarian.h"
+#include "shape_extraction.hpp"
+#include "association.hpp"
 
 #define PI 3.14159265
 #define MAX_OBJECTS 100
@@ -49,48 +54,69 @@ class tracking_lidar
 public:
 	tracking_lidar();
 	void odomCallback(const nav_msgs::Odometry& odometry);
+	void wheelodomCallback(const nav_msgs::Odometry& odometry); 
 	void mapCallback(const nav_msgs::OccupancyGrid& map);
 	void scanCallback(const sensor_msgs::LaserScan& scan);
 	void publishmsg();
-	void adaptive_breaK_point();
-	void static_map_filter();
-	void polygon_extraction();
-	void polygon_attribute_extraction();
 	void object_publisher();
-	void association();
 
+
+	
+
+	association association_interface;
 	/* Variables that can be dynamically changed */
 	float lambda;
-	int max_dist_laser;
+	float max_dist_laser;
 	int static_remove_dist;
 	float polygon_tolerance;
 	int polygon_min_points, min_size_cluster;
+
+
 	float min_twist_detection, max_similarty_deviation;
 	float sim_adj_dist, sim_adj_angle, sim_adj_side, sim_adj_xpos, sim_adj_ypos,sim_adj_posdiff;
+
+
 	bool static_filter;
+
+
 	int TRACKER_LIFE; 
 	int CONFIRMED_TRACK;
+
+
 	std::string mapframeid = "map";
 	std::string odomframeid = "odom_chassis";
 	std::string base_laser_frame = "base_laser";
 	std::string base_frame = "chassis_link";
 	tf2_ros::Buffer tf_buffer;
+
+	struct association_variables{
+		//similarity weights
+		float *sim_adj_dist;
+		float *sim_adj_angle;
+		float *sim_adj_side;
+		float *sim_adj_xpos;
+		float *sim_adj_ypos;
+		float *sim_adj_posdiff;
+		float *max_similarty_deviation;
+
+	}typedef association_variables;
+
+
+	shape_extraction shape_interface;
   	
 private:
-	void extract_corners(int startpoint,int endpoint, int length,int shape_nr);
-	void search_longest(int startpoint, int current_point,int end_point, int length, float distance_S, int itteration, int max_itteration, int *best_point, float *best_dist);
-	void initiate_Trackers();
-	void estimate_new_position();
-	void update_position();
-	void calculateVel(int objectnr, int trackernr,float *sum);
-	
 
+	
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
+	nav_msgs::Odometry wheel_odometry_data_;
+	nav_msgs::Odometry wheel_odometry_data_prev;
 	nav_msgs::OccupancyGrid map_data_;
 	sensor_msgs::LaserScan scan_data_;
+	sensor_msgs::LaserScan scan_data_old;
 	geometry_msgs::Polygon shapes[MAX_OBJECTS];
 	ros::Subscriber odometry_sub_;
+	ros::Subscriber odometry_sub_2;
 	ros::Subscriber map_sub_;
 	ros::Subscriber scan_sub_;
 	ros::Publisher object_pub_;

@@ -24,7 +24,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
-
+find_package(Eigen3 REQUIRED)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -117,7 +117,7 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   CATKIN_DEPENDS roscpp std_msgs nav_msgs sensor_msgs geometry_msgs costmap_converter visualization_msgs
 #  CATKIN_DEPENDS roscpp std_msgs nav_msgs actionlib actionlib_msgs tf geometry_msgs 
-#  DEPENDS system_lib
+  DEPENDS Eigen3
 )
 
 
@@ -130,6 +130,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${Eigen3_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -138,8 +139,8 @@ include_directories(
 # )
 
 
- add_executable(${PROJECT_NAME}_node src/tracking_lidar.cpp src/kalman.cpp src/Hungarian.cpp)
- target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES})
+ add_executable(${PROJECT_NAME}_node src/tracking_lidar.cpp src/shape_extraction.cpp src/association.cpp src/kalman/kalman.cpp src/Hungarian/Hungarian.cpp)
+ target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} ${Eigen3_LIBRARIES})
  add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 ## Add cmake target dependencies of the library
