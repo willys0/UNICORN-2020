@@ -2,6 +2,23 @@
 
 
 
+shape_extraction::shape_extraction()
+{
+
+	 min_size_cluster = &min_size_cluster_std;
+	 max_dist_laser = &max_dist_laser_std;
+	 lambda = &lambda_std;
+	 static_remove_dist = &static_remove_dist_std;
+	 static_remove_ratio = &static_remove_ratio_std;
+	 polygon_min_points = &polygon_min_points_std;
+	 polygon_tolerance = &polygon_tolerance_std;
+
+
+}
+
+
+
+
 void shape_extraction::shape_extraction_setvar(float *lambda_p,float *max_dist_laser_p,int *static_remove_dist_p,int* min_size_cluster_p, float *polygon_tolerance_p, int *polygon_min_points_p)
 {
   // Roscore
@@ -10,6 +27,7 @@ void shape_extraction::shape_extraction_setvar(float *lambda_p,float *max_dist_l
 		max_dist_laser = max_dist_laser_p;
 		// Filter
 		static_remove_dist = static_remove_dist_p;
+    //static_remove_ratio = static_remove_ratio_p;
 		min_size_cluster = min_size_cluster_p;
 		// Polygon extraction
 		polygon_tolerance = polygon_tolerance_p;
@@ -107,21 +125,24 @@ void shape_extraction::adaptive_break_point(const sensor_msgs::LaserScan& scan)
 
 
 /* Filters static map from scan, requires reliable odometry and static map*/
-void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map)
+void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map, const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame)
 {
 
-  int i,j,m,n;
+  int i,j,m,n,ratio;
   int x_map,y_map;
 
-  for(i=0; i < cluster_list.size(); i++)
+  for(i=cluster_list.size()-1; i >= 0; i--)
   {
+   
+    ratio = 0;
     for(j=0; j < cluster_list[i].cluster.size(); j++)
     {
       if(cluster_list[i].clusterNr != -1)
       {
+      geometry_msgs::Point point = transform_point(cluster_list[i].cluster[j].point, odometryData,BaseLaser2BaseFrame);
       // Get MAP COORDINATES
-      x_map = round((int)((float)cluster_list[i].cluster[j].point.x/(map.info.resolution))) + ((int)(map.info.width)/2);
-      y_map = round((int)((float)cluster_list[i].cluster[j].point.y/(map.info.resolution))) + ((int)(map.info.height)/2);
+      x_map = round((int)((float)point.x/(map.info.resolution))) + ((int)(map.info.width)/2);
+      y_map = round((int)((float)point.y/(map.info.resolution))) + ((int)(map.info.height)/2);
       // Check Surrounding MAp positions 
       for(m=-*static_remove_dist; m <= *static_remove_dist;m++)
         for(n=-*static_remove_dist; n <= *static_remove_dist;n++){
@@ -129,7 +150,8 @@ void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map)
             if((0 < (x_map+m)) && (0 < (y_map+n)))
             {
               if(map.data[(x_map+m) + (y_map+n)*map.info.width] > 0){
-                cluster_list[i].clusterNr = -1;
+                //cluster_list[i].clusterNr = -1;
+                ratio++;
                 m = *static_remove_dist+1;
                 n = *static_remove_dist+1;
               }
@@ -137,6 +159,13 @@ void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map)
           }
         }
       }
+    }
+    ROS_INFO("Number of clusters: %d - Points in cluster %d - Ratio found %f - Ratio needed %f", (int)cluster_list.size(),(int)cluster_list[i].cluster.size(), (ratio/(float)cluster_list[i].cluster.size()), *static_remove_ratio);
+    if((ratio/(float)cluster_list[i].cluster.size()) > *static_remove_ratio)
+    {
+      ROS_INFO("Clusters %d removed due to static filter", i);
+      //cluster_list[i].cluster.clear();
+      cluster_list.erase(cluster_list.begin() + i);
     }
   }
 
@@ -299,6 +328,31 @@ void shape_extraction::polygon_attribute_extraction()
     }
     //std::cout << "Cluster nr:" << i << " estimated_x:" << object_attributes_list[i].estimated_y << "estimated_y:"<< object_attributes_list[i].estimated_y <<std::endl;
   }
+}
+
+geometry_msgs::Point shape_extraction::transform_point(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame)
+{
+  double roll,pitch,yaw,x_t,y_t;
+  tf::Quaternion q(odometryData.pose.pose.orientation.x,odometryData.pose.pose.orientation.y,odometryData.pose.pose.orientation.z,odometryData.pose.pose.orientation.w);
+  tf::Matrix3x3 m(q);
+  m.getRPY(roll,pitch,yaw);
+
+  // To base
+  tf2::doTransform(position,position,BaseLaser2BaseFrame);
+
+  // transform with odometry
+  x_t = position.x;
+  y_t = position.y;
+  position.x = x_t*cos(-yaw) + y_t*sin(-yaw);
+  position.y = y_t*cos(-yaw) - x_t*sin(-yaw);
+  
+  position.x += odometryData.pose.pose.position.x;
+  position.y += odometryData.pose.pose.position.y;
+  position.z = 0;
+
+  return position;
+  // transform to map
+  //tf2::doTransform(point,point,odom2map);
 }
 
 // ------------------------------------------ Shape Extraction -----------------------------------------------------------------------

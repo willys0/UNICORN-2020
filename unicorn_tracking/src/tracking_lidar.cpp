@@ -285,8 +285,9 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       shape_interface.adaptive_break_point(scan);
       std::cout << "Test clsuters:" << std::endl;
       std::cout << shape_interface.cluster_list.size() << std::endl;
-      //if(static_filter)
-      //  shape.static_map_filter(map_data_);
+      if(static_filter)
+        shape_interface.static_map_filter(map_data_, odometry_data_, Lidar2base);
+      
 
       shape_interface.polygon_extraction();
       std::cout << "Test objects:" << std::endl;

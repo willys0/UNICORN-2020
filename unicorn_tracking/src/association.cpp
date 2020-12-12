@@ -87,7 +87,7 @@ void association::associate(const std::vector<shape_extraction::object_attribute
           if(!isnan(similarity))
             object_match_ratio[i][j] = double(similarity); 
 
-          ROS_INFO("Test sim %f - Tracker %d object %d , sim_prev %f velx %f vely %f, change yaw %f change x %f change y %f",similarity,i,j,sum[0],sum[1],sum[2],yaw_change, odom_change_x,odom_change_y);
+          //ROS_INFO("Test sim %f - Tracker %d object %d , sim_prev %f velx %f vely %f, change yaw %f change x %f change y %f",similarity,i,j,sum[0],sum[1],sum[2],yaw_change, odom_change_x,odom_change_y);
           //ROS_INFO("Size cluster %d - size tracker cluster %d ",(int)object_attributes_list[j].polygon.points.size(), (int)trackers[i].cluster.points.size());
           //ROS_INFO("last seen %d age %d",trackers[i].last_seen, trackers[i].age);
         }
@@ -443,7 +443,6 @@ geometry_msgs::Point association::transform_point(geometry_msgs::Point position,
   return position;
   // transform to map
   //tf2::doTransform(point,point,odom2map);
-
 }
 
 /* Estimates change in obometry from reliable pdometry changes*/
