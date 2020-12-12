@@ -1,10 +1,33 @@
 #include "association.hpp"
 
 
+
 association::association()
 {
-  
 
+	sim_adj_dist = &sim_adj_dist_std;
+	sim_adj_angle = &sim_adj_angle_std;
+	sim_adj_side = &sim_adj_side_std;
+	sim_adj_xpos = &sim_adj_xpos_std;
+	sim_adj_ypos = &sim_adj_ypos_std;
+	sim_adj_posdiff = &sim_adj_posdiff_std;
+	max_similarty_deviation = &max_similarty_deviation_std;
+	CONFIRMED_TRACK = &CONFIRMED_TRACK_std;
+	TRACKER_LIFE = &TRACKER_LIFE_std;
+}
+
+
+void association::association_setvar(int *CONFIRMED_TRACK_p, int *TRACKER_LIFE_p,float *max_similarty_deviation_p, float *sim_adj_dist_p,float *sim_adj_angle_p,float *sim_adj_side_p,float *sim_adj_xpos_p,float *sim_adj_ypos_p,float *sim_adj_posdiff_p){
+  
+  CONFIRMED_TRACK = CONFIRMED_TRACK_p;
+  TRACKER_LIFE = TRACKER_LIFE_p;
+  max_similarty_deviation = max_similarty_deviation_p; 
+  sim_adj_dist = sim_adj_dist_p;
+  sim_adj_angle = sim_adj_angle_p;
+  sim_adj_side = sim_adj_side_p;
+  sim_adj_xpos = sim_adj_xpos_p;
+  sim_adj_ypos = sim_adj_ypos_p;
+  sim_adj_posdiff = sim_adj_posdiff_p;
 }
 
 /* Associates objects with trackers*/
@@ -49,21 +72,21 @@ void association::associate(const std::vector<shape_extraction::object_attribute
       {
         if(object_attributes_list[j].polygon.points.size() >= 1){
           
-          s1 = sim_adj_angle*abs((trackers[i].average_angle) - (object_attributes_list[j].average_angle));
-          s2 = sim_adj_dist*abs((trackers[i].longest_size) - (object_attributes_list[j].longest_size));
-          s3 = sim_adj_side*abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount));  
+          s1 = *sim_adj_angle*abs((trackers[i].average_angle) - (object_attributes_list[j].average_angle));
+          s2 = *sim_adj_dist*abs((trackers[i].longest_size) - (object_attributes_list[j].longest_size));
+          s3 = *sim_adj_side*abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount));  
 
           geometry_msgs::Point point = transform_point(object_attributes_list[j].position, odometryData,BaseLaser2BaseFrame);
-          s4 = sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (point.x));
-          s5 = sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (point.y));
+          s4 = *sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (point.x));
+          s5 = *sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (point.y));
 
           calculateVel(object_attributes_list[j], i,sum,odometryData, BaseLaser2BaseFrame);
 
           if(sum[0] < 0.00001)
               sum[0] = 1;
 
-          s6 = sim_adj_posdiff*abs(sum[0]);
-          s6 = sim_adj_posdiff;
+          s6 = *sim_adj_posdiff*abs(sum[0]);
+          s6 = *sim_adj_posdiff;
           if(s1 > s2)
           {
             similarity = s2;
@@ -77,12 +100,12 @@ void association::associate(const std::vector<shape_extraction::object_attribute
           }
           if(isnan(s6))
           {
-            s6 = sim_adj_posdiff;
+            s6 = *sim_adj_posdiff;
           }
           similarity += s3 + s4 + s5 + s6;
-          similarity /= (sim_adj_dist + sim_adj_angle + sim_adj_side + sim_adj_xpos + sim_adj_ypos + sim_adj_posdiff);
+          similarity /= (*sim_adj_dist + *sim_adj_angle + *sim_adj_side + *sim_adj_xpos + *sim_adj_ypos + *sim_adj_posdiff);
           
-          if(trackers[i].age > CONFIRMED_TRACK)
+          if(trackers[i].age > *CONFIRMED_TRACK)
             similarity *= 0.9;
           if(!isnan(similarity))
             object_match_ratio[i][j] = double(similarity); 
@@ -108,7 +131,7 @@ void association::associate(const std::vector<shape_extraction::object_attribute
   /* Associates trackers according to cost*//**/
   for (m = 0; m < trackers.size(); m++)
   {
-    if(object_match_ratio[m][assignment[m]] < max_similarty_deviation)
+    if(object_match_ratio[m][assignment[m]] < *max_similarty_deviation)
     {
       dt = time - trackers[m].time;
       object_match[assignment[m]] = 1; 
@@ -167,7 +190,7 @@ void association::associate(const std::vector<shape_extraction::object_attribute
     j++;
     //ROS_INFO("Tracker %d, last seen %d age %d",i,trackers[i].last_seen, trackers[i].age);
     if(trackers[i].age > 0){
-      if((trackers[i].last_seen > TRACKER_LIFE) || (trackers[i].age < CONFIRMED_TRACK && trackers[i].last_seen > 1))
+      if((trackers[i].last_seen > *TRACKER_LIFE) || (trackers[i].age < *CONFIRMED_TRACK && trackers[i].last_seen > 1))
       {
 
         trackers.erase(trackers.begin() + i);

@@ -19,7 +19,7 @@ class shape_extraction
 public:
 	shape_extraction();
 
-    void shape_extraction_setvar(float *lambda_p,float *max_dist_laser_p,int *static_remove_dist_p,int* min_size_cluster_p, float *polygon_tolerance_p, int *polygon_min_points_p);
+    void shape_extraction_setvar(float *lambda_p,float *max_dist_laser_p,int *static_remove_dist_p,float* static_remove_ratio_p,int* min_size_cluster_p, float *polygon_tolerance_p, int *polygon_min_points_p);
 
 	
 	//void adaptive_break_point(const nav_msgs::Odometry& odometryData, const sensor_msgs::LaserScan& scan, geometry_msgs::TransformStamped BaseLaser2BaseFrame);
@@ -65,11 +65,11 @@ public:
 	int polygon_min_points_std = 3;
 	float polygon_tolerance_std = 1.04;
 
-	int *min_size_cluster = &min_size_cluster_std;
+	int *min_size_cluster;
 	float *max_dist_laser;
 	float *lambda;
 	int *static_remove_dist;
-	float *static_remove_ratio = &static_remove_ratio_std;
+	float *static_remove_ratio;
 	int *polygon_min_points;
 	float *polygon_tolerance;
 

@@ -19,7 +19,7 @@ shape_extraction::shape_extraction()
 
 
 
-void shape_extraction::shape_extraction_setvar(float *lambda_p,float *max_dist_laser_p,int *static_remove_dist_p,int* min_size_cluster_p, float *polygon_tolerance_p, int *polygon_min_points_p)
+void shape_extraction::shape_extraction_setvar(float *lambda_p,float *max_dist_laser_p,int *static_remove_dist_p, float* static_remove_ratio_p,int* min_size_cluster_p, float *polygon_tolerance_p, int *polygon_min_points_p)
 {
   // Roscore
 		// Adaptive breakpoint
@@ -27,7 +27,7 @@ void shape_extraction::shape_extraction_setvar(float *lambda_p,float *max_dist_l
 		max_dist_laser = max_dist_laser_p;
 		// Filter
 		static_remove_dist = static_remove_dist_p;
-    //static_remove_ratio = static_remove_ratio_p;
+    static_remove_ratio = static_remove_ratio_p;
 		min_size_cluster = min_size_cluster_p;
 		// Polygon extraction
 		polygon_tolerance = polygon_tolerance_p;
@@ -160,10 +160,10 @@ void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map, con
         }
       }
     }
-    ROS_INFO("Number of clusters: %d - Points in cluster %d - Ratio found %f - Ratio needed %f", (int)cluster_list.size(),(int)cluster_list[i].cluster.size(), (ratio/(float)cluster_list[i].cluster.size()), *static_remove_ratio);
+    //ROS_INFO("Number of clusters: %d - Points in cluster %d - Ratio found %f - Ratio needed %f", (int)cluster_list.size(),(int)cluster_list[i].cluster.size(), (ratio/(float)cluster_list[i].cluster.size()), *static_remove_ratio);
     if((ratio/(float)cluster_list[i].cluster.size()) > *static_remove_ratio)
     {
-      ROS_INFO("Clusters %d removed due to static filter", i);
+      //ROS_INFO("Clusters %d removed due to static filter", i);
       //cluster_list[i].cluster.clear();
       cluster_list.erase(cluster_list.begin() + i);
     }

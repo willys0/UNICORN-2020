@@ -68,6 +68,7 @@ public:
 	float lambda;
 	float max_dist_laser;
 	int static_remove_dist;
+	float static_remove_ratio;
 	float polygon_tolerance;
 	int polygon_min_points, min_size_cluster;
 

@@ -25,6 +25,7 @@ class association
 public:
     association();
 
+	void association_setvar(int *CONFIRMED_TRACK_p, int *TRACKER_LIFE_p,float *max_similarty_deviation_p, float *sim_adj_dist_p,float *sim_adj_angle_p,float *sim_adj_side_p,float *sim_adj_xpos_p,float *sim_adj_ypos_p,float *sim_adj_posdiff_p);
 	/*
 	struct object_attributes{
 		int sides_amount;
@@ -62,16 +63,25 @@ public:
 	std::vector<tracker_attributes> trackers;
 	
 
-	float sim_adj_dist = 1.0;
-	float sim_adj_angle = 1.0;
-	float sim_adj_side = 1.0;
-	float sim_adj_xpos = 2.2;
-	float sim_adj_ypos = 2.2;
-	float sim_adj_posdiff = 2.2;
-	float max_similarty_deviation = 1.5;
+	float *sim_adj_dist;
+	float *sim_adj_angle;
+	float *sim_adj_side;
+	float *sim_adj_xpos;
+	float *sim_adj_ypos;
+	float *sim_adj_posdiff;
+	float *max_similarty_deviation;
+	int *CONFIRMED_TRACK;
+	int *TRACKER_LIFE;
 
-	int CONFIRMED_TRACK = 50;
-	int TRACKER_LIFE = 200;
+	float sim_adj_dist_std = 1.0;
+	float sim_adj_angle_std = 1.0;
+	float sim_adj_side_std = 1.0;
+	float sim_adj_xpos_std = 2.2;
+	float sim_adj_ypos_std = 2.2;
+	float sim_adj_posdiff_std = 2.2;
+	float max_similarty_deviation_std = 1.5;
+	int CONFIRMED_TRACK_std = 50;
+	int TRACKER_LIFE_std = 200;
 
 
 private:

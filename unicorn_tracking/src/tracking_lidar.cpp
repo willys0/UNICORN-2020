@@ -23,6 +23,7 @@ void dynamicReconfigCallback(unicorn_tracking::TrackingConfig& config, uint32_t 
   data->sim_adj_posdiff = config.sim_adj_posdiff;
   data->TRACKER_LIFE = config.TRACKER_LIFE;
   data->CONFIRMED_TRACK = config.CONFIRMED_TRACK;
+  data->static_remove_ratio = config.static_remove_ratio;
 }
 
 int main(int argc, char** argv){
@@ -48,6 +49,9 @@ tracking_lidar::tracking_lidar()
 
   n_.param("static_filter",static_filter, true);
   n_.param("Static_map_removal_tolerance",static_remove_dist, 4);
+  n_.param("Static_map_removal_tolerance_ratio",static_remove_ratio, 0.5f);
+
+  
 
   n_.param("polygon_tolerance",polygon_tolerance, 1.04f);
   n_.param("polygon_side_min_points_required",polygon_min_points, 4);
@@ -98,7 +102,8 @@ tracking_lidar::tracking_lidar()
 
 
   seq = 0;
-  shape_interface.shape_extraction_setvar(&lambda, &max_dist_laser, &static_remove_dist, &min_size_cluster, &polygon_tolerance, &polygon_min_points);
+  shape_interface.shape_extraction_setvar(&lambda, &max_dist_laser, &static_remove_dist, &static_remove_ratio, &min_size_cluster, &polygon_tolerance, &polygon_min_points);
+  association_interface.association_setvar(&CONFIRMED_TRACK , &TRACKER_LIFE , &max_similarty_deviation , &sim_adj_dist ,&sim_adj_angle ,&sim_adj_side ,&sim_adj_xpos ,&sim_adj_ypos ,&sim_adj_posdiff);
   //initiate_Trackers();
 }
 
