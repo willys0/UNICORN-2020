@@ -79,7 +79,7 @@ void execute_lift(const unicorn_roborio_bridge::RunLiftGoalConstPtr& goal, LiftA
 
             ROS_INFO("[Roborio Bridge] Lift preemption requested, stopping and resetting lift...");
 
-            lift_interface->cancelLift();
+            lift_interface->stopLift();
 
             ROS_INFO("[Roborio Bridge] Lift action preempted.");
             as->setPreempted();

@@ -15,26 +15,9 @@ front_lidar_angle: 1.57079632679
 # The max number of seconds it can be since last laser scan
 max_time_since_lidar_scan: 0.5
 
-# The offset of the tag from the base frame
-offset:
-  x: 0.71
-  y: 0.0
-  th: 0.0
-
 # Number of retries (dock/undock cycles) before failing
 max_retries: 3
-
-# Offset in forward axis when undocking
-retry_offset: 1.6
 
 # Number of cycles to try to put robot within error margins before retrying
 retry_error_times: 50
 
-# # Accepted threshold for x (forward) error
-# thresh_x: 0.01
-
-# # Accepted threshold for y (lateral) error
-# thresh_y: 0.02
-
-# #Accepted threshold for th (angular) error
-# thresh_th: 0.045

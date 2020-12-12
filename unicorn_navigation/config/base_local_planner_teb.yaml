@@ -9,7 +9,7 @@ TebLocalPlannerROS:
  dt_ref: 0.3
  dt_hysteresis: 0.1
  global_plan_overwrite_orientation: True
- max_global_plan_lookahead_dist: 1.25
+ max_global_plan_lookahead_dist: 3.0
  feasibility_check_no_poses: 5
  orientation_mode: 2
 
@@ -36,7 +36,7 @@ TebLocalPlannerROS:
 
  # GoalTolerance
 
- xy_goal_tolerance: 0.1
+ xy_goal_tolerance: 0.2
  yaw_goal_tolerance: 0.0872665
  free_goal_vel: False
 
@@ -70,7 +70,7 @@ TebLocalPlannerROS:
  weight_obstacle: 50
  weight_viapoint: 40
  weight_dynamic_obstacle: 10 # not in use yet
- alternative_time_cost: False # not in use yet
+ selection_alternative_time_cost: False # not in use yet
 
  # Homotopy Class Planner
 
@@ -91,6 +91,6 @@ TebLocalPlannerROS:
 cmd_angle_instead_rotvel: False
 min_samples: 3
 allow_init_with_backwards_motion: False
-inflation_dist: 0.6
+inflation_dist: 0.4
 viapoints_all_candidates: False
 global_plan_via_point_sep: 2
