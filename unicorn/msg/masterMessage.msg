@@ -1,4 +1,0 @@
-string statusString
-int32 liftState
-geometry_msgs/Point position
-float32 avgDist

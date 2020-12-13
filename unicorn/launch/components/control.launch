@@ -4,9 +4,9 @@
     <!-- Starts interface between automower and unicorn to enable backward driving -->
     <group unless="$(arg sim)">
     </group>
-        <node name="am_unicorn_interface"
-            pkg="unicorn" 
-            type="am_unicorn_interface" 
+        <node name="unicorn_hrp_interface_node"
+            pkg="unicorn_hrp_interface"
+            type="unicorn_hrp_interface_node"
             output="screen">
         </node>
     
