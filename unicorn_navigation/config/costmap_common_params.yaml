@@ -6,6 +6,7 @@ plugins:
   - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
   #- {name: sonar_layer,       type: "range_sensor_layer::RangeSensorLayer"}
   #- {name: voxel_layer,       type: "costmap_2d::VoxelLayer"}
+  - {name: velocity_layer,    type: "tracking_layers::VelocityLayer"}
   - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
 
 #Set the tolerance we're willing to have for tf transforms
