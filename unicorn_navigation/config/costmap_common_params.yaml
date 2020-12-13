@@ -1,13 +1,6 @@
 footprint: [[-0.5, -0.3], [-0.5, 0.3], [0.2, 0.3], [0.2, -0.3]]
 footprint_padding: 0.0
 
-plugins:
-  - {name: static_layer,     type: "costmap_2d::StaticLayer"}
-  - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
-  #- {name: sonar_layer,       type: "range_sensor_layer::RangeSensorLayer"}
-  #- {name: voxel_layer,       type: "costmap_2d::VoxelLayer"}
-  - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
-
 #Set the tolerance we're willing to have for tf transforms
 transform_tolerance: 0.3
 

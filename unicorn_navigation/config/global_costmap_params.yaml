@@ -4,6 +4,9 @@
 # All distances are in meters
 
 global_costmap:
+  plugins:
+    - {name: static_layer,     type: "costmap_2d::StaticLayer"}
+    - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
 
   #Set the update and publish frequency of the costmap
   update_frequency: 10.0

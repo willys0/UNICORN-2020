@@ -3,9 +3,14 @@
 
 # All distances are in meters
 local_costmap:
+  plugins:
+    - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
+    - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
+
   #Set the update and publish frequency of the costmap
   update_frequency: 10.0
   publish_frequency: 10.0
+
 
   #We'll configure this costmap to be a rolling window... meaning it is always
   #centered at the robot
