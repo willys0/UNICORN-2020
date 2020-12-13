@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+<sdf version='1.6'>
+  <model name='BIN_STATION_v2'>
+    <link name='station'>
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://BinStation/meshes/model.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://BinStation/meshes/model.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <static>1</static>
+  </model>
+</sdf>
+
