@@ -21,3 +21,6 @@ max_retries: 3
 
 # Number of cycles to try to put robot within error margins before retrying
 retry_error_times: 50
+
+# true to publsh visualization markers that can be shown in rviz. Shows robot distance along tag norm and dist to tag norm.
+debug: false

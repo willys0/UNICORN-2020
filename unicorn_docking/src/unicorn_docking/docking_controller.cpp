@@ -2,11 +2,14 @@
 
 DockingController::DockingController() : nh_("~"), state_(DockingController::DockState::IDLE), tf_listener_(tf_buffer_) {
 
-    apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
-    front_lidar_sub_ = nh_.subscribe("/frontLidar/scan", 1, &DockingController::frontLidarCb, this);
+    nh_.param("debug", debug_, false);
+    if(debug_) {
+        apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
+        d_pub_ = nh_.advertise<visualization_msgs::Marker>("d_tag", 1);
+        n_pub_ = nh_.advertise<visualization_msgs::Marker>("n_tag", 1);
+    }
 
-    d_pub_ = nh_.advertise<visualization_msgs::Marker>("d_tag", 1);
-    n_pub_ = nh_.advertise<visualization_msgs::Marker>("n_tag", 1);
+    front_lidar_sub_ = nh_.subscribe("/frontLidar/scan", 1, &DockingController::frontLidarCb, this);
 
     // TODO: Load initial gains from parameter server
     pid_x_.initParam("~/pid/x");
