@@ -310,6 +310,8 @@ void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionSer
     ros::Subscriber apriltag_camera_sub_;
     ros::Publisher apriltag_camera_pub_;
 
+    // This subscriber and publisher is here so that the apriltag node only recive images during the docking or undocking state. 
+    // This stops the apriltag node from using a lot of resources when it is not needed
     apriltag_camera_pub_ = nh.advertise<sensor_msgs::Image>("/realsense/color/dock_image", 1);
     apriltag_camera_sub_ = nh.subscribe<sensor_msgs::Image>("/realsense/color/image_raw", 100, boost::bind(&apriltagCameraCB, _1, apriltag_camera_pub_));
     
