@@ -2,6 +2,7 @@
 
 #include <geometry_msgs/Twist.h>
 #include <geometry_msgs/Point.h>
+#include <sensor_msgs/Image.h>
 
 #include <unicorn_docking/DockAction.h>
 
@@ -301,8 +302,17 @@ void undock(ros::NodeHandle nh, DockingController* controller, DockActionServer*
     vel_pub.shutdown();
 }
 
+void apriltagCameraCB(const sensor_msgs::ImageConstPtr& msg, ros::Publisher& apriltag_camera_pub) {
+    apriltag_camera_pub.publish(*msg);
+}
 
 void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionServer* as, DockingController* controller, ros::NodeHandle nh) {
+    ros::Subscriber apriltag_camera_sub_;
+    ros::Publisher apriltag_camera_pub_;
+
+    apriltag_camera_pub_ = nh.advertise<sensor_msgs::Image>("/realsense/color/dock_image", 1);
+    apriltag_camera_sub_ = nh.subscribe<sensor_msgs::Image>("/realsense/color/image_raw", 100, boost::bind(&apriltagCameraCB, _1, apriltag_camera_pub_));
+    
 
     if(goal->undock) {
         undock(nh, controller, as);
@@ -311,6 +321,10 @@ void execute_action(const unicorn_docking::DockGoalConstPtr& goal, DockActionSer
         dock(nh, controller, as);
 
     }
+
+    apriltag_camera_sub_.shutdown();
+    apriltag_camera_pub_.shutdown();
+
 }
 
 int main(int argc, char **argv) {
