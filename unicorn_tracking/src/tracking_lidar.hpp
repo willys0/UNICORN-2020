@@ -106,8 +106,9 @@ public:
 	shape_extraction shape_interface;
   	
 private:
+	geometry_msgs::Point32 transform_point(geometry_msgs::Point32 position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new);
+	geometry_msgs::Point transform_vel(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new);
 
-	
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
 	nav_msgs::Odometry wheel_odometry_data;

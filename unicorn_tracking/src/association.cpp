@@ -110,7 +110,7 @@ void association::associate(const std::vector<shape_extraction::object_attribute
           if(!isnan(similarity))
             object_match_ratio[i][j] = double(similarity); 
 
-          //ROS_INFO("Test sim %f - Tracker %d object %d , sim_prev %f velx %f vely %f, change yaw %f change x %f change y %f",similarity,i,j,sum[0],sum[1],sum[2],yaw_change, odom_change_x,odom_change_y);
+          ROS_INFO("Test sim %f - Tracker %d object %d , sim_prev %f velx %f vely %f, change yaw %f change x %f change y %f",similarity,i,j,sum[0],sum[1],sum[2],yaw_change, odom_change_x,odom_change_y);
           //ROS_INFO("Size cluster %d - size tracker cluster %d ",(int)object_attributes_list[j].polygon.points.size(), (int)trackers[i].cluster.points.size());
           //ROS_INFO("last seen %d age %d",trackers[i].last_seen, trackers[i].age);
         }
@@ -143,14 +143,15 @@ void association::associate(const std::vector<shape_extraction::object_attribute
       trackers[m].sides_amount = object_attributes_list[j].sides_amount;
       
 
-      
+      /*
       calculateVel(object_attributes_list[j], m,sum,odometryData, BaseLaser2BaseFrame);
-      x_dot = sum[1];
-      y_dot = sum[2];
+      x_dot = sum[1]/dt;
+      y_dot = sum[2]/dt;
       if(isnan(x_dot))
         x_dot = 0;
       if(isnan(y_dot))
         y_dot = 0;
+      */
 
       geometry_msgs::Point point = transform_point(object_attributes_list[j].position, odometryData,BaseLaser2BaseFrame);
       x_dot = (trackers[m].tracker.x_hat(0)-point.x)/float(dt);
@@ -182,7 +183,7 @@ void association::associate(const std::vector<shape_extraction::object_attribute
       
   }
 	
-
+  ROS_INFO("Tracker %d - velx %f Vely %f",m,x_dot, y_dot);
 
   /*  Remove old trackers */
   j = 0;
@@ -246,8 +247,8 @@ void association::calculateVel(shape_extraction::object_attributes object, int t
   // Checks minimum movent between each point recorded in the tracker and the repective object
   for(j=0;j < (int)(trackers[trackernr].cluster.points.size()); j++)
   {
-    x_t = trackers[trackernr].cluster.points[j].x*cos(-yaw_change) + trackers[trackernr].cluster.points[j].y*sin(-yaw_change) - odom_change_x;
-    y_t = trackers[trackernr].cluster.points[j].y*cos(-yaw_change) - trackers[trackernr].cluster.points[j].x*sin(-yaw_change) - odom_change_y;
+    x_t = trackers[trackernr].cluster.points[j].x*cos(-yaw_change) + trackers[trackernr].cluster.points[j].y*sin(-yaw_change) + odom_change_x;
+    y_t = trackers[trackernr].cluster.points[j].y*cos(-yaw_change) - trackers[trackernr].cluster.points[j].x*sin(-yaw_change) + odom_change_y;
     point1.z = 10;
     point1.x = 0;
     point1.y = 0;
