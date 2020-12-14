@@ -33,7 +33,7 @@ void velocityCallback(const geometry_msgs::TwistConstPtr& msg, int* intention_an
 
 void stateCallback(const std_msgs::Int32ConstPtr& msg, ros::Publisher led_state_pub) {
 
-    static const int unicorn_state_to_led_state[] = { 0, 1, 3, 2, 4 };
+    static const int unicorn_state_to_led_state[] = { 0, 1, 3, 2, 4, 5, 6};
 
     led_msg.data = unicorn_state_to_led_state[msg->data];
 
