@@ -59,13 +59,15 @@ void VelocityLayer::updateBounds(double origin_x, double origin_y, double origin
 
         double avg_x, avg_y;
 
-        for(auto& p : o.polygon.points) {
-            avg_x += p.x;
-            avg_y += p.y;
-        }
-        avg_x /= o.polygon.points.size();
-        avg_y /= o.polygon.points.size();
+        // for(auto& p : o.polygon.points) {
+        //     avg_x += p.x;
+        //     avg_y += p.y;
+        // }
+        // avg_x /= o.polygon.points.size();
+        // avg_y /= o.polygon.points.size();
 
+        avg_x = o.polygon.points[o.polygon.points.size() / 2].x;
+        avg_y = o.polygon.points[o.polygon.points.size() / 2].y;
         double e_x = avg_x + o.velocities.twist.linear.x * mag_;
         double e_y = avg_y + o.velocities.twist.linear.y * mag_;
 
