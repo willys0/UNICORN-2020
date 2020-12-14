@@ -33,6 +33,8 @@ class AmUnicornInterface
         ros::Time last_cmd_vel_time_;
 
         float max_velocity_delay_;
+
+        bool started_;
 };
 
 #endif // __AM_UNICORN_INTERFACE_H_

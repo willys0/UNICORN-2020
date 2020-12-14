@@ -51,8 +51,6 @@ void StateMachine::start(ros::NodeHandle nh, bool publish_poses) {
         pose_pub_ = nh.advertise<geometry_msgs::PoseArray>("goal_poses", 1, true);
     }
 
-    paused_ = false;
-
     while(ros::ok()) {
         state_msg.data = currentState->stateIdentifier();
         state_pub_.publish(state_msg);
@@ -68,17 +66,12 @@ void StateMachine::start(ros::NodeHandle nh, bool publish_poses) {
             pose_pub_.publish(pa);
         }
 
-        while(paused_) {
-            if(!ros::ok()) {
-                return;
-            }
-
-            ros::Duration(0.5).sleep();
+        if(!paused_) {
+            newState = currentState->run();
+            delete currentState;
+            currentState = newState;
         }
-
-        newState = currentState->run();
-        delete currentState;
-        currentState = newState;
+        ros::Duration(0.5).sleep();
     }
 }
 
