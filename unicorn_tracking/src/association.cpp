@@ -145,8 +145,8 @@ void association::associate(const std::vector<shape_extraction::object_attribute
 
       
       calculateVel(object_attributes_list[j], m,sum,odometryData, BaseLaser2BaseFrame);
-      x_dot = sum[1];
-      y_dot = sum[2];
+      x_dot = sum[1]/dt;
+      y_dot = sum[2]/dt;
       if(isnan(x_dot))
         x_dot = 0;
       if(isnan(y_dot))
@@ -290,60 +290,6 @@ void association::calculateVel(shape_extraction::object_attributes object, int t
   sum[1] = point.x - BaseLaser2BaseFrame.transform.translation.x - odometryData.pose.pose.position.x;
   sum[2] = point.y - BaseLaser2BaseFrame.transform.translation.y - odometryData.pose.pose.position.y;
 }
-/* 
-void association::calculateVel(shape_extraction::object_attributes object, int trackernr,float *sum)
-{
-  int i,j;
-
-  float x_t,y_t,x_o,y_o,distance;
-
-  geometry_msgs::Polygon points;
-  geometry_msgs::Point32 point1;
-  
-  point1.z = 10;
-  point1.x = 0;
-  point1.y = 0;
-  sum[0] = 0;
-  sum[1] = 0;
-  sum[2] = 0;
-
-  // Checks minimum movent between each point recorded in the tracker and the repective object
-  for(j=0;j < (int)(trackers[trackernr].points.points.size()); j++)
-  {
-    x_t = trackers[trackernr].points.points[j].x;
-    y_t = trackers[trackernr].points.points[j].y;
-    point1.z = 10;
-    point1.x = 0;
-    point1.y = 0;
-    for(i=0;i < (int)(object.polygon.points.size());i++)
-    {
-      x_o = object.polygon.points[i].x;
-      y_o = object.polygon.points[i].y;
-      distance = sqrt(pow(x_o-x_t,2)+pow(y_o-y_t,2));
-      // new positon
-      if(distance < point1.z){
-         point1.z = distance;
-         point1.x = x_o-x_t;
-         point1.y = y_o-y_t;
-      }
-    }
-    if(point1.z < 10)
-      points.points.push_back(point1);
-
-  }
-  j=1;
-  for(i=0;i<(int)(points.points.size());i++)
-    if(points.points[i].z < 10)
-    {
-      j++;
-      sum[0] += points.points[i].z;
-      sum[1] += points.points[i].x;
-      sum[2] += points.points[i].y;
-    }
-  sum[0] /= j;
-  sum[1] /= j;
-  sum[2] /= j;
-}*/
 
 
 /* Initiates all trackers */
