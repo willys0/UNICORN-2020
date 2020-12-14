@@ -285,7 +285,7 @@
     </collision>
   </link>
 
-  <joint name="lift_horizontal_joint" type="prismatic">
+  <joint name="lift_horizontal_joint" type="fixed"> <!-- type="prismatic" -->
     <parent  link="lift_link" />
     <child  link="lift_horizontal_link" />
     <origin xyz="0.05 0 0.137" rpy="${M_PI2} 0 ${-M_PI2}" />
@@ -295,7 +295,7 @@
   </joint>
 
 
-  <joint name="lift_vertical_joint" type="prismatic">
+  <joint name="lift_vertical_joint" type="fixed"> <!-- type="prismatic" -->
     <origin xyz="0 -0.16 0" rpy="0 0 0" />
     <parent link="lift_horizontal_link" />
     <child link="lift_vertical_link" />
@@ -471,29 +471,72 @@
 </xacro:if>
 
 
+<!-- Set Color for nodes -->
 
+    <gazebo reference="chassis_link">
+      <material>Gazebo/Grey</material>
+      <turnGravityOff>false</turnGravityOff>
+    </gazebo>
+
+    <gazebo reference="lift_link">
+      <material>Gazebo/Grey</material>
+      <turnGravityOff>false</turnGravityOff>
+    </gazebo>
+
+    <gazebo reference="base_laser">
+      <material>Gazebo/RedBright</material>
+      <turnGravityOff>false</turnGravityOff>
+    </gazebo>
+
+    <gazebo reference="rear_laser">
+      <material>Gazebo/DarkGrey</material>
+      <turnGravityOff>false</turnGravityOff>
+    </gazebo>
+
+    <gazebo reference="zed_camera_center">
+      <material>Gazebo/FlatBlack</material>
+      <turnGravityOff>false</turnGravityOff>
+    </gazebo>
+
+    <gazebo reference="realsense_link">
+      <material>Gazebo/Grey</material>
+      <turnGravityOff>false</turnGravityOff>
+    </gazebo>
+
+    <gazebo reference="lift_vertical_link">
+      <material>Gazebo/White</material>
+      <turnGravityOff>false</turnGravityOff>
+    </gazebo>
+
+    <gazebo reference="lift_horizontal_link">
+      <material>Gazebo/White</material>
+      <turnGravityOff>false</turnGravityOff>
+    </gazebo>
+
+<!-- Used for Simulating Lift movment, removed due to problems with controllers -->
+ <!--
   <gazebo reference="lift_vertical_joint">
-      <mu1 value="10000.0" />
-      <mu2 value="10000.0" />
+      <mu1 value="0.8" />
+      <mu2 value="0.8" />
       <kp value="100000.0" />
       <kd value="10000.0" />
-      <dampingFactor value="50" />
+      <dampingFactor value="0.9" />
       <fdir1 value="1 0 0" />
-      <material>Gazebo/Black</material>
+      <material>Gazebo/Gold</material>
       <turnGravityOff>false</turnGravityOff>
   </gazebo>
 
   <gazebo reference="lift_horizontal_joint">
-      <mu1 value="10000.0" />
-      <mu2 value="10000.0" />
+      <mu1 value="0.8" />
+      <mu2 value="0.8" />
       <kp value="100000.0" />
       <kd value="10000.0" />
-      <dampingFactor value="100" />
+      <dampingFactor value="0.9" />
       <fdir1 value="1 0 0" />
-      <material>Gazebo/Black</material>
+      <material>Gazebo/Grey</material>
       <turnGravityOff>false</turnGravityOff>
   </gazebo>
-
+-->
   <transmission name="lift_h_trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="lift_horizontal_joint">
