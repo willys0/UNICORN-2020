@@ -145,16 +145,16 @@ void association::associate(const std::vector<shape_extraction::object_attribute
 
       
       calculateVel(object_attributes_list[j], m,sum,odometryData, BaseLaser2BaseFrame);
-      x_dot = sum[1]/dt;
-      y_dot = sum[2]/dt;
+      x_dot = sum[1];
+      y_dot = sum[2];
       if(isnan(x_dot))
         x_dot = 0;
       if(isnan(y_dot))
         y_dot = 0;
 
       geometry_msgs::Point point = transform_point(object_attributes_list[j].position, odometryData,BaseLaser2BaseFrame);
-      //x_dot = (trackers[m].tracker.x_hat(0)-point.x)/float(dt);
-      //y_dot = (trackers[m].tracker.x_hat(2)-point.y)/float(dt);
+      x_dot = (trackers[m].tracker.x_hat(0)-point.x)/float(dt);
+      y_dot = (trackers[m].tracker.x_hat(2)-point.y)/float(dt);
 
       
       trackers[m].tracker.y << point.x, x_dot, point.y,y_dot; 
