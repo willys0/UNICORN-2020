@@ -6,7 +6,7 @@ LiftInterface::LiftInterface(ros::NodeHandle nh) :
     initLiftMsg();
 
     lift_state_pub_ = nh_.advertise<std_msgs::Int32>("/lift/state", 1);
-    run_lift_pub_   = nh_.advertise<std_msgs::Int32>("/TX2_unicorn_picking_routine", 1);
+    run_lift_pub_   = nh_.advertise<std_msgs::Int32>("/lift/picking_routine", 1);
 
 }
 
