@@ -9,11 +9,15 @@ project(unicorn_simulator)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
+  gazebo_msgs
+  gazebo_plugins
+  gazebo_ros_control
   husky_gazebo
   unicorn_roborio_bridge
 )
 
-file(COPY models/. DESTINATION $ENV{HOME}/.gazebo/models)
+
+# file(COPY models/. DESTINATION $ENV{HOME}/.gazebo/models)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -111,6 +115,15 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
+##################################
+## Update the GAZEBO_MODEL_PATH ##
+##################################
+
+if(CMAKE_HOST_UNIX)
+  catkin_add_env_hooks(90.unicorn_simulator SHELLS sh DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/env-hooks)
+endif()
+
+
 ###########
 ## Build ##
 ###########
@@ -193,6 +206,12 @@ target_link_libraries(unicorn_roborio_simulator_node
 #   # myfile2
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
+
+
+install(DIRECTORY
+  models/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/models
+)
 
 #############
 ## Testing ##
