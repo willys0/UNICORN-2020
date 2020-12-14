@@ -38,6 +38,12 @@ void StateMachine::addGoal(struct Goal goal) {
 
 void StateMachine::start(ros::NodeHandle nh, bool publish_poses) {
 
+    while(paused_) {
+        if(!ros::ok())
+            return;
+        ros::Duration(0.25).sleep();
+    }
+
     publish_poses_ = publish_poses;
 
     State* currentState = new IdleState(nh);
