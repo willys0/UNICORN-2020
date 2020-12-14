@@ -87,7 +87,7 @@ tracking_lidar::tracking_lidar()
   // object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("obstacles",10,false);
 
   // publishers
-  object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("/move_base/TebLocalPlannerROS/obstacles",10,false);
+  object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("obstacles",10,false);
   marker_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArray",10,false);
   marker_Arrow_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArrowArray",10,false);
 
@@ -278,8 +278,6 @@ void tracking_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
 void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 {
 
-    
-    
 
     scan_data_ = scan;
     scan_received = true;
@@ -303,22 +301,7 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       
       //association_interface.estimate_new_position(scan_data_.header.stamp.sec  + scan_data_.header.stamp.nsec*0.000000001);
       association_interface.associate(shape_interface.object_attributes_list, odometry_data_, Lidar2base, scan.header.stamp);
-
-      /*
-      adaptive_breaK_point();
-      if(static_filter)
-        static_map_filter();
-
-      polygon_extraction();
-      polygon_attribute_extraction();
-
-      
-      estimate_new_position();
-      association();
-      update_position();*/
-
-
-        
+    
 
       object_publisher();
       wheel_received = false;
