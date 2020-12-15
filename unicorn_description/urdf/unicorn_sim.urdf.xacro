@@ -185,7 +185,7 @@
   </joint>
 
 
-
+<!-- Lift links-->
   <link
     name="lift_horizontal_link">
     <visual>
@@ -537,6 +537,8 @@
       <turnGravityOff>false</turnGravityOff>
   </gazebo>
 -->
+
+<!--Hardware Interface for moving lift in simulator -->
   <transmission name="lift_h_trans">
       <type>transmission_interface/SimpleTransmission</type>
       <joint name="lift_horizontal_joint">
@@ -628,6 +630,7 @@
         <headingDrift>0.0</headingDrift>
         <headingGaussianNoise>0.00</headingGaussianNoise>-->
     </plugin>
+
     <!-- Joint controll plugin -->
     <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/unicorn</robotNamespace>

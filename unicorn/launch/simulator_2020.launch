@@ -3,7 +3,7 @@
     <arg name="do_slam" 	        default="true" />
     <arg name="use_object_tracking" default="false" />
     <arg name="map_file"   			default="$(find unicorn_slam)/maps/gmap_map.yaml"/>
-    <arg name="use_simlift" 				default="true" />
+    <arg name="use_simlift" 				default="false" />
 
     <include file="$(find unicorn)/launch/main_2020.launch">
         <arg name="sim" value="true" />

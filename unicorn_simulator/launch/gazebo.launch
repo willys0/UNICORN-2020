@@ -2,7 +2,7 @@
 <!-- Launches Gazebo with predefined settings with the Unicorn platform -->
 <launch>
 	<arg name="gazebo_gui" default="false"/>
-	<arg name="use_simlift" 				default="true" />
+	<arg name="use_simlift" 				default="false" />
 
 	<rosparam param="odom_frame">odom_chassis</rosparam>
 	<rosparam param="global_local">false</rosparam>
@@ -37,6 +37,7 @@
 	</group>
 
 
+<!-- Simlift controller startup, of as default due to lift effortcontrollers shaking the model when in use. -->
 	<group if="$(arg use_simlift)">
 		<!-- Load joint controller configurations from YAML file to parameter server -->
 		<rosparam file="$(find unicorn_description)/config/robot_control.yaml" command="load"/>
