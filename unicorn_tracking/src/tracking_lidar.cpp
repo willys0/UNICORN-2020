@@ -337,21 +337,21 @@ geometry_msgs::Point32 tracking_lidar::transform_point(geometry_msgs::Point32 po
   tf::Quaternion r(odometryData_new.pose.pose.orientation.x,odometryData_new.pose.pose.orientation.y,odometryData_new.pose.pose.orientation.z,odometryData_new.pose.pose.orientation.w);
   tf::Matrix3x3 m(q);
   tf::Matrix3x3 n(r);
-  m.getRPY(roll,pitch,yaw_new);
+  m.getRPY(roll,pitch,yaw_old);
   n.getRPY(roll,pitch,yaw_new);
 
 
   // transform with odometry
   x_t = position.x - odometryData_old.pose.pose.position.x;
   y_t = position.y - odometryData_old.pose.pose.position.y;
-  position.x = x_t*cos(-yaw_new) - y_t*sin(-yaw_new);
-  position.y = y_t*cos(-yaw_new) + x_t*sin(-yaw_new);
+  //position.x = x_t*cos(-yaw_old) - y_t*sin(-yaw_old);
+  //position.y = y_t*cos(-yaw_old) + x_t*sin(-yaw_old);
 
-  x_t = position.x;
-  y_t = position.y;
+  //x_t = position.x;
+  //y_t = position.y;
 
-  position.x = x_t*cos(-yaw_new) + y_t*sin(-yaw_new);
-  position.y = y_t*cos(-yaw_new) - x_t*sin(-yaw_new);
+  position.x = x_t*cos(-yaw_new+yaw_old) + y_t*sin(-yaw_new+yaw_old);
+  position.y = y_t*cos(-yaw_new+yaw_old) - x_t*sin(-yaw_new+yaw_old);
 
   position.x += odometryData_new.pose.pose.position.x;
   position.y += odometryData_new.pose.pose.position.y;
@@ -369,21 +369,17 @@ geometry_msgs::Point tracking_lidar::transform_vel(geometry_msgs::Point position
   tf::Quaternion r(odometryData_new.pose.pose.orientation.x,odometryData_new.pose.pose.orientation.y,odometryData_new.pose.pose.orientation.z,odometryData_new.pose.pose.orientation.w);
   tf::Matrix3x3 m(q);
   tf::Matrix3x3 n(r);
-  m.getRPY(roll,pitch,yaw_new);
+  m.getRPY(roll,pitch,yaw_old);
   n.getRPY(roll,pitch,yaw_new);
 
 
   // transform with odometry
   x_t = position.x;
   y_t = position.y;
-  position.x = x_t*cos(-yaw_new) - y_t*sin(-yaw_new);
-  position.y = y_t*cos(-yaw_new) + x_t*sin(-yaw_new);
+  
+  position.x = x_t*cos(-yaw_new+yaw_old) + y_t*sin(-yaw_new+yaw_old);
+  position.y = y_t*cos(-yaw_new+yaw_old) - x_t*sin(-yaw_new+yaw_old);
 
-  x_t = position.x;
-  y_t = position.y;
-
-  position.x = x_t*cos(-yaw_new) + y_t*sin(-yaw_new);
-  position.y = y_t*cos(-yaw_new) - x_t*sin(-yaw_new);
 
   position.z = 0;
 
