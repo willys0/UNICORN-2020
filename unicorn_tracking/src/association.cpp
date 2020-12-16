@@ -4,7 +4,6 @@
 
 association::association()
 {
-
 	sim_adj_dist = &sim_adj_dist_std;
 	sim_adj_angle = &sim_adj_angle_std;
 	sim_adj_side = &sim_adj_side_std;
@@ -63,59 +62,59 @@ void association::associate(const std::vector<shape_extraction::object_attribute
   for(i=0; i<trackers.size(); i++)
   {
     //ROS_INFO("Tracker test %d",i);
-    if(trackers[i].age > 0){
-      trackers[i].age++;
-      trackers[i].last_seen++;
 
-      dt = time - trackers[i].time; 
-      for(j=0; j<objects_size; j++)
-      {
-        if(object_attributes_list[j].polygon.points.size() >= 1){
-          
-          s1 = *sim_adj_angle*abs((trackers[i].average_angle) - (object_attributes_list[j].average_angle));
-          s2 = *sim_adj_dist*abs((trackers[i].longest_size) - (object_attributes_list[j].longest_size));
-          s3 = *sim_adj_side*abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount));  
+    trackers[i].age++;
+    trackers[i].last_seen++;
 
-          geometry_msgs::Point point = transform_point(object_attributes_list[j].position, odometryData,BaseLaser2BaseFrame);
-          s4 = *sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (point.x));
-          s5 = *sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (point.y));
+    dt = time - trackers[i].time; 
+    for(j=0; j<objects_size; j++)
+    {
+      if(object_attributes_list[j].polygon.points.size() >= 1){
+        
+        s1 = *sim_adj_angle*abs((trackers[i].average_angle) - (object_attributes_list[j].average_angle));
+        s2 = *sim_adj_dist*abs((trackers[i].longest_size) - (object_attributes_list[j].longest_size));
+        s3 = *sim_adj_side*abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount));  
 
-          calculateVel(object_attributes_list[j], i,sum,odometryData, BaseLaser2BaseFrame);
+        geometry_msgs::Point point = transform_point(object_attributes_list[j].position, odometryData,BaseLaser2BaseFrame);
+        s4 = *sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (point.x));
+        s5 = *sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (point.y));
 
-          if(sum[0] < 0.00001)
-              sum[0] = 1;
+        calculateVel(object_attributes_list[j], i,sum,odometryData, BaseLaser2BaseFrame);
 
-          s6 = *sim_adj_posdiff*abs(sum[0]);
-          s6 = *sim_adj_posdiff;
-          if(s1 > s2)
-          {
-            similarity = s2;
-          }else{
-            similarity = s1;
-          }
-          if(isnan(s4 + s5))
-          {
-            s4 = 5;
-            s5 = 5;
-          }
-          if(isnan(s6))
-          {
-            s6 = *sim_adj_posdiff;
-          }
-          similarity += s3 + s4 + s5 + s6;
-          similarity /= (*sim_adj_dist + *sim_adj_angle + *sim_adj_side + *sim_adj_xpos + *sim_adj_ypos + *sim_adj_posdiff);
-          
-          if(trackers[i].age > *CONFIRMED_TRACK)
-            similarity *= 0.9;
-          if(!isnan(similarity))
-            object_match_ratio[i][j] = double(similarity); 
+        if(sum[0] < 0.00001)
+            sum[0] = 1;
 
-          ROS_INFO("Test sim %f - Tracker %d object %d , sim_prev %f velx %f vely %f, change yaw %f change x %f change y %f",similarity,i,j,sum[0],sum[1],sum[2],yaw_change, odom_change_x,odom_change_y);
-          //ROS_INFO("Size cluster %d - size tracker cluster %d ",(int)object_attributes_list[j].polygon.points.size(), (int)trackers[i].cluster.points.size());
-          //ROS_INFO("last seen %d age %d",trackers[i].last_seen, trackers[i].age);
+        s6 = *sim_adj_posdiff*abs(sum[0]);
+        s6 = *sim_adj_posdiff;
+        if(s1 > s2)
+        {
+          similarity = s2;
+        }else{
+          similarity = s1;
         }
-      }  
-    }
+        if(isnan(s4 + s5))
+        {
+          s4 = 5;
+          s5 = 5;
+        }
+        if(isnan(s6))
+        {
+          s6 = *sim_adj_posdiff;
+        }
+        similarity += s3 + s4 + s5 + s6;
+        similarity /= (*sim_adj_dist + *sim_adj_angle + *sim_adj_side + *sim_adj_xpos + *sim_adj_ypos + *sim_adj_posdiff);
+        
+        if(trackers[i].age > *CONFIRMED_TRACK)
+          similarity *= 0.9;
+        if(!isnan(similarity))
+          object_match_ratio[i][j] = double(similarity); 
+
+        //ROS_INFO("Test sim %f - Tracker %d object %d , sim_prev %f velx %f vely %f, change yaw %f change x %f change y %f",similarity,i,j,sum[0],sum[1],sum[2],yaw_change, odom_change_x,odom_change_y);
+        //ROS_INFO("Size cluster %d - size tracker cluster %d ",(int)object_attributes_list[j].polygon.points.size(), (int)trackers[i].cluster.points.size());
+        //ROS_INFO("last seen %d age %d",trackers[i].last_seen, trackers[i].age);
+      }
+    }  
+    
   }
 
   /* Hungarian algorithm to find the best match for the trackers */
@@ -124,14 +123,11 @@ void association::associate(const std::vector<shape_extraction::object_attribute
   double cost = HungAlgo.Solve(object_match_ratio, assignment);
 
 
-  /*
-  for (m = 0; m < 100; m++)
-    std::cout << "Tracker M:" << m << " Object:" << assignment[m] << " Cost" << object_match_ratio[m][assignment[m]] << std::endl;*/
-  
+  /**/
   /* Associates trackers according to cost*//**/
   for (m = 0; m < trackers.size(); m++)
   {
-    if(object_match_ratio[m][assignment[m]] < *max_similarty_deviation)
+    if((object_match_ratio[m][assignment[m]]) < *max_similarty_deviation)
     {
       dt = time - trackers[m].time;
       object_match[assignment[m]] = 1; 
@@ -182,24 +178,31 @@ void association::associate(const std::vector<shape_extraction::object_attribute
     }
       
   }
-	
-  ROS_INFO("Tracker %d - velx %f Vely %f",m,x_dot, y_dot);
+  /*
+	for (m = 0; m < 100; m++)
+    std::cout << "Object: " << m << "- Object:" << assignment[m] << "- Cost" << object_match_ratio[m][assignment[m]] << std::endl;
+  //ROS_INFO("Tracker %d - velx %f Vely %f",m,x_dot, y_dot);
+  std::cout << "Tracker M:";
+  for (m = 0; m < 100; m++)
+    std::cout << " --- Number:" << m << " " << object_match[m];
+  std::cout << std::endl;*/
 
   /*  Remove old trackers */
   j = 0;
   for(i=trackers.size()-1; i>=0; i--){
     j++;
-    //ROS_INFO("Tracker %d, last seen %d age %d",i,trackers[i].last_seen, trackers[i].age);
-    if(trackers[i].age > 0){
-      if((trackers[i].last_seen > *TRACKER_LIFE) || (trackers[i].age < *CONFIRMED_TRACK && trackers[i].last_seen > 1))
-      {
+    ROS_INFO("Tracker %d, last seen %d age %d - total life %d, confirmed %d",i,trackers[i].last_seen, trackers[i].age, *TRACKER_LIFE, *CONFIRMED_TRACK);
 
-        trackers.erase(trackers.begin() + i);
-       
-        ROS_INFO("Tracker removed %d - trackers %d",i, (int)trackers.size());
+    if((trackers[i].last_seen > (*TRACKER_LIFE)) || (trackers[i].age < *CONFIRMED_TRACK && trackers[i].last_seen > 1))
+    {
 
-      }
+      trackers.erase(trackers.begin() + i);
+      
+      ROS_INFO("Tracker removed %d - trackers %d",i, (int)trackers.size());
+
     }
+
+    
   }
 
        
@@ -215,7 +218,7 @@ void association::associate(const std::vector<shape_extraction::object_attribute
       }
     }
   }
-  //ROS_INFO("Number of trackers %d",(int)trackers.size());
+  ROS_INFO("Number of trackers %d",(int)trackers.size());
 
   
 
