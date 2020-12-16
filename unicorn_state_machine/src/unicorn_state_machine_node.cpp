@@ -128,7 +128,6 @@ int main(int argc, char** argv) {
 
     //ros::AsyncSpinner spinner(1);
 
-    StateMachine state_machine;
 
     std::vector<struct Goal> goals;
     bool publish_poses;
@@ -139,6 +138,8 @@ int main(int argc, char** argv) {
     nh.param("publish_poses", publish_poses, false);
     nh.param("autostart", autostart, false);
     nh.param("robot_base_frame", base_frame, std::string("base_link"));
+
+    StateMachine state_machine(nh, publish_poses);
 
 
     ros::ServiceServer run_service = nh.advertiseService<std_srvs::SetBoolRequest, std_srvs::SetBoolResponse>("set_running", boost::bind(&toggleRunningCb, _1, _2, &state_machine));
@@ -167,7 +168,7 @@ int main(int argc, char** argv) {
         state_machine.resume();
 
     //state_machine.start(nh, publish_poses);
-    boost::thread t(boost::bind(&StateMachine::start, &state_machine, nh, publish_poses));
+    boost::thread t(boost::bind(&StateMachine::start, &state_machine));
 
     ros::spin();
     //spinner.stop();

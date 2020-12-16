@@ -5,9 +5,15 @@
 #include <std_msgs/Int32.h>
 #include <geometry_msgs/PoseArray.h>
 
-StateMachine::StateMachine() {
+StateMachine::StateMachine(ros::NodeHandle nh, bool publish_poses) : nh_(nh) {
     paused_ = true;
-   
+    publish_poses_ = publish_poses;
+
+    state_pub_ = nh.advertise<std_msgs::Int32>("current_state", 1, true);
+
+    if(publish_poses) {
+        pose_pub_ = nh.advertise<geometry_msgs::PoseArray>("goal_poses", 1, true);
+    }
 }
 
 void StateMachine::setGoals(const std::vector<struct Goal> &goals) {
@@ -36,7 +42,7 @@ void StateMachine::addGoal(struct Goal goal) {
     }
 }
 
-void StateMachine::start(ros::NodeHandle nh, bool publish_poses) {
+void StateMachine::start() {
 
     while(paused_) {
         if(!ros::ok())
@@ -44,18 +50,10 @@ void StateMachine::start(ros::NodeHandle nh, bool publish_poses) {
         ros::Duration(0.25).sleep();
     }
 
-    publish_poses_ = publish_poses;
-
-    State* currentState = new IdleState(nh);
+    State* currentState = new IdleState(nh_);
     State* newState;
 
     std_msgs::Int32 state_msg;
-
-    state_pub_ = nh.advertise<std_msgs::Int32>("current_state", 1, true);
-
-    if(publish_poses) {
-        pose_pub_ = nh.advertise<geometry_msgs::PoseArray>("goal_poses", 1, true);
-    }
 
     while(ros::ok()) {
         state_msg.data = currentState->stateIdentifier();

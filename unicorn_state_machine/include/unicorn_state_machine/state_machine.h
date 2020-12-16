@@ -8,12 +8,12 @@
 
 class StateMachine {
     public:
-        StateMachine();
+        StateMachine(ros::NodeHandle nh, bool publish_poses = false);
 
         void setGoals(const std::vector<struct Goal>& goals);
         void addGoal(struct Goal goal);
 
-        void start(ros::NodeHandle nh, bool publish_poses = false);
+        void start();
 
         void pause();
         void resume();
