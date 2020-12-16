@@ -19,7 +19,7 @@ dictitems:
               state: true
               th_desired_offset: 0.0
               type: ''
-              x_desired_offset: 0.75
+              x_desired_offset: 0.70
               x_desired_retry_offset: 1.6
               y_desired_offset: 0.0
             state: []
@@ -50,7 +50,7 @@ dictitems:
               state: true
               th_error_thresh: 0.02
               type: ''
-              x_error_thresh: 0.01
+              x_error_thresh: 0.0075
               y_error_thresh: 0.01
             state: []
           Object_Avoidabce: !!python/object/new:dynamic_reconfigure.encoding.Config
