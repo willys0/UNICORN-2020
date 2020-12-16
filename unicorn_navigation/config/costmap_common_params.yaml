@@ -22,7 +22,7 @@ obstacle_layer:
     raytrace_range: 3.0
 
     #Configuration for the sensors that the costmap will use to update a map
-    observation_sources: laser_scan_sensor point_cloud_sensor
+    observation_sources: laser_scan_sensor # point_cloud_sensor
 
     #testing with 360 degrees of view from LIDAR
     laser_scan_sensor: {sensor_frame: base_laser, data_type: LaserScan, topic: /frontLidar/scan, expected_update_rate: 0.5,
