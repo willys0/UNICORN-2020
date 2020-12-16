@@ -34,7 +34,7 @@ int lift() {
         lift_pos = 0.0;
     }
 
-    return (int)lift_pos;
+    return picking_routine;
 }
 
 int main(int argc, char** argv) {
@@ -42,7 +42,7 @@ int main(int argc, char** argv) {
     ros::NodeHandle n;
 
     ros::Subscriber lift_sub = n.subscribe("/TX2_unicorn_picking_routine", 1, &pickingRoutineCallback);
-    ros::Publisher master_msg_pub = n.advertise<unicorn_roborio_bridge::RioMasterMsg>("/RIO_publisher_master_Message", 1, false);
+    ros::Publisher master_msg_pub = n.advertise<unicorn_roborio_bridge::RioMasterMsg>("/RIO_message", 1, false);
 
 
     unicorn_roborio_bridge::RioMasterMsg msg;
