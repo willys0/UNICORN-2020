@@ -132,15 +132,16 @@ int main(int argc, char** argv) {
     std::vector<struct Goal> goals;
     bool publish_poses;
     bool autostart;
+    bool repeat;
     std::string base_frame;
 
     ros::Publisher pose_pub;
     nh.param("publish_poses", publish_poses, false);
     nh.param("autostart", autostart, false);
     nh.param("robot_base_frame", base_frame, std::string("base_link"));
+    nh.param("repeat", repeat, false);
 
-    StateMachine state_machine(nh, publish_poses);
-
+    StateMachine state_machine(nh, repeat, publish_poses);
 
     ros::ServiceServer run_service = nh.advertiseService<std_srvs::SetBoolRequest, std_srvs::SetBoolResponse>("set_running", boost::bind(&toggleRunningCb, _1, _2, &state_machine));
 

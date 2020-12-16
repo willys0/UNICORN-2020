@@ -8,7 +8,7 @@
 
 class StateMachine {
     public:
-        StateMachine(ros::NodeHandle nh, bool publish_poses = false);
+        StateMachine(ros::NodeHandle nh, bool repeating = false, bool publish_poses = false);
 
         void setGoals(const std::vector<struct Goal>& goals);
         void addGoal(struct Goal goal);

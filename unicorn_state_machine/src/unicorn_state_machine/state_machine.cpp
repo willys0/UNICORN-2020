@@ -5,9 +5,12 @@
 #include <std_msgs/Int32.h>
 #include <geometry_msgs/PoseArray.h>
 
-StateMachine::StateMachine(ros::NodeHandle nh, bool publish_poses) : nh_(nh) {
+StateMachine::StateMachine(ros::NodeHandle nh, bool repeating, bool publish_poses) : nh_(nh) {
     paused_ = true;
     publish_poses_ = publish_poses;
+
+    State::removeError();
+    State::setRepeating(repeating);
 
     state_pub_ = nh.advertise<std_msgs::Int32>("current_state", 1, true);
 

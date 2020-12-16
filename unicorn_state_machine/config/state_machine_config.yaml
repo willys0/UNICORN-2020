@@ -1,3 +1,5 @@
 autostart: false
 
 publish_poses: true
+
+repeat: true

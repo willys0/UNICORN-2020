@@ -37,19 +37,24 @@ class State {
         static void forceError() { error_ = true; }
         static void removeError() { error_ = false; }
 
-        static void setGoals(std::vector<struct Goal> goals) { goals_ = goals; }
+        static void setRepeating(bool repeating) { repeating_ = repeating; }
 
-        static void addGoal(struct Goal goal) { goals_.insert(goals_.begin(), goal); }
+        static void setGoals(const std::vector<struct Goal>& goals) { goal_it_.setGoals(goals); }
 
-        static std::vector<struct Goal> getGoals() { return goals_;}
+        static void addGoal(const struct Goal& goal) { goal_it_.addGoal(goal); }
+
+        static std::vector<struct Goal> getGoals() { return goal_it_.getGoals();}
+
+        static bool getNextGoal(struct Goal& goal) { return goal_it_.next(goal); }
 
 
     protected:
         ros::NodeHandle nh_;
 
         static bool error_;
+        static bool repeating_;
 
-        static std::vector<struct Goal> goals_;
+        static GoalIterator goal_it_;
 
 };
 
