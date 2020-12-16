@@ -33,9 +33,36 @@ void velocityCallback(const geometry_msgs::TwistConstPtr& msg, int* intention_an
 
 void stateCallback(const std_msgs::Int32ConstPtr& msg, ros::Publisher led_state_pub) {
 
-    static const int unicorn_state_to_led_state[] = { 0, 1, 3, 2, 4, 5, 6};
-
-    led_msg.data = unicorn_state_to_led_state[msg->data];
+    switch(msg->data) {
+        case 0:
+            // Idle, spinning green LEDs
+            led_msg.data = 0;
+            break;
+        case 1:
+            // Navigation, LEDs in direction of movement
+            led_msg.data = 1;
+            break;
+        case 2:
+            // Docking state, forward pulsating orange LEDs
+            led_msg.data = 4;
+            break;
+        case 3:
+            // Lifting state, spinning orange LEDs
+            led_msg.data = 2;
+            break;
+        case 4:
+            // Docking state, backward pulsating orange LEDs
+            led_msg.data = 3;
+            break;
+        case 6:
+            // Full red (emergency stop)
+            led_msg.data = 6;
+            break;
+        default:
+            // Blinking yellow LEDs
+            led_msg.data = 5;
+            break;
+    }
 
     led_state_pub.publish(led_msg);
 }
