@@ -119,7 +119,7 @@ bool DockingController::getRotationToTag(double& rotation_to_tag) {
     catch(tf2::TransformException &ex) {
         ROS_WARN("in getRotationToTag(): %s",ex.what());
         rotation_to_tag = 0.0;
-        return true;
+        return false;
     }
     // Rotation from chassis_ling frame to DOCK_BUNDLE frame
     rotation_to_tag = atan2(dock_chassi_tf.transform.translation.y, -dock_chassi_tf.transform.translation.x);
