@@ -344,11 +344,6 @@ geometry_msgs::Point32 tracking_lidar::transform_point(geometry_msgs::Point32 po
   // transform with odometry
   x_t = position.x - odometryData_old.pose.pose.position.x;
   y_t = position.y - odometryData_old.pose.pose.position.y;
-  //position.x = x_t*cos(-yaw_old) - y_t*sin(-yaw_old);
-  //position.y = y_t*cos(-yaw_old) + x_t*sin(-yaw_old);
-
-  //x_t = position.x;
-  //y_t = position.y;
 
   position.x = x_t*cos(-yaw_new+yaw_old) + y_t*sin(-yaw_new+yaw_old);
   position.y = y_t*cos(-yaw_new+yaw_old) - x_t*sin(-yaw_new+yaw_old);
@@ -357,9 +352,11 @@ geometry_msgs::Point32 tracking_lidar::transform_point(geometry_msgs::Point32 po
   position.y += odometryData_new.pose.pose.position.y;
   position.z = 0;
 
-  return position;
   // transform to map
   //tf2::doTransform(point,point,odom2map);
+
+  return position;
+
 }
 
 geometry_msgs::Point tracking_lidar::transform_vel(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new)
