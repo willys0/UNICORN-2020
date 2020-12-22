@@ -1,9 +1,6 @@
 #include "tracking_lidar.hpp"
 
 
-
-
-
 /* Makes Variables reconfigurable */
 void dynamicReconfigCallback(unicorn_tracking::TrackingConfig& config, uint32_t level, tracking_lidar *data) {
   data->lambda = config.lambda;
@@ -87,7 +84,7 @@ tracking_lidar::tracking_lidar()
   // object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("obstacles",10,false);
 
   // publishers
-  object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("obstacles",10,false);
+  object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("/move_base/TebLocalPlannerROS/obstacles",10,false);
   marker_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArray",10,false);
   marker_Arrow_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArrowArray",10,false);
 
@@ -116,12 +113,10 @@ void tracking_lidar::object_publisher()
   visualization_msgs::Marker marker;
   visualization_msgs::MarkerArray markerArray, markerDArray;
   geometry_msgs::Point point;
-  geometry_msgs::Point vel;
-  geometry_msgs::Point32 point32_pos, point32_pos_temp;
   tf2::Quaternion Quad;
 
   object.header.frame_id = mapframeid;
-  seq++;
+  
   object.header.seq = seq;
   object.header.stamp = scan_data_.header.stamp;
 
@@ -173,17 +168,12 @@ void tracking_lidar::object_publisher()
       marker.type = 5;
 
       object.polygon.points.clear();
-      for(m =0; m < association_interface.trackers[i].points.points.size()-1; m++)
-        object.polygon.points.push_back(transform_point(association_interface.trackers[i].points.points[m],wheel_odometry_data,odometry_data_));
+      object.polygon = association_interface.trackers[i].points;
 
-      vel.x = association_interface.trackers[i].tracker.x_hat(1);
-      vel.y = association_interface.trackers[i].tracker.x_hat(3);
-      vel.z = 0;
-      vel = transform_vel(vel,wheel_odometry_data,odometry_data_);
       if(min_length_arrow > min_twist_detection)
       {
-        object.velocities.twist.linear.x = vel.x;
-        object.velocities.twist.linear.y = vel.y;
+        object.velocities.twist.linear.x = association_interface.trackers[i].tracker.x_hat(1);
+        object.velocities.twist.linear.y = association_interface.trackers[i].tracker.x_hat(3);
       }else{
         object.velocities.twist.linear.x = 0;
         object.velocities.twist.linear.y = 0;
@@ -197,16 +187,11 @@ void tracking_lidar::object_publisher()
       marker.color.b = association_interface.trackers[i].color[1];
       marker.color.g = association_interface.trackers[i].color[2];
       marker.color.r = association_interface.trackers[i].color[3];
-
-      point32_pos.x = association_interface.trackers[i].tracker.x_hat(0);
-      point32_pos.y = association_interface.trackers[i].tracker.x_hat(2);
-      point32_pos.z = 0;
-      point32_pos = transform_point(point32_pos,wheel_odometry_data,odometry_data_);
-      marker.pose.position.x = point32_pos.x;
-      marker.pose.position.y = point32_pos.y;
+      marker.pose.position.x = association_interface.trackers[i].tracker.x_hat(0);
+      marker.pose.position.y = association_interface.trackers[i].tracker.x_hat(2);
 
       //std::cout << "Plotted Cluster nr:" << i << " estimated_x:" << association_interface.trackers[i].tracker.x_hat(0) << "estimated_y:"<< association_interface.trackers[i].tracker.x_hat(2) << " Sides"<< association_interface.trackers[i].points.points.size() <<std::endl;
-
+      
       
       marker.id = i;
 
@@ -214,22 +199,15 @@ void tracking_lidar::object_publisher()
       marker.points.clear();
       for(m =0; m < association_interface.trackers[i].points.points.size()-1; m++)
       {
-        point32_pos_temp.x = association_interface.trackers[i].points.points[m].x;
-        point32_pos_temp.y = association_interface.trackers[i].points.points[m].y;
-        point32_pos_temp.z = association_interface.trackers[i].points.points[m].z;
-        point32_pos_temp = transform_point(point32_pos_temp,wheel_odometry_data,odometry_data_);
-        point.x = point32_pos_temp.x - point32_pos.x;
-        point.y = point32_pos_temp.y - point32_pos.y;
-        point.z = point32_pos_temp.z;
+        point.x = association_interface.trackers[i].points.points[m].x - association_interface.trackers[i].tracker.x_hat(0);
+        point.y = association_interface.trackers[i].points.points[m].y - association_interface.trackers[i].tracker.x_hat(2);
+        point.z = association_interface.trackers[i].points.points[m].z;
  
         marker.points.push_back(point);
-        point32_pos_temp.x = association_interface.trackers[i].points.points[m+1].x;
-        point32_pos_temp.y = association_interface.trackers[i].points.points[m+1].y;
-        point32_pos_temp.z = association_interface.trackers[i].points.points[m+1].z;
-        point32_pos_temp = transform_point(point32_pos_temp,wheel_odometry_data,odometry_data_);
-        point.x = point32_pos_temp.x - point32_pos.x;
-        point.y = point32_pos_temp.y - point32_pos.y;
-        point.z = point32_pos_temp.z;
+        point.x = association_interface.trackers[i].points.points[m+1].x - association_interface.trackers[i].tracker.x_hat(0);
+        point.y = association_interface.trackers[i].points.points[m+1].y - association_interface.trackers[i].tracker.x_hat(2);
+        point.z = association_interface.trackers[i].points.points[m+1].z;
+
         marker.points.push_back(point);
       }
       markerArray.markers.push_back(marker);
@@ -242,8 +220,8 @@ void tracking_lidar::object_publisher()
         point.y = 0;
         point.z = 0;
         marker.points.push_back(point);
-        point.x = vel.x/min_length_arrow;
-        point.y = vel.y/min_length_arrow;
+        point.x = association_interface.trackers[i].tracker.x_hat(1)/min_length_arrow;
+        point.y = association_interface.trackers[i].tracker.x_hat(3)/min_length_arrow;
         point.z = 0;
         marker.points.push_back(point);
         markerDArray.markers.push_back(marker);
@@ -297,10 +275,12 @@ void tracking_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
 void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 {
 
+    
+    
 
     scan_data_ = scan;
     scan_received = true;
-
+    esitmate_odometry();
     if(map_received && odom_received && scan_received && wheel_received){
       
 
@@ -319,68 +299,116 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       //std::cout << "Angle:" << shape_interface.object_attributes_list[0].average_angle << "side:" << shape_interface.object_attributes_list[0].longest_size << "Sides:" << shape_interface.object_attributes_list[0].sides_amount  << std::endl;
       
       //association_interface.estimate_new_position(scan_data_.header.stamp.sec  + scan_data_.header.stamp.nsec*0.000000001);
-      association_interface.associate(shape_interface.object_attributes_list, wheel_odometry_data, Lidar2base, scan.header.stamp);
-    
+      association_interface.associate(shape_interface.object_attributes_list, odometry_data_, Lidar2base, scan.header.stamp);
 
       object_publisher();
       wheel_received = false;
       scan_received = false; 
       
     }
+    seq++;
 }
 
 
-geometry_msgs::Point32 tracking_lidar::transform_point(geometry_msgs::Point32 position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new)
-{
-  double roll,pitch,yaw_old, yaw_new,x_old,x_new,y_old,y_new, x_t, y_t;
-  tf::Quaternion q(odometryData_old.pose.pose.orientation.x,odometryData_old.pose.pose.orientation.y,odometryData_old.pose.pose.orientation.z,odometryData_old.pose.pose.orientation.w);
-  tf::Quaternion r(odometryData_new.pose.pose.orientation.x,odometryData_new.pose.pose.orientation.y,odometryData_new.pose.pose.orientation.z,odometryData_new.pose.pose.orientation.w);
-  tf::Matrix3x3 m(q);
-  tf::Matrix3x3 n(r);
-  m.getRPY(roll,pitch,yaw_old);
-  n.getRPY(roll,pitch,yaw_new);
+
+using namespace std;
+
+void tracking_lidar::esitmate_odometry(){
+
+  int i,m;
+  int multiplier = 10000;
+  if(seq > 0)
+  {
+    int max_itterations_new = round((scan_data_.angle_max - scan_data_.angle_min)/scan_data_.angle_increment);
+    int max_itterations_old = round((scan_data_old.angle_max - scan_data_old.angle_min)/scan_data_old.angle_increment);
+    // define a 3 dim problem with 10000 model points
+    // and 10000 template points:
+    int32_t dim = 2;
+    
+    // allocate model and template memory
+    double* M = (double*)calloc(dim*max_itterations_new,sizeof(double));
+    double* T = (double*)calloc(dim*max_itterations_old,sizeof(double));
+
+    int j = 0;
+    for(i = 0; i < max_itterations_new; i++)
+    {
+      // Transfor to Cartesian Coordinates
+      T[(i-j)*dim+0] = scan_data_.ranges[i]*cos(float(i)*scan_data_.angle_increment+scan_data_.angle_min)*multiplier;
+      T[(i-j)*dim+1] = scan_data_.ranges[i]*sin(float(i)*scan_data_.angle_increment+scan_data_.angle_min)*multiplier;
+      if(isnan(T[(i-j)*dim+0]) || isinf(T[(i-j)*dim+0]) || isinf(T[(i-j)*dim+1]) || isnan(T[(i-j)*dim+1]))
+        j++;
+    }
+    int m = 0;
+    for(i = 0; i < max_itterations_old; i++)
+    {
+      // Transfor to Cartesian Coordinates
+      M[(i-m)*dim+0] = scan_data_old.ranges[i]*cos(float(i)*scan_data_old.angle_increment+scan_data_old.angle_min)*multiplier;
+      M[(i-m)*dim+1]  = scan_data_old.ranges[i]*sin(float(i)*scan_data_old.angle_increment+scan_data_old.angle_min)*multiplier;
+      if(isnan(M[(i-m)*dim+0]) || isinf(M[(i-m)*dim+0]) || isnan(M[(i-m)*dim+1]) || isinf(M[(i-m)*dim+1]) )
+         m++;    
+    }
 
 
-  // transform with odometry
-  x_t = position.x - odometryData_old.pose.pose.position.x;
-  y_t = position.y - odometryData_old.pose.pose.position.y;
+    // start with identity as initial transformation
+    // in practice you might want to use some kind of prediction here
+    Matrix R = Matrix::eye(dim);
+    Matrix t(dim,1);
+    
+    // run point-to-plane ICP (-1 = no outlier threshold)
+    IcpPointToPlane icp(M,max_itterations_old-m,dim);
+    double residual = icp.fit(T,max_itterations_new-j,R,t,100);
 
-  position.x = x_t*cos(-yaw_new+yaw_old) + y_t*sin(-yaw_new+yaw_old);
-  position.y = y_t*cos(-yaw_new+yaw_old) - x_t*sin(-yaw_new+yaw_old);
+    // results
+    /*
+    std::cout << endl << "Transformation results:"<< std::endl;
+    std::cout <<  "R:" << endl << R << std::endl;
+    std::cout <<  "t:" << endl << t << std::endl;
+    */
+    //std::cout <<  "Residual:"<< residual;*/
+    
+    double rotation[4], rotation_val, translation[2];
+    R.getData(rotation);
+    t.getData(translation);
+    rotation_val = atan2(rotation[1],rotation[0]);
+    //std::cout <<  "Rotation:" << atan2(R.val(1),R.val(1)) << std::endl; << atan2(R.val[2][1],R.val[1][1])
+    //std::cout <<  "Rotation:" << rotation_val << " 1:" << rotation[0]  << " 2:" << rotation[1]  << " 3:" <<  rotation[2]  << " 4:" <<  rotation[3]  << std::endl;
+    //std::cout <<  "translation:" << translation[0]/multiplier  << " 2:" << translation[1]/multiplier << std::endl;
+    // free memory
+    free(M);
+    free(T);
 
-  position.x += odometryData_new.pose.pose.position.x;
-  position.y += odometryData_new.pose.pose.position.y;
-  position.z = 0;
+    double roll,pitch,yaw_est;
+    tf::Quaternion q(esitmated_odometry.pose.pose.orientation.x,esitmated_odometry.pose.pose.orientation.y,esitmated_odometry.pose.pose.orientation.z,esitmated_odometry.pose.pose.orientation.w);
+    tf::Matrix3x3 n(q);
+    n.getRPY(roll,pitch,yaw_est);
+    tf2::Quaternion myQuaternion;
+    myQuaternion.setRPY( roll, pitch,  -rotation_val+yaw_est); 
 
-  // transform to map
-  //tf2::doTransform(point,point,odom2map);
+    esitmated_odometry.pose.pose.orientation.x = myQuaternion.getX();
+    esitmated_odometry.pose.pose.orientation.y = myQuaternion.getY();
+    esitmated_odometry.pose.pose.orientation.z = myQuaternion.getZ();
+    esitmated_odometry.pose.pose.orientation.w = myQuaternion.getW();
 
-  return position;
+    esitmated_odometry.pose.pose.position.x += translation[0]/multiplier*cos(yaw_est) - translation[1]/multiplier*sin(yaw_est);
+    esitmated_odometry.pose.pose.position.y += translation[0]/multiplier*sin(yaw_est) + translation[1]/multiplier*cos(yaw_est);
 
-}
+    std::cout <<  "translation x:" << esitmated_odometry.pose.pose.position.x  << " y" << esitmated_odometry.pose.pose.position.y << std::endl;
+    std::cout <<  "rotation :" << esitmated_odometry.pose.pose.orientation.x << " "  << esitmated_odometry.pose.pose.orientation.y << " " << esitmated_odometry.pose.pose.orientation.z  << " " << esitmated_odometry.pose.pose.orientation.w<< std::endl;
+  }else{
 
-geometry_msgs::Point tracking_lidar::transform_vel(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new)
-{
-  double roll,pitch,yaw_old, yaw_new,x_old,x_new,y_old,y_new, x_t, y_t;
-  tf::Quaternion q(odometryData_old.pose.pose.orientation.x,odometryData_old.pose.pose.orientation.y,odometryData_old.pose.pose.orientation.z,odometryData_old.pose.pose.orientation.w);
-  tf::Quaternion r(odometryData_new.pose.pose.orientation.x,odometryData_new.pose.pose.orientation.y,odometryData_new.pose.pose.orientation.z,odometryData_new.pose.pose.orientation.w);
-  tf::Matrix3x3 m(q);
-  tf::Matrix3x3 n(r);
-  m.getRPY(roll,pitch,yaw_old);
-  n.getRPY(roll,pitch,yaw_new);
+    esitmated_odometry.header.frame_id = base_laser_frame;
+    esitmated_odometry.pose.pose.position.x = odometry_data_.pose.pose.position.x;
+    esitmated_odometry.pose.pose.position.y = odometry_data_.pose.pose.position.y;
+    esitmated_odometry.pose.pose.position.z = odometry_data_.pose.pose.position.z;
 
+    esitmated_odometry.pose.pose.orientation.x = odometry_data_.pose.pose.orientation.x;
+    esitmated_odometry.pose.pose.orientation.y = odometry_data_.pose.pose.orientation.y;
+    esitmated_odometry.pose.pose.orientation.z = odometry_data_.pose.pose.orientation.z;
+    esitmated_odometry.pose.pose.orientation.w = odometry_data_.pose.pose.orientation.w;
+    
+  }
+  esitmated_odometry.header.stamp = scan_data_.header.stamp;
+  esitmated_odometry.header.seq = seq;
+  scan_data_old = scan_data_;
 
-  // transform with odometry
-  x_t = position.x;
-  y_t = position.y;
-  
-  position.x = x_t*cos(-yaw_new+yaw_old) + y_t*sin(-yaw_new+yaw_old);
-  position.y = y_t*cos(-yaw_new+yaw_old) - x_t*sin(-yaw_new+yaw_old);
-
-
-  position.z = 0;
-
-  return position;
-  // transform to map
-  //tf2::doTransform(point,point,odom2map);
 }

@@ -46,6 +46,7 @@ Icp::Icp (double *M,const int32_t M_num,const int32_t dim)
 
 	// build a kd tree from the model point cloud
 	m_kd_tree = new kdtree::KDTree(m_kd_data);
+
 }
 
 Icp::~Icp () {

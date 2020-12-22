@@ -4,6 +4,8 @@ project(unicorn_tracking)
 ## Compile as C++11, supported in ROS Kinetic and newer
 add_compile_options(-std=c++11)
 
+set (LIBICP_SRC_DIR src/ICP)
+FIND_PATH(BOOST_DIR "boost")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -131,6 +133,8 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${Eigen3_INCLUDE_DIRS}
+  ${BOOST_DIR}
+  ${LIBICP_SRC_DIR}
 )
 
 ## Declare a C++ library
@@ -139,7 +143,7 @@ include_directories(
 # )
 
 
- add_executable(${PROJECT_NAME}_node src/tracking_lidar.cpp src/shape_extraction.cpp src/association.cpp src/kalman/kalman.cpp src/Hungarian/Hungarian.cpp)
+ add_executable(${PROJECT_NAME}_node src/tracking_lidar.cpp src/shape_extraction.cpp src/association.cpp src/kalman/kalman.cpp src/Hungarian/Hungarian.cpp src/ICP/icp.cpp src/ICP/matrix.cpp src/ICP/icpPointToPoint.cpp src/ICP/icpPointToPlane.cpp src/ICP/kdtree.cpp)
  target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} ${Eigen3_LIBRARIES})
  add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
