@@ -7,11 +7,22 @@
 
     <include file="$(find unicorn)/launch/main_2020.launch">
         <arg name="sim" value="true" />
+<<<<<<< HEAD
         <arg name="use_simlift" value="$(arg use_simlift)" />
         <arg name="use_zed" value="false" />
         <arg name="use_realsense" value="false" />
+=======
+        <arg name="use_zed" value="true" />
+        <arg name="use_realsense" value="true" />
+>>>>>>> dev
         <arg name="do_slam" value="$(arg do_slam)" />
         <arg name="use_object_tracking" value="$(arg use_object_tracking)" />
         <arg name="map_file" value="$(arg map_file)" />
     </include>
+
+    <include file="$(find unicorn_roborio_bridge)/launch/bridge.launch">
+        <arg name="rear_lidar_scan_topic" value="/rearLidar/empty_sim_scan" />
+    </include>
+
+    <include file="$(find unicorn_simulator)/launch/roborio_simulator.launch"/>
 </launch>

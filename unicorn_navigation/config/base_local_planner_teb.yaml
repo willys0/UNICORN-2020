@@ -9,7 +9,7 @@ TebLocalPlannerROS:
  dt_ref: 0.3
  dt_hysteresis: 0.1
  global_plan_overwrite_orientation: True
- max_global_plan_lookahead_dist: 1.25
+ max_global_plan_lookahead_dist: 3.0
  feasibility_check_no_poses: 5
  orientation_mode: 2
 
@@ -18,10 +18,10 @@ TebLocalPlannerROS:
  max_vel_x: 0.4
  max_vel_y: 0
  max_vel_x_backwards: 0.2
- max_vel_theta: 0.4
- acc_lim_x: 1
+ max_vel_theta: 0.7
+ acc_lim_x: 2.0
  acc_lim_y: 0.0
- acc_lim_theta: 10
+ acc_lim_theta: 0.7
  min_turning_radius: 0.0
  footprint_model: # types: "point", "circular", "two_circles", "line", "polygon"
    type: "two_circles"
@@ -36,7 +36,7 @@ TebLocalPlannerROS:
 
  # GoalTolerance
 
- xy_goal_tolerance: 0.1
+ xy_goal_tolerance: 0.2
  yaw_goal_tolerance: 0.0872665
  free_goal_vel: False
 
@@ -58,9 +58,11 @@ TebLocalPlannerROS:
  optimization_verbose: False
  penalty_epsilon: 0.0
  weight_max_vel_x: 1.5
+ weight_max_vel_y: 0
  weight_max_vel_theta: 1
- weight_acc_lim_x: 0
- weight_acc_lim_theta: 0
+ weight_acc_lim_x: 0.2
+ weight_acc_lim_y: 0
+ weight_acc_lim_theta: 0.2
  weight_kinematics_nh: 1000
  weight_kinematics_forward_drive: 1000.0
  weight_kinematics_turning_radius: 0
@@ -68,7 +70,7 @@ TebLocalPlannerROS:
  weight_obstacle: 50
  weight_viapoint: 40
  weight_dynamic_obstacle: 10 # not in use yet
- alternative_time_cost: False # not in use yet
+ selection_alternative_time_cost: False # not in use yet
 
  # Homotopy Class Planner
 
@@ -89,6 +91,6 @@ TebLocalPlannerROS:
 cmd_angle_instead_rotvel: False
 min_samples: 3
 allow_init_with_backwards_motion: False
-inflation_dist: 0.6
+inflation_dist: 0.4
 viapoints_all_candidates: False
 global_plan_via_point_sep: 2

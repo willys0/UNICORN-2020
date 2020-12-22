@@ -1,19 +1,27 @@
 <launch>
   <arg name="camera_name" default="realsense/color" />
-  <arg name="image_topic" default="image_raw" />
-  <arg name="camera_frame" value="realsense_camera" />
+  <arg name="image_topic" default="dock_image" />
+  <arg name="camera_frame" default="realsense_color_optical_frame" />
+  <arg name="remove_duplicates" default="true" />
+  <arg name="docking_config" default="$(find unicorn_docking)/config/docking.yaml" />
+  <arg name="pid_config" default="$(find unicorn_docking)/config/pid_gains.yaml" />
+  <arg name="dyn_reconfigure_config" default="$(find unicorn_docking)/config/reconfigurable.yaml" />
+
+  <!-- Load dynamic reconfigurable values from file -->
+  <node name="dynamic_reconfigure_load" pkg="dynamic_reconfigure" type="dynparam" args="load /unicorn_docking_node $(arg dyn_reconfigure_config)" />
 
   <node pkg="unicorn_docking" type="unicorn_docking_node" name="unicorn_docking_node" output="screen">
     <remap from="/cmd_vel" to="/unicorn/cmd_vel" />
 
-    <rosparam command="load" file="$(find unicorn_docking)/config/pid_gains.yaml" ns="pid" />
-    <rosparam command="load" file="$(find unicorn_docking)/config/docking.yaml" />
+    <rosparam command="load" file="$(arg pid_config)" ns="pid" />
+    <rosparam command="load" file="$(arg docking_config)" />
   </node>
 
   <include file="$(find unicorn_docking)/launch/apriltag.launch">
     <arg name="camera_name" value="$(arg camera_name)" />
     <arg name="image_topic" value="$(arg image_topic)" />
     <arg name="camera_frame" value="$(arg camera_frame)" />
+    <arg name="remove_duplicates" value="$(arg remove_duplicates)" />
 
   </include>
 </launch>

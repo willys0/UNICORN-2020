@@ -1,0 +1,2 @@
+# The maximum time (in seconds) for a velocity command to be valid.:w
+max_velocity_delay: 0.1

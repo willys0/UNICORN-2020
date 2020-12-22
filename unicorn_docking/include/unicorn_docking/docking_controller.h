@@ -9,32 +9,71 @@
 #include <control_toolbox/pid.h>
 
 #include <apriltag_ros/AprilTagDetectionArray.h>
+#include <sensor_msgs/LaserScan.h>
 #include <std_msgs/Int32.h>
 
 #include <tf/transform_datatypes.h>
 #include <geometry_msgs/Quaternion.h>
 #include <cmath>
 
-#include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <tf2/transform_datatypes.h>
+#include <tf2/utils.h>
 
 #include <tf2_ros/transform_listener.h>
 #include <geometry_msgs/TransformStamped.h>
+
+#include <visualization_msgs/Marker.h>
+#include <geometry_msgs/PoseStamped.h>
+
+#include <std_msgs/Float64.h>
 
 
 class DockingController {
 
     public:
         typedef enum DockState { IDLE, DOCKING } DockState;
-        DockingController(int nr_for_pitch_average);
+        DockingController();
 
         void reset();
 
         bool computeVelocity(geometry_msgs::Twist& msg_out);
 
-        double getDistanceToTag();
+        DockState getState() { return state_; }
+        void setState(DockState state) { state_ = state; }
 
+        void setDesiredOffset(geometry_msgs::Point offset) { desired_offset_ = offset; }
+
+        void setDesiredRotationFunctionParameters(double a, double b, double c) {
+                rotational_a_ = a;
+                rotational_b_ = b;
+                rotational_c_ = c;
+        }
+
+        void setMaxTfLookupTime(double max_tf_time) {
+            max_tf_lookup_time_ = max_tf_time;
+        }
+
+        void setMinObjectDistances(double min_distance_infront, double min_distance_behind, double min_dist_to_wall) {
+            min_distance_infront_ = min_distance_infront;
+            min_distance_behind_ = min_distance_behind;
+            min_dist_to_wall_ = min_dist_to_wall;
+        }
+
+        void setRearLidarRotationMissalignment(double rotation_offset) {
+            lidar_rotational_missalignment_ = rotation_offset;
+        }
+
+        void setLidarContributionParameters(double lidar_contrib_factor, double lidar_contrib_offset) {
+            lidar_contrib_factor_ = lidar_contrib_factor;
+            lidar_contrib_offset_ = lidar_contrib_offset;
+
+        }
+
+        double xError() { return err_x_; }
+        double yError() { return err_y_; }
+        double thError() { return err_th_; }
+
+    protected:
         double getPitchComponent();
 
         double getLateralComponent();
@@ -43,49 +82,73 @@ class DockingController {
 
         double getDesiredRotation();
 
-        double getRotationToTag();
-        
-        DockState getState() { return state_; }
-        void setState(DockState state) { state_ = state; }
+        bool getRotationToTag(double& rotation_to_tag);
 
-        void setDesiredOffset(geometry_msgs::Point offset) { desired_offset_ = offset; }
+        double getDistanceToClosestObject(const sensor_msgs::LaserScan& laser_scan, double laser_scan_angle);
 
-        double xError() { return err_x_; }
-        double yError() { return err_y_; }
-        double thError() { return err_th_; }
+        double fuseDistances(double apriltag_dist, double lidar_dist, double lidar_angle);
 
-    protected:
+        double fuseAngles(double apriltag_angle, double lidar_angle, double apriltag_dist);
+
         void apriltagDetectionsCb(const apriltag_ros::AprilTagDetectionArray::ConstPtr& msg);
+
+        void rearLidarCb(const sensor_msgs::LaserScanConstPtr& msg);
+
+        void frontLidarCb(const sensor_msgs::LaserScanConstPtr& msg);
 
     private:
         ros::NodeHandle nh_;
 
         ros::Subscriber apriltag_sub_;
+        ros::Subscriber lidar_sub_;
+        ros::Subscriber front_lidar_sub_;
 
-        ros::Publisher  detection_pub_;
+        ros::Publisher  d_pub_;
+        ros::Publisher  n_pub_;
 
         control_toolbox::Pid pid_x_;
         control_toolbox::Pid pid_th_;
 
-        geometry_msgs::Pose  tag_pose_;
         geometry_msgs::Point desired_offset_;
-        geometry_msgs::Vector3 tag_point_rel_wheel_base_;
-        geometry_msgs::Vector3 camera_to_wheelbase_transform;
+        geometry_msgs::TransformStamped wheelbase_to_tag_tf_;
 
         tf2_ros::Buffer tf_buffer_;
         tf2_ros::TransformListener tf_listener_;
 
-        std::vector<double> tag_pitch_mean_vec_;
-        int nr_for_pitch_average_;   
+        std::string base_link_frame_;
+        std::string lidar_frame_;
 
-        bool tag_visible_;
-        int error_times_;
-        
-        int retry_error_times_;
+        bool use_lidar_;
+        std::vector<int> lidar_indices_;
+        double lidar_offset_x_;
+        double lidar_dist_;
+        double lidar_angle_;
 
         double err_x_;
         double err_y_;
         double err_th_;
+
+        double rotational_a_;
+        double rotational_b_;
+        double rotational_c_;
+
+        double max_tf_lookup_time_ = 5.0;
+
+        double min_distance_infront_;
+        double min_distance_behind_;
+        double min_dist_to_wall_;
+
+        double rear_lidar_angle_;
+        double front_lidar_angle_;
+        sensor_msgs::LaserScan front_lidar_scan_;
+        sensor_msgs::LaserScan rear_lidar_scan_;
+        double max_time_since_lidar_scan_;
+        double lidar_rotational_missalignment_;
+
+        double lidar_contrib_factor_;
+        double lidar_contrib_offset_;
+
+        bool debug_;
 
         ros::Time last_time_;
 

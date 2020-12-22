@@ -2,6 +2,8 @@
 
 #include <unicorn_state_machine/navigating_state.h>
 
+#include <unicorn_state_machine/goal.h>
+
 IdleState::IdleState() {
    
 }
@@ -14,9 +16,21 @@ State* IdleState::run() {
 
     ROS_INFO("[IdleState]");
 
-    geometry_msgs::Pose goal;
-    goal.position.x = 0.0;
-    goal.orientation.w = 1;
+    struct Goal goal;
 
-    return new NavigatingState(goal, 1, nh_);
+    if(!getNextGoal(goal)) {
+        if(repeating_)
+            goal_it_.reset();
+
+        while(!getNextGoal(goal)) {
+            if(!ros::ok())
+                return nullptr;
+
+            RETURN_ON_ERROR();
+            ROS_INFO("[IdleState] No goals, sleeping for a while...");
+            ros::Duration(2.0).sleep();
+        }
+    }
+
+    return new NavigatingState(goal.pose, goal.lift_cmd, nh_);
 }

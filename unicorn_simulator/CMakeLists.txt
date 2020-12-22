@@ -9,10 +9,15 @@ project(unicorn_simulator)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   gazebo_ros
+  gazebo_msgs
+  gazebo_plugins
+  gazebo_ros_control
   husky_gazebo
+  unicorn_roborio_bridge
 )
 
-file(COPY models/. DESTINATION $ENV{HOME}/.gazebo/models)
+
+# file(COPY models/. DESTINATION $ENV{HOME}/.gazebo/models)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -110,6 +115,15 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
+##################################
+## Update the GAZEBO_MODEL_PATH ##
+##################################
+
+if(CMAKE_HOST_UNIX)
+  catkin_add_env_hooks(90.unicorn_simulator SHELLS sh DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/env-hooks)
+endif()
+
+
 ###########
 ## Build ##
 ###########
@@ -134,7 +148,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/unicorn_simulator_node.cpp)
+add_executable(unicorn_roborio_simulator_node src/roborio_simulator_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -144,12 +158,12 @@ include_directories(
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(unicorn_roborio_simulator_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(unicorn_roborio_simulator_node
+  ${catkin_LIBRARIES}
+)
 
 #############
 ## Install ##
@@ -192,6 +206,12 @@ include_directories(
 #   # myfile2
 #   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 # )
+
+
+install(DIRECTORY
+  models/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/models
+)
 
 #############
 ## Testing ##

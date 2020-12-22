@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <launch>
-  <arg name="roborio_master_message_topic"  default="/RIO_publisher_master_Message" />
+  <arg name="roborio_master_message_topic"  default="/RIO_message" />
   <arg name="rear_lidar_scan_topic"         default="/rearLidar/scan" />
   <arg name="lift_state_topic"              default="/lift/state" />
   <arg name="lift_action_ns"                default="/lift/lift_action" />

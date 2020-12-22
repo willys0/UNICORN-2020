@@ -21,8 +21,9 @@ State* DockState::run() {
 
     ROS_INFO("[DockState] Waiting for dock action server...");
     DockActionClient client("/dock", true);
-    client.waitForServer();
-
+    while(ros::ok() && !client.waitForServer(ros::Duration(0.5))) {
+        RETURN_ON_ERROR();
+    }
 
     // TODO: Try to find a tag, if fail go to idle state (?)
     // return new IdleState(nh_);
@@ -30,7 +31,9 @@ State* DockState::run() {
     // Call the docking controller to initiate a dock
     unicorn_docking::DockGoal goal;
     client.sendGoal(goal);
-    client.waitForResult();
+    while(ros::ok() && !client.waitForResult(ros::Duration(0.5))) {
+        RETURN_ON_ERROR();
+    }
 
     if(client.getState() == actionlib::SimpleClientGoalState::SUCCEEDED) {
         // Go to lift state if docked

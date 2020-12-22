@@ -1,21 +1,14 @@
 footprint: [[-0.5, -0.3], [-0.5, 0.3], [0.2, 0.3], [0.2, -0.3]]
 footprint_padding: 0.0
 
-plugins:
-  - {name: static_layer,     type: "costmap_2d::StaticLayer"}
-  - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
-  #- {name: sonar_layer,       type: "range_sensor_layer::RangeSensorLayer"}
-  #- {name: voxel_layer,       type: "costmap_2d::VoxelLayer"}
-  - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
-
 #Set the tolerance we're willing to have for tf transforms
 transform_tolerance: 0.3
 
 
 #Cost function parameters
 inflation_layer:
-    inflation_radius: 0.55
-    cost_scaling_factor: 8.0
+    inflation_radius: 0.5
+    cost_scaling_factor: 2.0
 
 #The cost at which a cell is considered an obstacle when a map is read from the map_server
 static_map:
@@ -29,7 +22,7 @@ obstacle_layer:
     raytrace_range: 3.0
 
     #Configuration for the sensors that the costmap will use to update a map
-    observation_sources: laser_scan_sensor point_cloud_sensor
+    observation_sources: laser_scan_sensor # point_cloud_sensor
 
     #testing with 360 degrees of view from LIDAR
     laser_scan_sensor: {sensor_frame: base_laser, data_type: LaserScan, topic: /frontLidar/scan, expected_update_rate: 0.5,

@@ -1,6 +1,6 @@
 # Overall filter parameters
-min_particles:        15      # 100,500
-max_particles:        1000     # 5000
+min_particles:        25      # 100,500
+max_particles:        400     # 5000
 kld_err:              0.01      # 0.01, 0.05
 kld_z:                0.99      # 0.99
 update_min_d:         0.1       # 0.2
@@ -22,7 +22,7 @@ first_map_only:       false     # false
 
 # Laser Model Parameters 
 laser_min_range:            0.2   # -1.0
-laser_max_range:            -1.0   # -1.0
+laser_max_range:            10.0   # -1.0
 laser_max_beams:            250    # 180
 laser_z_hit:                0.95   # 0.95, 0.5
 laser_z_short:              0.05    # 0.1,  0.05
@@ -41,6 +41,6 @@ odom_alpha3:      0.3    # 0.2,0.8 tt
 odom_alpha4:      0.1   # 0.2 tr
 odom_alpha5:      0.02    # 0.2,0.1
 odom_frame_id:    odom_chassis
-base_frame_id:    chassis_link
+base_frame_id:    base_link
 global_frame_id: map
 tf_broadcast: false

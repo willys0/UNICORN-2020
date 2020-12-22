@@ -7,6 +7,8 @@
 
 #define N 30
 
+std_msgs::Int32 led_msg;
+
 void velocityCallback(const geometry_msgs::TwistConstPtr& msg, int* intention_angles, int* intention_avg) {
     *intention_avg = 0;
     for(int i = 0; i < N-1; i++) {
@@ -31,10 +33,36 @@ void velocityCallback(const geometry_msgs::TwistConstPtr& msg, int* intention_an
 
 void stateCallback(const std_msgs::Int32ConstPtr& msg, ros::Publisher led_state_pub) {
 
-    static const int unicorn_state_to_led_state[] = { 0, 1, 3, 2, 4 };
-    static std_msgs::Int32 led_msg;
-
-    led_msg.data = unicorn_state_to_led_state[msg->data];
+    switch(msg->data) {
+        case 0:
+            // Idle, spinning green LEDs
+            led_msg.data = 0;
+            break;
+        case 1:
+            // Navigation, LEDs in direction of movement
+            led_msg.data = 1;
+            break;
+        case 2:
+            // Docking state, forward pulsating orange LEDs
+            led_msg.data = 4;
+            break;
+        case 3:
+            // Lifting state, spinning orange LEDs
+            led_msg.data = 2;
+            break;
+        case 4:
+            // Docking state, backward pulsating orange LEDs
+            led_msg.data = 3;
+            break;
+        case 6:
+            // Full red (emergency stop)
+            led_msg.data = 6;
+            break;
+        default:
+            // Blinking yellow LEDs
+            led_msg.data = 5;
+            break;
+    }
 
     led_state_pub.publish(led_msg);
 }
@@ -47,6 +75,8 @@ int main(int argc, char** argv) {
 
     int intention_angles[N];
     int intention_avg = 0;
+
+    led_msg.data = 0;
 
     ros::Publisher intention_pub = nh.advertise<std_msgs::Int32>("intention_angle", 1, false);
     ros::Publisher led_state_pub = nh.advertise<std_msgs::Int32>("led_state", 1, true);

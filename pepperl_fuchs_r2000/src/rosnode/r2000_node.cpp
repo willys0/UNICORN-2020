@@ -127,8 +127,8 @@ void R2000Node::getScanData(const ros::TimerEvent &e)
     scanmsg.header.stamp = ros::Time::now();
     
     //Added by Niklas Fasth
-    scanmsg.angle_min = start_angle*(M_PI/180); //-M_PI;
-    scanmsg.angle_max = -start_angle*(M_PI/180); //+M_PI;
+    scanmsg.angle_min = start_angle*(M_PI/180)/10000; //-M_PI;
+    scanmsg.angle_max = -start_angle*(M_PI/180)/10000; //+M_PI;
 
     scanmsg.angle_increment = 2*((-(float)start_angle)/10000)*(M_PI/180)/float(scandata.distance_data.size()); //2*M_PI/float(scandata.distance_data.size());
     //End add

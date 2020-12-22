@@ -6,7 +6,7 @@ LiftInterface::LiftInterface(ros::NodeHandle nh) :
     initLiftMsg();
 
     lift_state_pub_ = nh_.advertise<std_msgs::Int32>("/lift/state", 1);
-    run_lift_pub_   = nh_.advertise<std_msgs::Int32>("/TX2_unicorn_picking_routine", 1);
+    run_lift_pub_   = nh_.advertise<std_msgs::Int32>("/lift/picking_routine", 1);
 
 }
 
@@ -48,11 +48,9 @@ LiftInterface::LiftState LiftInterface::getCurrentState() {
             return LiftState::IDLE;
         case 1:
         case 2:
-        case 3:
-        case 4:
-        case 5:
             return LiftState::RUNNING;
-        case 6:
+        case 3:
+            return LiftState::RESETTING;
         default:
             return LiftState::ERROR;
     }
