@@ -53,13 +53,13 @@
 	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
 		<arg name="global_frame" value="map" />
 		<arg unless="$(arg sim)" name="robot_base_frame" value="base_link" />
-		<arg if="$(arg sim)" name="robot_base_frame" value="chassis_link" />
+		<arg if="$(arg sim)" name="robot_base_frame" value="base_link" />
 	</include>
 
 	<group if="$(arg do_slam)">
 		<include file="$(find unicorn_slam)/launch/gmapping.launch">
 			<arg name="scan_topic" value="$(arg scan_topic)" />
-            <arg if="$(arg sim)" name="robot_base_frame" value="chassis_link" />
+            <arg if="$(arg sim)" name="robot_base_frame" value="base_link" />
             <arg unless="$(arg sim)" name="robot_base_frame" value="base_link" />
 		</include>
 	</group>
@@ -76,7 +76,7 @@
 
 	<include file="$(find unicorn_state_machine)/launch/state_machine.launch">
 		<arg unless="$(arg sim)" name="robot_base_frame" value="base_link" />
-		<arg if="$(arg sim)" name="robot_base_frame" value="chassis_link" />
+		<arg if="$(arg sim)" name="robot_base_frame" value="base_link" />
 	</include>
 
 	<!--include unless="$(arg sim)" file="$(find unicorn_intention)/launch/intention.launch"-->
@@ -99,9 +99,7 @@
 	<!-- publish all the frames to TF -->
 
 	<group if="$(arg sim)">
-		<include file="$(find unicorn_simulator)/launch/gazebo.launch" >
-		<arg name="use_simlift" value="$(arg use_simlift)" />
-		</include>
+		<include file="$(find unicorn_simulator)/launch/gazebo.launch" />
 	</group>
 
 	<param unless="$(arg sim)" name="robot_description" command="$(find xacro)/xacro.py '$(find unicorn_description)/urdf/unicorn_target.urdf.xacro'" />

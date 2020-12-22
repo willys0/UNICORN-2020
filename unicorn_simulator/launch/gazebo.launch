@@ -33,18 +33,17 @@
 
 
 		<!-- push robot_description to factory and spawn robot in gazebo -->
-		<node name="automower_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model UNICORN -x 0.0 -y 0.0 -z 0.2 -Y 0.0"/> <!-- 5.5 -2.6 0.2 -1.5707 -->
+		<node name="automower_spawn" pkg="gazebo_ros" type="spawn_model" output="screen" args="-urdf -param robot_description -model UNICORN -x 0.0 -y 0.0 -z 0.2 -Y 0.0"/>
+		
 	</group>
 
 
-<!-- Simlift controller startup, of as default due to lift effortcontrollers shaking the model when in use. -->
+<!-- Simlift controller startup, of as default due to lift effortcontrollers shaking the model when in use.
 	<group if="$(arg use_simlift)">
-		<!-- Load joint controller configurations from YAML file to parameter server -->
 		<rosparam file="$(find unicorn_description)/config/robot_control.yaml" command="load"/>
-		<!-- load the controllers -->
 		<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
 			output="screen" ns="/unicorn" args="lift_vertical_controller lift_horizontal_controller joint_state_controller"/>
-	</group>
+	</group> -->
 
 
 
