@@ -87,6 +87,7 @@ tracking_lidar::tracking_lidar()
   object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("/move_base/TebLocalPlannerROS/obstacles",10,false);
   marker_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArray",10,false);
   marker_Arrow_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArrowArray",10,false);
+  est_odom_pub_ = n_.advertise<nav_msgs::Odometry>("icp/odom",10,false);
 
   tf2_ros::TransformListener tf2_listener(tf_buffer);
   Lidar2base = tf_buffer.lookupTransform(base_frame, base_laser_frame, ros::Time(0),ros::Duration(100));
@@ -285,15 +286,15 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
       
 
       shape_interface.adaptive_break_point(scan);
-      std::cout << "Test clsuters:" << std::endl;
-      std::cout << shape_interface.cluster_list.size() << std::endl;
+      //std::cout << "Test clsuters:" << std::endl;
+      //std::cout << shape_interface.cluster_list.size() << std::endl;
       if(static_filter)
         shape_interface.static_map_filter(map_data_, odometry_data_, Lidar2base);
       
 
       shape_interface.polygon_extraction();
-      std::cout << "Test objects:" << std::endl;
-      std::cout << shape_interface.object_attributes_list.size() << std::endl;
+      //std::cout << "Test objects:" << std::endl;
+      //std::cout << shape_interface.object_attributes_list.size() << std::endl;
       shape_interface.polygon_attribute_extraction();
       association_interface.calculateOdometryChange(wheel_odometry_data);
       //std::cout << "Angle:" << shape_interface.object_attributes_list[0].average_angle << "side:" << shape_interface.object_attributes_list[0].longest_size << "Sides:" << shape_interface.object_attributes_list[0].sides_amount  << std::endl;
@@ -312,20 +313,20 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 
 
 using namespace std;
-
+// Uses ICP to estimate odometry
 void tracking_lidar::esitmate_odometry(){
 
   int i,m;
-  int multiplier = 10000;
-  if(seq > 0)
+  int multiplier = 1000; // Solves issue with rounding error in ICP library
+  esitmated_odometry.header.stamp = scan_data_.header.stamp;
+  esitmated_odometry.header.seq = seq;
+
+  if(seq > 0 && !isnan(esitmated_odometry.pose.pose.orientation.x))
   {
     int max_itterations_new = round((scan_data_.angle_max - scan_data_.angle_min)/scan_data_.angle_increment);
     int max_itterations_old = round((scan_data_old.angle_max - scan_data_old.angle_min)/scan_data_old.angle_increment);
-    // define a 3 dim problem with 10000 model points
-    // and 10000 template points:
-    int32_t dim = 2;
-    
-    // allocate model and template memory
+
+    int32_t dim = 2;    
     double* M = (double*)calloc(dim*max_itterations_new,sizeof(double));
     double* T = (double*)calloc(dim*max_itterations_old,sizeof(double));
 
@@ -348,32 +349,17 @@ void tracking_lidar::esitmate_odometry(){
          m++;    
     }
 
-
-    // start with identity as initial transformation
-    // in practice you might want to use some kind of prediction here
     Matrix R = Matrix::eye(dim);
     Matrix t(dim,1);
     
     // run point-to-plane ICP (-1 = no outlier threshold)
     IcpPointToPlane icp(M,max_itterations_old-m,dim);
-    double residual = icp.fit(T,max_itterations_new-j,R,t,100);
-
-    // results
-    /*
-    std::cout << endl << "Transformation results:"<< std::endl;
-    std::cout <<  "R:" << endl << R << std::endl;
-    std::cout <<  "t:" << endl << t << std::endl;
-    */
-    //std::cout <<  "Residual:"<< residual;*/
-    
+    double residual = icp.fit(T,max_itterations_new-j,R,t,50);
     double rotation[4], rotation_val, translation[2];
     R.getData(rotation);
     t.getData(translation);
     rotation_val = atan2(rotation[1],rotation[0]);
-    //std::cout <<  "Rotation:" << atan2(R.val(1),R.val(1)) << std::endl; << atan2(R.val[2][1],R.val[1][1])
-    //std::cout <<  "Rotation:" << rotation_val << " 1:" << rotation[0]  << " 2:" << rotation[1]  << " 3:" <<  rotation[2]  << " 4:" <<  rotation[3]  << std::endl;
-    //std::cout <<  "translation:" << translation[0]/multiplier  << " 2:" << translation[1]/multiplier << std::endl;
-    // free memory
+
     free(M);
     free(T);
 
@@ -382,18 +368,19 @@ void tracking_lidar::esitmate_odometry(){
     tf::Matrix3x3 n(q);
     n.getRPY(roll,pitch,yaw_est);
     tf2::Quaternion myQuaternion;
-    myQuaternion.setRPY( roll, pitch,  -rotation_val+yaw_est); 
+    myQuaternion.setRPY( roll, pitch,yaw_est-rotation_val); 
 
     esitmated_odometry.pose.pose.orientation.x = myQuaternion.getX();
     esitmated_odometry.pose.pose.orientation.y = myQuaternion.getY();
     esitmated_odometry.pose.pose.orientation.z = myQuaternion.getZ();
     esitmated_odometry.pose.pose.orientation.w = myQuaternion.getW();
 
-    esitmated_odometry.pose.pose.position.x += translation[0]/multiplier*cos(yaw_est) - translation[1]/multiplier*sin(yaw_est);
-    esitmated_odometry.pose.pose.position.y += translation[0]/multiplier*sin(yaw_est) + translation[1]/multiplier*cos(yaw_est);
+    esitmated_odometry.pose.pose.position.x += translation[0]/multiplier*cos(yaw_est-rotation_val) - translation[1]/multiplier*sin(yaw_est-rotation_val);
+    esitmated_odometry.pose.pose.position.y += translation[0]/multiplier*sin(yaw_est-rotation_val) + translation[1]/multiplier*cos(yaw_est-rotation_val);
 
-    std::cout <<  "translation x:" << esitmated_odometry.pose.pose.position.x  << " y" << esitmated_odometry.pose.pose.position.y << std::endl;
-    std::cout <<  "rotation :" << esitmated_odometry.pose.pose.orientation.x << " "  << esitmated_odometry.pose.pose.orientation.y << " " << esitmated_odometry.pose.pose.orientation.z  << " " << esitmated_odometry.pose.pose.orientation.w<< std::endl;
+    est_odom_pub_.publish(esitmated_odometry);
+    //std::cout <<  "translation x:" << esitmated_odometry.pose.pose.position.x  << " y" << esitmated_odometry.pose.pose.position.y << std::endl;
+    //std::cout <<  "rotation :" << esitmated_odometry.pose.pose.orientation.x << " "  << esitmated_odometry.pose.pose.orientation.y << " " << esitmated_odometry.pose.pose.orientation.z  << " " << esitmated_odometry.pose.pose.orientation.w<< std::endl;
   }else{
 
     esitmated_odometry.header.frame_id = base_laser_frame;
@@ -405,10 +392,16 @@ void tracking_lidar::esitmate_odometry(){
     esitmated_odometry.pose.pose.orientation.y = odometry_data_.pose.pose.orientation.y;
     esitmated_odometry.pose.pose.orientation.z = odometry_data_.pose.pose.orientation.z;
     esitmated_odometry.pose.pose.orientation.w = odometry_data_.pose.pose.orientation.w;
-    
+    esitmated_odometry.pose.covariance = { 1.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                                          0.0, 1.0, 0.0, 0.0, 0.0, 0.0,
+                                          0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+                                          0.0, 0.0, 0.0, 1.0, 0.0, 0.0,
+                                          0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
+                                          0.0, 0.0, 0.0, 0.0, 0.0, 1.0
+                                          };
+
+
   }
-  esitmated_odometry.header.stamp = scan_data_.header.stamp;
-  esitmated_odometry.header.seq = seq;
   scan_data_old = scan_data_;
 
 }

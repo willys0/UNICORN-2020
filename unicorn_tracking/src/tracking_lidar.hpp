@@ -119,6 +119,8 @@ private:
 	sensor_msgs::LaserScan scan_data_;
 	sensor_msgs::LaserScan scan_data_old;
 	geometry_msgs::Polygon shapes[MAX_OBJECTS];
+	geometry_msgs::TransformStamped Lidar2base;
+	geometry_msgs::TransformStamped odom2map;
 	ros::Subscriber odometry_sub_;
 	ros::Subscriber odometry_sub_2;
 	ros::Subscriber map_sub_;
@@ -126,9 +128,7 @@ private:
 	ros::Publisher object_pub_;
 	ros::Publisher marker_pub_;
 	ros::Publisher marker_Arrow_pub_;
-	geometry_msgs::TransformStamped Lidar2base;
-	geometry_msgs::TransformStamped odom2map;
-
+	ros::Publisher est_odom_pub_;
 	int seq;
 	int tf_frame_listener_thread;
 
