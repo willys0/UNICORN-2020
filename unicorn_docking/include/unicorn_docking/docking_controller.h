@@ -148,8 +148,9 @@ class DockingController {
         double lidar_contrib_factor_;
         double lidar_contrib_offset_;
 
+        bool debug_;
+
         ros::Time last_time_;
-        ros::Time tag_last_seen_;
 
         DockState state_;
 

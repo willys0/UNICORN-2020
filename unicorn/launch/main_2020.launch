@@ -30,20 +30,15 @@
 		<arg name="sim" value="$(arg sim)" />
 	</include>
 
-	<group unless="$(arg sim)">
-		<include file="$(find unicorn)/launch/components/sensors.launch">
-			<arg name="use_zed" value="$(arg use_zed)" />
-			<arg name="use_realsense" value="$(arg use_realsense)" />
-		</include>
+	<include file="$(find unicorn)/launch/components/sensors.launch">
+		<arg name="sim" value="$(arg sim)" />
+		<arg name="use_zed" value="$(arg use_zed)" />
+		<arg name="use_realsense" value="$(arg use_realsense)" />
+	</include>
 
+	<group unless="$(arg sim)">
 		<include file="$(find unicorn_roborio_bridge)/launch/bridge.launch" />
 	</group>
-
-	<include file="$(find unicorn)/launch/components/voxel_filter.launch">
-		<arg name="input_pointcloud_topic" value="/zed/depth/points"/>
-		<arg name="output_pointcloud_topic" value="/zed/depth/points_filtered"/>
-		<arg name="sim" value="$(arg sim)" />
-	</include>
 
 	<include file="$(find unicorn_localization)/launch/localization.launch">
 		<arg name="sim" value="$(arg sim)" />
@@ -64,7 +59,7 @@
 		<include file="$(find unicorn_slam)/launch/gmapping.launch">
 			<arg name="scan_topic" value="$(arg scan_topic)" />
             <arg if="$(arg sim)" name="robot_base_frame" value="chassis_link" />
-            <arg unless="$(arg sim)" name="robot_base_frame" value="chassis_link" />
+            <arg unless="$(arg sim)" name="robot_base_frame" value="base_link" />
 		</include>
 	</group>
 
@@ -86,8 +81,8 @@
 	<!--include unless="$(arg sim)" file="$(find unicorn_intention)/launch/intention.launch"-->
 	<include file="$(find unicorn_intention)/launch/intention.launch" >
 		<arg name="unicorn_state_topic" 	value="/unicorn_state_machine_node/current_state" />
-		<arg name="intention_angle_topic" 	value="/TX2_localplanner_intention" />
-		<arg name="led_state_topic" 		value="/TX2_unicorn_state" />
+		<arg name="intention_angle_topic" 	value="/led/navigation_angle" />
+		<arg name="led_state_topic" 		value="/led/state" />
 
 	</include>
 

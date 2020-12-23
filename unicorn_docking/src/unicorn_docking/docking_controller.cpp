@@ -2,11 +2,14 @@
 
 DockingController::DockingController() : nh_("~"), state_(DockingController::DockState::IDLE), tf_listener_(tf_buffer_) {
 
-    apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
-    front_lidar_sub_ = nh_.subscribe("/frontLidar/scan", 1, &DockingController::frontLidarCb, this);
+    nh_.param("debug", debug_, false);
+    if(debug_) {
+        apriltag_sub_ = nh_.subscribe("/tag_detections", 100, &DockingController::apriltagDetectionsCb, this);
+        d_pub_ = nh_.advertise<visualization_msgs::Marker>("d_tag", 1);
+        n_pub_ = nh_.advertise<visualization_msgs::Marker>("n_tag", 1);
+    }
 
-    d_pub_ = nh_.advertise<visualization_msgs::Marker>("d_tag", 1);
-    n_pub_ = nh_.advertise<visualization_msgs::Marker>("n_tag", 1);
+    front_lidar_sub_ = nh_.subscribe("/frontLidar/scan", 1, &DockingController::frontLidarCb, this);
 
     // TODO: Load initial gains from parameter server
     pid_x_.initParam("~/pid/x");
@@ -48,8 +51,6 @@ DockingController::DockingController() : nh_("~"), state_(DockingController::Doc
 
 void DockingController::reset() {
     last_time_ = ros::Time::now();
-
-    tag_last_seen_ = ros::Time::now();
 }
 
 
@@ -111,7 +112,9 @@ bool DockingController::getRotationToTag(double& rotation_to_tag) {
 
     // Try to get transform from DOCK_BUNDLE to base_link_frame_
     try {
-        dock_chassi_tf = tf_buffer_.lookupTransform(base_link_frame_, ros::Time::now(), "DOCK_BUNDLE", tag_last_seen_, "map", ros::Duration(max_tf_lookup_time_));
+        // The +0.1 on max_tf_lookup_time_ is to allow it to finnish succesfully if previous transform in computeVelocity() finnished before
+        // max_tf_lookup_time_ have passed
+        dock_chassi_tf = tf_buffer_.lookupTransform(base_link_frame_, ros::Time::now(), "DOCK_BUNDLE", ros::Time(0), "map", ros::Duration(max_tf_lookup_time_+0.1));
     }
     catch(tf2::TransformException &ex) {
         ROS_WARN("in getRotationToTag(): %s",ex.what());
@@ -243,9 +246,6 @@ void DockingController::apriltagDetectionsCb(const apriltag_ros::AprilTagDetecti
             n_pub_.publish(n_pose_msg);
             //======================================================================================
 
-            // Set time at witch the tag was last seen
-            tag_last_seen_ = tag.pose.header.stamp;
-
             break;
         }
     }
@@ -302,10 +302,9 @@ bool DockingController::computeVelocity(geometry_msgs::Twist& msg_out) {
         err_th_ = desired_offset_.z - getPitchComponent();
 
         // Try to timetravel!
-        // Try to find transform between DOCK_BUNDLE frame at tag_last_seen_ time and chassis_link at current_time
+        // Try to find transform between latest DOCK_BUNDLE frame and chassis_link at current_time
         try {
-            // The -0.2 on max_tf_lookup_time_ is to allow "rotation_to_tag = getRotationToTag()" below to finnish succesfully before max_tf_lookup_time_ have passed
-            wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", tag_last_seen_, base_link_frame_, current_time, "map", ros::Duration(max_tf_lookup_time_-0.2));
+            wheelbase_to_tag_tf_ = tf_buffer_.lookupTransform("DOCK_BUNDLE", ros::Time(0), base_link_frame_, current_time, "map", ros::Duration(max_tf_lookup_time_));
         }
         catch(tf2::TransformException &ex) {
             // If no transform could be found, set linear and angular velocities to zero

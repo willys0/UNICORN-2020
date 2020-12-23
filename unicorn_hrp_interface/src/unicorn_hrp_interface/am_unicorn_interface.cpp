@@ -22,6 +22,7 @@ AmUnicornInterface::AmUnicornInterface()
   n_.param("max_velocity_delay", max_velocity_delay_, 0.1f);
 
   last_cmd_vel_time_ = ros::Time::now();
+  started_ = false;
 }
 
 void AmUnicornInterface::cmdVelCallback(const geometry_msgs::Twist& cmd_vel)
@@ -39,14 +40,20 @@ void AmUnicornInterface::amStatusCallback(const am_driver::SensorStatusConstPtr&
   static std_msgs::UInt16 mode_msg;
 
   if(msg->mowerInternalState != am_driver::SensorStatus::MOWER_INTERNAL_STATUS_PAUSED) {
-    srv.request.data = true;
-    ros::service::call("/unicorn_state_machine_node/force_stop", srv);
+    if(started_) {
+      srv.request.data = true;
+      ros::service::call("/unicorn_state_machine_node/force_stop", srv);
 
-    movebase_cancel_pub_.publish(cancel_msg);
-    dock_cancel_pub_.publish(cancel_msg);
-    lift_cancel_pub_.publish(cancel_msg);
+      movebase_cancel_pub_.publish(cancel_msg);
+      dock_cancel_pub_.publish(cancel_msg);
+      lift_cancel_pub_.publish(cancel_msg);
+    }
   }
   else {
+    if(!started_) {
+      // Set started the first time we receive a paused state
+      started_ = true;
+    }
     srv.request.data = false;
     ros::service::call("/unicorn_state_machine_node/force_stop", srv);
   }

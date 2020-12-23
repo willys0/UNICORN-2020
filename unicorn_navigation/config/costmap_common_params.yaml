@@ -1,6 +1,7 @@
 footprint: [[-0.5, -0.3], [-0.5, 0.3], [0.2, 0.3], [0.2, -0.3]]
 footprint_padding: 0.0
 
+<<<<<<< HEAD
 plugins:
   - {name: static_layer,     type: "costmap_2d::StaticLayer"}
   - {name: obstacle_layer,    type: "costmap_2d::ObstacleLayer"}
@@ -9,6 +10,8 @@ plugins:
   - {name: velocity_layer,    type: "tracking_layers::VelocityLayer"}
   - {name: inflation_layer,   type: "costmap_2d::InflationLayer"}
 
+=======
+>>>>>>> dev
 #Set the tolerance we're willing to have for tf transforms
 transform_tolerance: 0.3
 
