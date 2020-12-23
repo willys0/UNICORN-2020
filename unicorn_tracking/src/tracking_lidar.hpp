@@ -43,6 +43,7 @@
 #include "Hungarian/Hungarian.h"
 #include "shape_extraction.hpp"
 #include "association.hpp"
+#include "ICP/icpPointToPlane.h"
 
 #define PI 3.14159265
 #define MAX_OBJECTS 100
@@ -57,6 +58,7 @@ public:
 	void wheelodomCallback(const nav_msgs::Odometry& odometry); 
 	void mapCallback(const nav_msgs::OccupancyGrid& map);
 	void scanCallback(const sensor_msgs::LaserScan& scan);
+	void esitmate_odometry();
 	void publishmsg();
 	void object_publisher();
 
@@ -112,6 +114,7 @@ private:
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
 	nav_msgs::Odometry wheel_odometry_data;
+	nav_msgs::Odometry esitmated_odometry;
 	nav_msgs::OccupancyGrid map_data_;
 	sensor_msgs::LaserScan scan_data_;
 	sensor_msgs::LaserScan scan_data_old;
