@@ -74,14 +74,8 @@ tracking_lidar::tracking_lidar()
   n_.param("odomframeid",odomframeid, std::string("odom_chassis")); 
 
   
- 
-
-  //odometry_sub_ = n_.subscribe("/odom", 10, &tracking_lidar::odomCallback, this); /move_base/TebLocalPlannerROS/obstacles
-  //scan_sub_ = n_.subscribe("/scan", 10, &tracking_lidar::scanCallback, this);
   odometry_sub_ = n_.subscribe("/odometry/filtered", 10, &tracking_lidar::odomCallback, this);
-  odometry_sub_2 = n_.subscribe("/wheel_encoder/odom", 10, &tracking_lidar::wheelodomCallback, this);
   scan_sub_ = n_.subscribe("/frontLidar/scan", 10, &tracking_lidar::scanCallback, this);
-  // object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("obstacles",10,false);
 
   // publishers
   object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("/move_base/TebLocalPlannerROS/obstacles",10,false);
@@ -113,7 +107,8 @@ void tracking_lidar::object_publisher()
   costmap_converter::ObstacleArrayMsg object_array;
   visualization_msgs::Marker marker;
   visualization_msgs::MarkerArray markerArray, markerDArray;
-  geometry_msgs::Point point;
+  geometry_msgs::Point point, velocity, position;
+  geometry_msgs::Point32 point32;
   tf2::Quaternion Quad;
 
   object.header.frame_id = mapframeid;
@@ -169,12 +164,26 @@ void tracking_lidar::object_publisher()
       marker.type = 5;
 
       object.polygon.points.clear();
-      object.polygon = association_interface.trackers[i].points;
+      for(m=0; m < association_interface.trackers[i].points.points.size();m++)
+      {
+        point.x = association_interface.trackers[i].points.points[m].x - position.x;
+        point.y = association_interface.trackers[i].points.points[m].y - position.y;
+        point.z = association_interface.trackers[i].points.points[m].z;
+        velocity = transform_point_odometry(point, esitmated_odometry, odometry_data_);
+        point32.x = point.x;
+        point32.y = point.y;
+        point32.z = point.z;
+        object.polygon.points.push_back(point32);
+      }
+            
 
       if(min_length_arrow > min_twist_detection)
       {
-        object.velocities.twist.linear.x = association_interface.trackers[i].tracker.x_hat(1);
-        object.velocities.twist.linear.y = association_interface.trackers[i].tracker.x_hat(3);
+        velocity.x  = association_interface.trackers[i].tracker.x_hat(1);
+        velocity.y  = association_interface.trackers[i].tracker.x_hat(3); 
+        velocity = transform_vel_odometry(velocity, esitmated_odometry, odometry_data_);
+        object.velocities.twist.linear.x = velocity.x;
+        object.velocities.twist.linear.y = velocity.y;
       }else{
         object.velocities.twist.linear.x = 0;
         object.velocities.twist.linear.y = 0;
@@ -188,27 +197,32 @@ void tracking_lidar::object_publisher()
       marker.color.b = association_interface.trackers[i].color[1];
       marker.color.g = association_interface.trackers[i].color[2];
       marker.color.r = association_interface.trackers[i].color[3];
-      marker.pose.position.x = association_interface.trackers[i].tracker.x_hat(0);
-      marker.pose.position.y = association_interface.trackers[i].tracker.x_hat(2);
-
-      //std::cout << "Plotted Cluster nr:" << i << " estimated_x:" << association_interface.trackers[i].tracker.x_hat(0) << "estimated_y:"<< association_interface.trackers[i].tracker.x_hat(2) << " Sides"<< association_interface.trackers[i].points.points.size() <<std::endl;
-      
-      
+      position.x = association_interface.trackers[i].tracker.x_hat(0);
+      position.y = association_interface.trackers[i].tracker.x_hat(2);
+      position = transform_point_odometry(position, esitmated_odometry, odometry_data_);
+      marker.pose.position.x = position.x;
+      marker.pose.position.y = position.y;   
       marker.id = i;
 
 
       marker.points.clear();
       for(m =0; m < association_interface.trackers[i].points.points.size()-1; m++)
       {
-        point.x = association_interface.trackers[i].points.points[m].x - association_interface.trackers[i].tracker.x_hat(0);
-        point.y = association_interface.trackers[i].points.points[m].y - association_interface.trackers[i].tracker.x_hat(2);
+        point.x = association_interface.trackers[i].points.points[m].x;
+        point.y = association_interface.trackers[i].points.points[m].y;
         point.z = association_interface.trackers[i].points.points[m].z;
- 
+        point = transform_point_odometry(point, esitmated_odometry, odometry_data_);
+        point.x -= position.x;
+        point.y -= position.y;
+        point.z = Lidar_Height;
         marker.points.push_back(point);
-        point.x = association_interface.trackers[i].points.points[m+1].x - association_interface.trackers[i].tracker.x_hat(0);
-        point.y = association_interface.trackers[i].points.points[m+1].y - association_interface.trackers[i].tracker.x_hat(2);
+        point.x = association_interface.trackers[i].points.points[m+1].x;
+        point.y = association_interface.trackers[i].points.points[m+1].y;
         point.z = association_interface.trackers[i].points.points[m+1].z;
-
+        point = transform_point_odometry(point, esitmated_odometry, odometry_data_);
+        point.x -= position.x;
+        point.y -= position.y;
+        point.z = Lidar_Height;
         marker.points.push_back(point);
       }
       markerArray.markers.push_back(marker);
@@ -221,8 +235,8 @@ void tracking_lidar::object_publisher()
         point.y = 0;
         point.z = 0;
         marker.points.push_back(point);
-        point.x = association_interface.trackers[i].tracker.x_hat(1)/min_length_arrow;
-        point.y = association_interface.trackers[i].tracker.x_hat(3)/min_length_arrow;
+        point.x = velocity.x/min_length_arrow;
+        point.y = velocity.y/min_length_arrow;
         point.z = 0;
         marker.points.push_back(point);
         markerDArray.markers.push_back(marker);
@@ -246,21 +260,9 @@ void tracking_lidar::odomCallback(const nav_msgs::Odometry& odometry)
     tf::Quaternion q(odometry.pose.pose.orientation.x,odometry.pose.pose.orientation.y,odometry.pose.pose.orientation.z,odometry.pose.pose.orientation.w);
     tf::Matrix3x3 m(q);
     /* Get Euler angles */
-    m.getRPY(roll,pitch,yaw);
-    yaw = -yaw; 
-    x = odometry.pose.pose.position.x;
-    y = odometry.pose.pose.position.y;
-    z = odometry.pose.pose.position.z;
     odom_received = true;
 }
 
-void tracking_lidar::wheelodomCallback(const nav_msgs::Odometry& odometry)
-{
-
-  wheel_odometry_data = odometry;
-  wheel_received = true;
-
-}
 
 /* Get map  */
 void tracking_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
@@ -276,34 +278,27 @@ void tracking_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
 void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 {
 
-    
-    
-
     scan_data_ = scan;
     scan_received = true;
     esitmate_odometry();
-    if(map_received && odom_received && scan_received && wheel_received){
+    if(map_received && odom_received && scan_received){
       
 
       shape_interface.adaptive_break_point(scan);
-      //std::cout << "Test clsuters:" << std::endl;
-      //std::cout << shape_interface.cluster_list.size() << std::endl;
+      std::cout << "Test clsuters:" << std::endl;
+      std::cout << shape_interface.cluster_list.size() << std::endl;
       if(static_filter)
         shape_interface.static_map_filter(map_data_, odometry_data_, Lidar2base);
       
-
+      shape_interface.transformObjects(esitmated_odometry,Lidar2base);
       shape_interface.polygon_extraction();
-      //std::cout << "Test objects:" << std::endl;
-      //std::cout << shape_interface.object_attributes_list.size() << std::endl;
+      std::cout << "Test objects:" << std::endl;
+      std::cout << shape_interface.object_attributes_list.size() << std::endl;
       shape_interface.polygon_attribute_extraction();
-      association_interface.calculateOdometryChange(wheel_odometry_data);
-      //std::cout << "Angle:" << shape_interface.object_attributes_list[0].average_angle << "side:" << shape_interface.object_attributes_list[0].longest_size << "Sides:" << shape_interface.object_attributes_list[0].sides_amount  << std::endl;
-      
-      //association_interface.estimate_new_position(scan_data_.header.stamp.sec  + scan_data_.header.stamp.nsec*0.000000001);
-      association_interface.associate(shape_interface.object_attributes_list, odometry_data_, Lidar2base, scan.header.stamp);
+
+      association_interface.associate(shape_interface.object_attributes_list, esitmated_odometry, Lidar2base, scan.header.stamp);
 
       object_publisher();
-      wheel_received = false;
       scan_received = false; 
       
     }
@@ -312,8 +307,8 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 
 
 
-using namespace std;
 // Uses ICP to estimate odometry
+using namespace std;
 void tracking_lidar::esitmate_odometry(){
 
   int i,m;
@@ -382,8 +377,7 @@ void tracking_lidar::esitmate_odometry(){
     //std::cout <<  "translation x:" << esitmated_odometry.pose.pose.position.x  << " y" << esitmated_odometry.pose.pose.position.y << std::endl;
     //std::cout <<  "rotation :" << esitmated_odometry.pose.pose.orientation.x << " "  << esitmated_odometry.pose.pose.orientation.y << " " << esitmated_odometry.pose.pose.orientation.z  << " " << esitmated_odometry.pose.pose.orientation.w<< std::endl;
   }else{
-
-    esitmated_odometry.header.frame_id = base_laser_frame;
+    esitmated_odometry.header.frame_id = odomframeid;
     esitmated_odometry.pose.pose.position.x = odometry_data_.pose.pose.position.x;
     esitmated_odometry.pose.pose.position.y = odometry_data_.pose.pose.position.y;
     esitmated_odometry.pose.pose.position.z = odometry_data_.pose.pose.position.z;
@@ -399,9 +393,51 @@ void tracking_lidar::esitmate_odometry(){
                                           0.0, 0.0, 0.0, 0.0, 1.0, 0.0,
                                           0.0, 0.0, 0.0, 0.0, 0.0, 1.0
                                           };
-
-
   }
   scan_data_old = scan_data_;
+}
 
+
+geometry_msgs::Point tracking_lidar::transform_point_odometry(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new)
+{
+  double roll,pitch,yaw_old,yaw_new,x_t,y_t;
+  tf::Quaternion q(odometryData_old.pose.pose.orientation.x,odometryData_old.pose.pose.orientation.y,odometryData_old.pose.pose.orientation.z,odometryData_old.pose.pose.orientation.w);
+  tf::Quaternion r(odometryData_new.pose.pose.orientation.x,odometryData_new.pose.pose.orientation.y,odometryData_new.pose.pose.orientation.z,odometryData_new.pose.pose.orientation.w);
+  tf::Matrix3x3 m(q);
+  tf::Matrix3x3 n(r);
+  m.getRPY(roll,pitch,yaw_old);
+  n.getRPY(roll,pitch,yaw_new);
+
+  position.x -= odometryData_old.pose.pose.position.x;
+  position.y -= odometryData_old.pose.pose.position.y;
+
+  x_t = position.x;
+  y_t = position.y;
+  position.x = x_t*cos(yaw_new-yaw_old) - y_t*sin(yaw_new-yaw_old);
+  position.y = y_t*cos(yaw_new-yaw_old) + x_t*sin(yaw_new-yaw_old);
+
+  position.x += odometryData_new.pose.pose.position.x;
+  position.y += odometryData_new.pose.pose.position.y;
+  position.z = 0;
+
+  return position;
+}
+
+geometry_msgs::Point tracking_lidar::transform_vel_odometry(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new)
+{
+  double roll,pitch,yaw_old,yaw_new,x_t,y_t;
+  tf::Quaternion q(odometryData_old.pose.pose.orientation.x,odometryData_old.pose.pose.orientation.y,odometryData_old.pose.pose.orientation.z,odometryData_old.pose.pose.orientation.w);
+  tf::Quaternion r(odometryData_new.pose.pose.orientation.x,odometryData_new.pose.pose.orientation.y,odometryData_new.pose.pose.orientation.z,odometryData_new.pose.pose.orientation.w);
+  tf::Matrix3x3 m(q);
+  tf::Matrix3x3 n(r);
+  m.getRPY(roll,pitch,yaw_old);
+  n.getRPY(roll,pitch,yaw_new);
+
+  x_t = position.x;
+  y_t = position.y;
+  position.x = x_t*cos(yaw_new-yaw_old) - y_t*sin(yaw_new-yaw_old);
+  position.y = y_t*cos(yaw_new-yaw_old) + x_t*sin(yaw_new-yaw_old);
+  
+
+  return position;
 }

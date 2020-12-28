@@ -75,11 +75,11 @@ void association::associate(const std::vector<shape_extraction::object_attribute
         s2 = *sim_adj_dist*abs((trackers[i].longest_size) - (object_attributes_list[j].longest_size));
         s3 = *sim_adj_side*abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount));  
 
-        geometry_msgs::Point point = transform_point(object_attributes_list[j].position, odometryData,BaseLaser2BaseFrame);
-        s4 = *sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (point.x));
-        s5 = *sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (point.y));
+        //geometry_msgs::Point point = transform_point(object_attributes_list[j].position, odometryData,BaseLaser2BaseFrame);
+        s4 = *sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (object_attributes_list[j].position.x));
+        s5 = *sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (object_attributes_list[j].position.y));
 
-        calculateVel(object_attributes_list[j], i,sum,odometryData, BaseLaser2BaseFrame);
+        calculateVel(object_attributes_list[j], i,sum);
 
         if(sum[0] < 0.00001)
             sum[0] = 1;
@@ -148,13 +148,17 @@ void association::associate(const std::vector<shape_extraction::object_attribute
       if(isnan(y_dot))
         y_dot = 0;
       */
-
-      geometry_msgs::Point point = transform_point(object_attributes_list[j].position, odometryData,BaseLaser2BaseFrame);
-      x_dot = (trackers[m].tracker.x_hat(0)-point.x)/float(dt);
-      y_dot = (trackers[m].tracker.x_hat(2)-point.y)/float(dt);
-
       
-      trackers[m].tracker.y << point.x, x_dot, point.y,y_dot; 
+      /*
+      geometry_msgs::Point point = transform_point(object_attributes_list[j].position, odometryData,BaseLaser2BaseFrame);
+      update_tracker(m, point.x, point.y,dt);*/
+      geometry_msgs::Point point;
+      update_tracker(m, object_attributes_list[j].position.x, object_attributes_list[j].position.y,dt);
+
+      //x_dot = (trackers[m].tracker.x_hat(0)-point.x)/float(dt);
+      //y_dot = (trackers[m].tracker.x_hat(2)-point.y)/float(dt);
+      //trackers[m].tracker.y << point.x, x_dot, point.y,y_dot;
+ 
       trackers[m].points.points.clear();
      
       for(i = 0; i < object_attributes_list[j].polygon.points.size(); i++)
@@ -162,7 +166,7 @@ void association::associate(const std::vector<shape_extraction::object_attribute
         point.x = object_attributes_list[j].polygon.points[i].x;
         point.y = object_attributes_list[j].polygon.points[i].y;
         point.z = object_attributes_list[j].polygon.points[i].z;
-        point = transform_point(point, odometryData, BaseLaser2BaseFrame);
+        //point = transform_point(point, odometryData, BaseLaser2BaseFrame);
         geometry_msgs::Point32 point32;
         point32.x = point.x;
         point32.y = point.y;
@@ -230,17 +234,22 @@ void association::associate(const std::vector<shape_extraction::object_attribute
 
 
 /* Estimates the movment between an object a a tracker*/
-void association::calculateVel(shape_extraction::object_attributes object, int trackernr,float *sum, const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame)
+void association::calculateVel(shape_extraction::object_attributes object, int trackernr,float *sum)
 {
   int i,j;
 
   float x_t,y_t,x_o,y_o,distance;
+  double roll,pitch,yaw;
 
   geometry_msgs::Polygon points;
   geometry_msgs::Point32 point1;
   geometry_msgs::Point point;
-  
-  point1.z = 100;
+  /* 
+  tf::Quaternion q(odometryData.pose.pose.orientation.x,odometryData.pose.pose.orientation.y,odometryData.pose.pose.orientation.z,odometryData.pose.pose.orientation.w);
+  tf::Matrix3x3 m(q);
+  m.getRPY(roll,pitch,yaw);*/
+
+  point1.z = 10;
   point1.x = 0;
   point1.y = 0;
   sum[0] = 0;
@@ -250,8 +259,8 @@ void association::calculateVel(shape_extraction::object_attributes object, int t
   // Checks minimum movent between each point recorded in the tracker and the repective object
   for(j=0;j < (int)(trackers[trackernr].cluster.points.size()); j++)
   {
-    x_t = trackers[trackernr].cluster.points[j].x*cos(-yaw_change) + trackers[trackernr].cluster.points[j].y*sin(-yaw_change) + odom_change_x;
-    y_t = trackers[trackernr].cluster.points[j].y*cos(-yaw_change) - trackers[trackernr].cluster.points[j].x*sin(-yaw_change) + odom_change_y;
+    x_t = trackers[trackernr].cluster.points[j].x*cos(yaw);
+    y_t = trackers[trackernr].cluster.points[j].y*cos(yaw);
     point1.z = 10;
     point1.x = 0;
     point1.y = 0;
@@ -285,14 +294,8 @@ void association::calculateVel(shape_extraction::object_attributes object, int t
 
   sum[0] /= j;
   sum[1] /= j;
-  /**/
-  point.x = sum[1];
-  point.y = sum[2];
-  point.z = 0;
-  point = transform_point(point, odometryData,BaseLaser2BaseFrame);
+  sum[2] /= j;
 
-  sum[1] = point.x - BaseLaser2BaseFrame.transform.translation.x - odometryData.pose.pose.position.x;
-  sum[2] = point.y - BaseLaser2BaseFrame.transform.translation.y - odometryData.pose.pose.position.y;
 }
 
 
@@ -317,10 +320,14 @@ void association::initiate_Trackers(shape_extraction::object_attributes object,d
   new_trackers.time = time;
   new_trackers.last_seen = 0;
   new_trackers.tracker.init();
-
+  /*
   geometry_msgs::Point point = transform_point(object.position, odometryData,BaseLaser2BaseFrame);
   new_trackers.tracker.x_hat << point.x, 0,point.y, 0;
   new_trackers.tracker.y << point.x, 0, point.y, 0;
+  */
+  geometry_msgs::Point point;
+  new_trackers.tracker.x_hat << object.position.x, 0,object.position.y, 0;
+  new_trackers.tracker.y << object.position.x, 0, object.position.y, 0;
 
   // Set Random Colors
   new_trackers.color[0] = 1;
@@ -336,7 +343,7 @@ void association::initiate_Trackers(shape_extraction::object_attributes object,d
     point.x = object.polygon.points[i].x;
     point.y = object.polygon.points[i].y;
     point.z = object.polygon.points[i].z;
-    point = transform_point(point, odometryData, BaseLaser2BaseFrame);
+    //point = transform_point(point, odometryData, BaseLaser2BaseFrame);
     geometry_msgs::Point32 point32;
     point32.x = point.x;
     point32.y = point.y;
@@ -380,18 +387,12 @@ void association::update_position(){
   }
 }
 
-
-/*
-void association::transform_polygon(geometry_msgs::Polygon polygon_in, geometry_msgs::Polygon polygon_out, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame)
+void association::update_tracker(int trackerID, float x, float y, double dt)
 {
-  int i;
- for(i = 0; i < polygon_in.points.size(); i++)
- {
-   geometry_msgs::Point point = transform_point(polygon_in.points[i], odometryData, BaseLaser2BaseFrame);
-   polygon_out.points.push_back(point);
- }
-
-}*/
+    float x_dot = (trackers[trackerID].tracker.x_hat(0)-x)/float(dt);
+    float y_dot = (trackers[trackerID].tracker.x_hat(2)-y)/float(dt);
+    trackers[trackerID].tracker.y << x, x_dot, y,y_dot;
+}
 
 geometry_msgs::Point association::transform_point(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame)
 {
@@ -406,8 +407,8 @@ geometry_msgs::Point association::transform_point(geometry_msgs::Point position,
   // transform with odometry
   x_t = position.x;
   y_t = position.y;
-  position.x = x_t*cos(-yaw) + y_t*sin(-yaw);
-  position.y = y_t*cos(-yaw) - x_t*sin(-yaw);
+  position.x = x_t*cos(yaw) - y_t*sin(yaw);
+  position.y = y_t*cos(yaw) + x_t*sin(yaw);
   
   position.x += odometryData.pose.pose.position.x;
   position.y += odometryData.pose.pose.position.y;
@@ -447,53 +448,3 @@ void association::calculateOdometryChange(const nav_msgs::Odometry& odometryData
   } 
   
 }
-
-/*
-using namespace gs;
-
-void association::estimate_odometry(const sensor_msgs::LaserScan& scan_new, const sensor_msgs::LaserScan& scan_old)
-{
-  int i;
-  float j;
-  std::vector<Point*> staticPointCloud;
-  std::vector<Point*> dynamicPointCloud;
-
-  int max_itterations = round((scan_new.angle_max - scan_new.angle_min)/scan_new.angle_increment);
-
-  for(i=0; i < max_itterations; i++)
-  {
-    //polygon_point_list.push_back(clustered_point);
-    j = float(i)*scan_new.angle_increment+scan_new.angle_min;
-
-    if(!isnan(scan_old.ranges[i]) && isnan(scan_new.ranges[i]))
-    {
-      staticPointCloud.push_back(new Point(scan_old.ranges[i]*cos(j), scan_old.ranges[i]*sin(j), 0.0f));
-      dynamicPointCloud.push_back(new Point(scan_new.ranges[i]*cos(j), scan_new.ranges[i]*sin(j), 0.0f));
-
-    }
-
-  }
-    //use iterative closest point to transform the dynamic point cloud to best align the static point cloud.
-    icp(dynamicPointCloud, staticPointCloud);
-
- 
-    float alignmentError = 0.0f;
-    for (int i = 0; i < dynamicPointCloud.size(); i++)
-    {
-      alignmentError += pow(dynamicPointCloud[i]->pos[0] - staticPointCloud[i]->pos[0], 2.0f);
-      alignmentError += pow(dynamicPointCloud[i]->pos[1] - staticPointCloud[i]->pos[1], 2.0f);
-      alignmentError += pow(dynamicPointCloud[i]->pos[2] - staticPointCloud[i]->pos[2], 2.0f);
-    } 
-
-    alignmentError /= (float)dynamicPointCloud.size();
-
-    printf("Alignment Error: %0.5f \n", alignmentError);
-    
-
-    staticPointCloud.clear();
-    dynamicPointCloud.clear();
-
-
-
-
-}*/

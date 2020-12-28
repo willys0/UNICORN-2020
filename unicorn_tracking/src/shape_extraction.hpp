@@ -25,6 +25,7 @@ public:
 	//void adaptive_break_point(const nav_msgs::Odometry& odometryData, const sensor_msgs::LaserScan& scan, geometry_msgs::TransformStamped BaseLaser2BaseFrame);
 	void adaptive_break_point(const sensor_msgs::LaserScan& scan);
 	void static_map_filter(const nav_msgs::OccupancyGrid& map, const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame);
+	void transformObjects(const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame);
 	void polygon_extraction();
 	void polygon_attribute_extraction();
 
@@ -41,7 +42,6 @@ public:
 		float max_range;
 		float min_range;
 	}typedef cluster;
-	
 	std::vector<cluster> cluster_list;
 
 

@@ -168,10 +168,20 @@ void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map, con
       cluster_list.erase(cluster_list.begin() + i);
     }
   }
-
 }
 
-
+/* Transform objects to Global coordinates*/
+void shape_extraction::transformObjects(const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame)
+{
+  int i,j;
+  for(i=cluster_list.size()-1; i >= 0; i--)
+  {
+    for(j=0; j < cluster_list[i].cluster.size(); j++)
+    {
+       cluster_list[i].cluster[j].point = transform_point(cluster_list[i].cluster[j].point, odometryData,BaseLaser2BaseFrame);
+    }
+  }
+}
 
 /* Extracts polygon shapes from lidar clusters*/
 void shape_extraction::polygon_extraction(){
@@ -336,15 +346,13 @@ geometry_msgs::Point shape_extraction::transform_point(geometry_msgs::Point posi
   tf::Quaternion q(odometryData.pose.pose.orientation.x,odometryData.pose.pose.orientation.y,odometryData.pose.pose.orientation.z,odometryData.pose.pose.orientation.w);
   tf::Matrix3x3 m(q);
   m.getRPY(roll,pitch,yaw);
-
   // To base
   tf2::doTransform(position,position,BaseLaser2BaseFrame);
-
   // transform with odometry
   x_t = position.x;
   y_t = position.y;
-  position.x = x_t*cos(-yaw) + y_t*sin(-yaw);
-  position.y = y_t*cos(-yaw) - x_t*sin(-yaw);
+  position.x = x_t*cos(yaw) - y_t*sin(yaw);
+  position.y = y_t*cos(yaw) + x_t*sin(yaw);
   
   position.x += odometryData.pose.pose.position.x;
   position.y += odometryData.pose.pose.position.y;

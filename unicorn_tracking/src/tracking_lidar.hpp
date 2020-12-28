@@ -46,6 +46,7 @@
 #include "ICP/icpPointToPlane.h"
 
 #define PI 3.14159265
+#define Lidar_Height 0.465
 #define MAX_OBJECTS 100
 #define SCAN_SIZE 800
 #define MAXTRACKS MAX_OBJECTS
@@ -55,7 +56,6 @@ class tracking_lidar
 public:
 	tracking_lidar();
 	void odomCallback(const nav_msgs::Odometry& odometry);
-	void wheelodomCallback(const nav_msgs::Odometry& odometry); 
 	void mapCallback(const nav_msgs::OccupancyGrid& map);
 	void scanCallback(const sensor_msgs::LaserScan& scan);
 	void esitmate_odometry();
@@ -108,21 +108,19 @@ public:
 	shape_extraction shape_interface;
   	
 private:
-	geometry_msgs::Point32 transform_point(geometry_msgs::Point32 position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new);
-	geometry_msgs::Point transform_vel(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new);
+	geometry_msgs::Point transform_point_odometry(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new);
+	geometry_msgs::Point transform_vel_odometry(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new);
+
 
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_;
-	nav_msgs::Odometry wheel_odometry_data;
 	nav_msgs::Odometry esitmated_odometry;
 	nav_msgs::OccupancyGrid map_data_;
 	sensor_msgs::LaserScan scan_data_;
 	sensor_msgs::LaserScan scan_data_old;
-	geometry_msgs::Polygon shapes[MAX_OBJECTS];
 	geometry_msgs::TransformStamped Lidar2base;
 	geometry_msgs::TransformStamped odom2map;
 	ros::Subscriber odometry_sub_;
-	ros::Subscriber odometry_sub_2;
 	ros::Subscriber map_sub_;
 	ros::Subscriber scan_sub_;
 	ros::Publisher object_pub_;
@@ -130,60 +128,7 @@ private:
 	ros::Publisher marker_Arrow_pub_;
 	ros::Publisher est_odom_pub_;
 	int seq;
-	int tf_frame_listener_thread;
 
-
-
-	
-	//float xy_positions[SCAN_SIZE][2];
-  	//int clusters[SCAN_SIZE];
-	//int polygon[SCAN_SIZE];
-	int polygon_size[MAX_OBJECTS];
-	
-	struct polygon_points{
-		geometry_msgs::Point point;
-		float range;
-		float angle;
-		int cluster; 
-		int polygon_num;
-	}typedef polygon_points;
-	std::vector<polygon_points> polygon_point_list;
-	
-	double roll, pitch, yaw;
-	double x,y,z;
-
-	struct object_attributes{
-		int sides_amount;
-		float longest_size;
-		float average_angle;
-		float estimated_x;
-		float estimated_y;
-		geometry_msgs::Polygon points;
-	}typedef object_attributes;
-	object_attributes object_attributes_list[MAX_OBJECTS];
-
-	
-
-	int object_match[MAX_OBJECTS];
-	//float object_match_ratio[MAX_OBJECTS][MAXTRACKS];
-
-	//tracker multitracker;/*
-	struct tracker_attributes{
-		int confirmed;
-		int age;
-		int last_seen;
-		int sides_amount;
-		float longest_size;
-		float average_angle;
-		double time;
-		float color[4];
-		geometry_msgs::Polygon points;
-		KalmanFilter tracker;
-  	}typedef tracker_attributes;
-//KalmanFilter tracker;
-  	tracker_attributes trackers[MAXTRACKS];
-
-	bool wheel_received = false;
 	bool map_received = false;
 	bool odom_received = false;
 	bool scan_received = false;

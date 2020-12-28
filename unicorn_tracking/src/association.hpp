@@ -37,7 +37,6 @@ public:
 	}typedef object_attributes;*/
 
 	void associate(const std::vector<shape_extraction::object_attributes>& object_attributes_list,const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame, ros::Time stamp);
-	
 	void estimate_new_position(double time);
 	void update_position();
 
@@ -87,8 +86,9 @@ public:
 private:
 	//void association::transform_polygon(geometry_msgs::Polygon polygon_in, geometry_msgs::Polygon polygon_out, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame);
 	geometry_msgs::Point transform_point(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame);
-	void calculateVel(shape_extraction::object_attributes object, int trackernr,float *sum, const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame);
+	void calculateVel(shape_extraction::object_attributes object, int trackernr,float *sum);
 	void initiate_Trackers(shape_extraction::object_attributes object,double time, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame);
+	void update_tracker(int trackerID, float x, float y, double dt);
 
 	bool OdometryChange_initiated = false;
 	nav_msgs::Odometry odometryData;
