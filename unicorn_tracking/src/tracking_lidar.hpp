@@ -63,8 +63,6 @@ public:
 	void object_publisher();
 
 
-	
-
 	association association_interface;
 	/* Variables that can be dynamically changed */
 	float lambda;
@@ -132,9 +130,6 @@ private:
 	bool map_received = false;
 	bool odom_received = false;
 	bool scan_received = false;
-
-
-
 	
 };
 #endif

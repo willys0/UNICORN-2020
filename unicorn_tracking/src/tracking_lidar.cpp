@@ -263,8 +263,7 @@ void tracking_lidar::odomCallback(const nav_msgs::Odometry& odometry)
     odom_received = true;
 }
 
-
-/* Get map  */
+/* Checks for map */
 void tracking_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
 {
     map_data_ = map;

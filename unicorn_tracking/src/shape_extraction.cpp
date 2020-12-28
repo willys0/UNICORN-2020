@@ -299,7 +299,8 @@ void shape_extraction::polygon_attribute_extraction()
   geometry_msgs::Point32 point1,point2,point3;
   float length1,length2,length3, angle,lowest_angle;
   for(i=0; i < object_attributes_list.size(); i++){
-    object_attributes_list[i].longest_size = 0;
+    object_attributes_list[i].length = -1;
+    object_attributes_list[i].width = -1;
     object_attributes_list[i].sides_amount = 0;
     object_attributes_list[i].position.x = 0;
     object_attributes_list[i].position.y = 0;
@@ -312,8 +313,12 @@ void shape_extraction::polygon_attribute_extraction()
         point1 = object_attributes_list[i].polygon.points[j];
         point2 = object_attributes_list[i].polygon.points[j+1];
         length1 = sqrt(pow(point1.x - point2.x,2) + pow(point1.y - point2.y,2));
-        if(length1 >object_attributes_list[i].longest_size)
-         object_attributes_list[i].longest_size = length1;
+        if(length1 >object_attributes_list[i].length)
+        {
+          object_attributes_list[i].width = object_attributes_list[i].length;
+          object_attributes_list[i].length = length1;
+        }
+         
 
         object_attributes_list[i].sides_amount++;
         object_attributes_list[i].position.x += point1.x;
@@ -332,6 +337,7 @@ void shape_extraction::polygon_attribute_extraction()
 
       object_attributes_list[i].position.x /= object_attributes_list[i].polygon.points.size();
       object_attributes_list[i].position.y /= object_attributes_list[i].polygon.points.size();
+      
       if(object_attributes_list[i].polygon.points.size()-2 > 0)
         object_attributes_list[i].average_angle /= object_attributes_list[i].polygon.points.size()-2;
 

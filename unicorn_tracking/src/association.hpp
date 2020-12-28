@@ -11,7 +11,8 @@
 
 #include <stdio.h>      
 #include <time.h>    
-#include <iostream>  
+#include <iostream>
+#include <Eigen/Dense>
  
 #include "kalman/kalman.hpp"
 #include "Hungarian/Hungarian.h"
@@ -29,7 +30,7 @@ public:
 	/*
 	struct object_attributes{
 		int sides_amount;
-		float longest_size;
+		float length;
 		float average_angle;
 		float estimated_x;
 		float estimated_y;
@@ -50,12 +51,14 @@ public:
 		int age;
 		int last_seen;
 		int sides_amount;
-		float longest_size;
+		float length;
+		float width;
 		float average_angle;
 		double time;
 		float color[4];
 		geometry_msgs::Polygon cluster;
 		geometry_msgs::Polygon points;
+		std::vector<geometry_msgs::Point> trace;
 		KalmanFilter tracker;
   	}typedef tracker_attributes;
 

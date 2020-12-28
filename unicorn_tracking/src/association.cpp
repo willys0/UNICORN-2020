@@ -72,9 +72,22 @@ void association::associate(const std::vector<shape_extraction::object_attribute
       if(object_attributes_list[j].polygon.points.size() >= 1){
         
         s1 = *sim_adj_angle*abs((trackers[i].average_angle) - (object_attributes_list[j].average_angle));
-        s2 = *sim_adj_dist*abs((trackers[i].longest_size) - (object_attributes_list[j].longest_size));
+        s2 = *sim_adj_dist;
+        if((trackers[i].length) > 0 && (object_attributes_list[j].length) > 0)
+        {
+          s2 = *sim_adj_dist*abs((trackers[i].length) - (object_attributes_list[j].length));
+          if((trackers[i].width) > 0 && (object_attributes_list[j].width) > 0)
+          {
+            s2 /=2;
+            s2 = *sim_adj_dist*abs((trackers[i].width) - (object_attributes_list[j].width))/(2);
+          }
+        }
+          
+        
+        //s2 = *sim_adj_dist*abs((trackers[i].width) - (object_attributes_list[j].width));
+        
         s3 = *sim_adj_side*abs((trackers[i].sides_amount) - (object_attributes_list[j].sides_amount));  
-
+        
         //geometry_msgs::Point point = transform_point(object_attributes_list[j].position, odometryData,BaseLaser2BaseFrame);
         s4 = *sim_adj_xpos*abs((trackers[i].tracker.x_hat(0)) - (object_attributes_list[j].position.x));
         s5 = *sim_adj_ypos*abs((trackers[i].tracker.x_hat(2)) - (object_attributes_list[j].position.y));
@@ -129,13 +142,14 @@ void association::associate(const std::vector<shape_extraction::object_attribute
   {
     if((object_match_ratio[m][assignment[m]]) < *max_similarty_deviation)
     {
+      geometry_msgs::Point new_trace;
       dt = time - trackers[m].time;
       object_match[assignment[m]] = 1; 
       trackers[m].last_seen = 0; 
       j = assignment[m];
 
       trackers[m].average_angle = object_attributes_list[j].average_angle;
-      trackers[m].longest_size = object_attributes_list[j].longest_size;
+      trackers[m].length = object_attributes_list[j].length;
       trackers[m].sides_amount = object_attributes_list[j].sides_amount;
       
 
@@ -155,9 +169,10 @@ void association::associate(const std::vector<shape_extraction::object_attribute
       geometry_msgs::Point point;
       update_tracker(m, object_attributes_list[j].position.x, object_attributes_list[j].position.y,dt);
 
-      //x_dot = (trackers[m].tracker.x_hat(0)-point.x)/float(dt);
-      //y_dot = (trackers[m].tracker.x_hat(2)-point.y)/float(dt);
-      //trackers[m].tracker.y << point.x, x_dot, point.y,y_dot;
+      new_trace.x = object_attributes_list[j].position.x;
+      new_trace.y = object_attributes_list[j].position.y;
+      new_trace.z = dt;
+      trackers[m].trace.push_back(new_trace);
  
       trackers[m].points.points.clear();
      
@@ -315,7 +330,8 @@ void association::initiate_Trackers(shape_extraction::object_attributes object,d
 
   new_trackers.age = 1;
   new_trackers.average_angle = object.average_angle;
-  new_trackers.longest_size = object.longest_size;
+  new_trackers.length = object.length;
+  new_trackers.width = object.width;
   new_trackers.sides_amount = object.sides_amount;
   new_trackers.time = time;
   new_trackers.last_seen = 0;
@@ -328,6 +344,12 @@ void association::initiate_Trackers(shape_extraction::object_attributes object,d
   geometry_msgs::Point point;
   new_trackers.tracker.x_hat << object.position.x, 0,object.position.y, 0;
   new_trackers.tracker.y << object.position.x, 0, object.position.y, 0;
+
+  geometry_msgs::Point new_trace;
+  new_trace.x = object.position.x;
+  new_trace.y = object.position.y;
+  new_trace.z = 0;
+  new_trackers.trace.push_back(new_trace);
 
   // Set Random Colors
   new_trackers.color[0] = 1;
@@ -351,7 +373,6 @@ void association::initiate_Trackers(shape_extraction::object_attributes object,d
     new_trackers.points.points.push_back(point32);
   }
 //new_trackers.points = object.polygon;
-
 
   trackers.push_back(new_trackers);
 }
@@ -387,11 +408,27 @@ void association::update_position(){
   }
 }
 
+
 void association::update_tracker(int trackerID, float x, float y, double dt)
 {
-    float x_dot = (trackers[trackerID].tracker.x_hat(0)-x)/float(dt);
-    float y_dot = (trackers[trackerID].tracker.x_hat(2)-y)/float(dt);
-    trackers[trackerID].tracker.y << x, x_dot, y,y_dot;
+  float x_dot = (trackers[trackerID].tracker.x_hat(0)-x)/float(dt);
+  float y_dot = (trackers[trackerID].tracker.x_hat(2)-y)/float(dt);
+  int m = 6;
+  if(trackers[trackerID].trace.size() >= m)
+  {
+    x_dot = 0;
+    y_dot = 0;
+    int i;
+    for(i = trackers[trackerID].trace.size()-1;i > trackers[trackerID].trace.size()-m;i--)
+    {
+      x_dot += (trackers[trackerID].trace[i-1].x - trackers[trackerID].trace[i].x) /float(trackers[trackerID].trace[i].z);
+      y_dot += (trackers[trackerID].trace[i-1].y - trackers[trackerID].trace[i].y) /float(trackers[trackerID].trace[i].z);
+    }
+    x_dot /= m;
+    y_dot /= m;
+  }
+  trackers[trackerID].tracker.y << x, x_dot, y,y_dot;
+  
 }
 
 geometry_msgs::Point association::transform_point(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame)
@@ -448,3 +485,4 @@ void association::calculateOdometryChange(const nav_msgs::Odometry& odometryData
   } 
   
 }
+

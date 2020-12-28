@@ -47,7 +47,8 @@ public:
 
 	struct object_attributes{
 		int sides_amount;
-		float longest_size;
+		float length;
+		float width;
 		float average_angle;
 		geometry_msgs::Point position;
 		std::vector<clustered_point> cluster;
