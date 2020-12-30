@@ -264,7 +264,7 @@
   <swivel_wheel fb="front" lr="right" parent="chassis_link" translateY="-0.16" translateX="-0.355" translateZ="0.1531" wheel_radius="0.05" wheel_height="0.05" flip="0"/>
 
   <!-- Front Lidar -->
-  <lidar_gazebo frame="base_laser" topic="frontLidar/scan" simulation="$(arg sim)" sample_size="800" min_angle="-2.35619" max_angle="2.35619" robot_namespace="$(arg robot_namespace)" filename="$(arg frontlidar_meshfile)" />
+  <lidar_gazebo frame="base_laser" topic="frontLidar/scan" simulation="$(arg sim)" sample_size="800" min_angle="-2.09439510239" max_angle="2.09439510239" robot_namespace="$(arg robot_namespace)" filename="$(arg frontlidar_meshfile)" />
   
   <joint name="laser_mount_joint" type="fixed">
     <origin xyz="$(arg laser_xyz)" rpy="$(arg laser_rpy)" />
