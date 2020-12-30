@@ -8,6 +8,7 @@
             <rosparam file="$(find unicorn_tracking)/config/tracking_sim.yaml"/>
             <remap from="odom" to="/odometry/filtered" />
             <remap from="scan" to="/frontLidar/scan" />
+            <remap from="estamited_odom" to="/wheel_encoder/odom" />
             <remap from="/unicorn_tracking/obstacles" to="/obstacles" />
             <!--remap from="scan" to="$(arg scan_topic)" /-->
         </node>
@@ -17,6 +18,8 @@
             <rosparam file="$(find unicorn_tracking)/config/tracking.yaml"/>
             <remap from="odom" to="/odometry/filtered" />
             <remap from="scan" to="/frontLidar/scan" />
+            <remap from="estamited_odom" to="/wheel_encoder/odom" />
+            
             <remap from="/unicorn_tracking/obstacles" to="/obstacles" />
             <!--remap from="scan" to="$(arg scan_topic)" /-->
         </node>

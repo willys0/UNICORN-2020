@@ -56,9 +56,9 @@ class tracking_lidar
 public:
 	tracking_lidar();
 	void odomCallback(const nav_msgs::Odometry& odometry);
+	void stable_odomCallback(const nav_msgs::Odometry& odometry);
 	void mapCallback(const nav_msgs::OccupancyGrid& map);
 	void scanCallback(const sensor_msgs::LaserScan& scan);
-	void esitmate_odometry();
 	void publishmsg();
 	void object_publisher();
 
@@ -111,14 +111,14 @@ private:
 
 
 	ros::NodeHandle n_;
-	nav_msgs::Odometry odometry_data_;
-	nav_msgs::Odometry esitmated_odometry;
+	nav_msgs::Odometry odometry_data_; 
+	nav_msgs::Odometry stable_odom_; 
 	nav_msgs::OccupancyGrid map_data_;
 	sensor_msgs::LaserScan scan_data_;
-	sensor_msgs::LaserScan scan_data_old;
 	geometry_msgs::TransformStamped Lidar2base;
 	geometry_msgs::TransformStamped odom2map;
 	ros::Subscriber odometry_sub_;
+	ros::Subscriber stable_odom_sub_;
 	ros::Subscriber map_sub_;
 	ros::Subscriber scan_sub_;
 	ros::Publisher object_pub_;
@@ -130,6 +130,7 @@ private:
 	bool map_received = false;
 	bool odom_received = false;
 	bool scan_received = false;
+	bool stable_odom_received = false;
 	
 };
 #endif

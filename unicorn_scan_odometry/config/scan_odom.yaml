@@ -1,0 +1,11 @@
+
+
+
+
+outlier_ratio: 0.15
+
+
+mapframeid: map
+odomframeid: odom_chassis
+base_laser_frame: base_laser
+base_frame: base_link
