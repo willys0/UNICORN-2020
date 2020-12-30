@@ -1,9 +1,0 @@
-<map id="lexer.hpp" name="lexer.hpp">
-<area shape="rect" id="node11" href="$input__adapters_8hpp.html" title="nlohmann/detail/input\l/input_adapters.hpp" alt="" coords="621,80,767,121"/>
-<area shape="rect" id="node23" href="$macro__scope_8hpp.html" title="nlohmann/detail/macro\l_scope.hpp" alt="" coords="1215,169,1368,211"/>
-<area shape="rect" id="node25" href="$position__t_8hpp.html" title="nlohmann/detail/input\l/position_t.hpp" alt="" coords="49,80,195,121"/>
-<area shape="rect" id="node19" href="$iterator__traits_8hpp.html" title="nlohmann/detail/iterators\l/iterator_traits.hpp" alt="" coords="783,169,947,211"/>
-<area shape="rect" id="node20" href="$void__t_8hpp.html" title="nlohmann/detail/meta\l/void_t.hpp" alt="" coords="922,259,1069,300"/>
-<area shape="rect" id="node21" href="$cpp__future_8hpp.html" title="nlohmann/detail/meta\l/cpp_future.hpp" alt="" coords="751,259,898,300"/>
-<area shape="rect" id="node24" href="$hedley_8hpp.html" title="nlohmann/thirdparty\l/hedley/hedley.hpp" alt="" coords="1258,259,1394,300"/>
-</map>

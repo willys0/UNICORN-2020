@@ -1,6 +1,0 @@
-<map id="idle_state.h" name="idle_state.h">
-<area shape="rect" id="node2" href="$state__machine_8h.html" title="state_machine.h" alt="" coords="12,80,131,107"/>
-<area shape="rect" id="node4" href="$idle__state_8cpp.html" title="idle_state.cpp" alt="" coords="155,80,257,107"/>
-<area shape="rect" id="node5" href="$state__factory_8cpp.html" title="state_factory.cpp" alt="" coords="282,80,405,107"/>
-<area shape="rect" id="node3" href="$state__machine_8cpp.html" title="state_machine.cpp" alt="" coords="5,155,137,181"/>
-</map>
