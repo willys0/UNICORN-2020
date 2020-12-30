@@ -119,7 +119,7 @@
       <kp value="10e2" />
       <kd value="10e2" />
       <dampingFactor value="0.9" />
-      <fdir1 value="0 0 0" />
+      <fdir1 value="1 1 1" />
       <material>Gazebo/Black</material>
       <turnGravityOff>false</turnGravityOff>
     </gazebo>
