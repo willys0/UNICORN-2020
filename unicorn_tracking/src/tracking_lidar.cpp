@@ -344,6 +344,7 @@ geometry_msgs::Point tracking_lidar::transform_vel_odometry(geometry_msgs::Point
   tf::Matrix3x3 o(t);
   m.getRPY(roll,pitch,yaw_old);
   n.getRPY(roll,pitch,yaw_new);
+  o.getRPY(roll,pitch,yaw_map);
   x_t = position.x;
   y_t = position.y;
   position.x = x_t*cos(yaw_new-yaw_old+yaw_map) - y_t*sin(yaw_new-yaw_old+yaw_map);
