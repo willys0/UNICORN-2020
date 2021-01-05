@@ -4,7 +4,6 @@
 
 shape_extraction::shape_extraction()
 {
-
 	 min_size_cluster = &min_size_cluster_std;
 	 max_dist_laser = &max_dist_laser_std;
 	 lambda = &lambda_std;
@@ -12,11 +11,7 @@ shape_extraction::shape_extraction()
 	 static_remove_ratio = &static_remove_ratio_std;
 	 polygon_min_points = &polygon_min_points_std;
 	 polygon_tolerance = &polygon_tolerance_std;
-
-
 }
-
-
 
 
 void shape_extraction::shape_extraction_setvar(float *lambda_p,float *max_dist_laser_p,int *static_remove_dist_p, float* static_remove_ratio_p,int* min_size_cluster_p, float *polygon_tolerance_p, int *polygon_min_points_p)
@@ -36,65 +31,41 @@ void shape_extraction::shape_extraction_setvar(float *lambda_p,float *max_dist_l
 
 }
 
-// ------------------------------------------ Shape Extraction -----------------------------------------------------------------------
-
-/* Clusters data into groups */
+/* Cluster data with adaptive break point detection */
 void shape_extraction::adaptive_break_point(const sensor_msgs::LaserScan& scan)
 {
   int i,j = 0;
-  float r,p,dmax, x_t, y_t, x_previous = 0, y_previous = 0;
+  float range, angle, r,p,dmax, x_t, y_t, x_previous = 0, y_previous = 0;
   //double roll,pitch,yaw,x,y,z;
 
-  clustered_point point;
+  geometry_msgs::Point point;
   cluster cluster;
   cluster_list.clear();
-
-  /*
-  tf::Quaternion q(odometryData.pose.pose.orientation.x,odometryData.pose.pose.orientation.y,odometryData.pose.pose.orientation.z,odometryData.pose.pose.orientation.w);
-  tf::Matrix3x3 m(q);
-  m.getRPY(roll,pitch,yaw);*/
   
   int max_itterations = round((scan.angle_max - scan.angle_min)/scan.angle_increment);
   
   for(i = 0; i < max_itterations+1; i++)
   {
     //polygon_point_list.push_back(clustered_point);
-    point.angle = float(i)*scan.angle_increment+scan.angle_min;
-    point.range = scan.ranges[i];
+    angle = float(i)*scan.angle_increment+scan.angle_min;
+    range = scan.ranges[i];
 
     // Transfor to Cartesian Coordinates
-    point.point.x = point.range*cos(point.angle);
-    point.point.y  = point.range*sin(point.angle);
-    point.point.z = 0;
+    point.x = range*cos(angle);
+    point.y  = range*sin(angle);
+    point.z = 0;
 
-    /*
-    // Transform to base frame
-    tf2::doTransform(point.point,point.point,BaseLaser2BaseFrame);
-
-    // transform with odometry
-    x_t = point.point.x;
-    y_t = point.point.y;
-    point.point.x = x_t*cos(-yaw) + y_t*sin(-yaw);
-    point.point.y = y_t*cos(-yaw) - x_t*sin(-yaw);
-    
-    point.point.x += odometryData.pose.pose.position.x;
-    point.point.y += odometryData.pose.pose.position.y;
-    point.point.z = 0;*/
-
-
-    // transform to map
-    //tf2::doTransform(point,point,odom2map);
     if(i == 0)
     {
       cluster.cluster.clear();
       cluster.cluster.push_back(point);
 
-      cluster.max_range = point.range;
-      cluster.min_range = point.range;
+      cluster.max_range = range;
+      cluster.min_range = range;
     }else
     {
       r = sqrt(pow(x_previous,2) + pow(y_previous,2));
-      p = sqrt(pow(x_previous - point.point.x,2) + pow(y_previous - point.point.y,2));
+      p = sqrt(pow(x_previous - point.x,2) + pow(y_previous - point.y,2));
       dmax = r*sin(scan.angle_increment)/sin(*lambda + scan.angle_increment) + 3*scan.angle_increment;
       if(dmax < p && cluster.cluster.size()>0)
       {
@@ -104,28 +75,28 @@ void shape_extraction::adaptive_break_point(const sensor_msgs::LaserScan& scan)
         cluster_list.push_back(cluster);
         cluster.cluster.clear();
         j++;
-        cluster.max_range = point.range;
-        cluster.min_range = point.range;
+        cluster.max_range = range;
+        cluster.min_range = range;
       }
-      if(*max_dist_laser > point.range)
+      if(*max_dist_laser > range)
       {
       cluster.cluster.push_back(point);
 
-      if(cluster.max_range < point.range)
-        cluster.max_range = point.range;
-      if(cluster.min_range > point.range)
-        cluster.min_range = point.range;
+      if(cluster.max_range < range)
+        cluster.max_range = range;
+      if(cluster.min_range > range)
+        cluster.min_range = range;
       }
     }
-    x_previous = point.point.x;
-    y_previous = point.point.y;
+    x_previous = point.x;
+    y_previous = point.y;
   }
 }
 
 
 
 /* Filters static map from scan, requires reliable odometry and static map*/
-void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map, const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame)
+void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map, const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame,const geometry_msgs::TransformStamped odom2map)
 {
 
   int i,j,m,n,ratio;
@@ -139,7 +110,8 @@ void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map, con
     {
       if(cluster_list[i].clusterNr != -1)
       {
-      geometry_msgs::Point point = transform_point(cluster_list[i].cluster[j].point, odometryData,BaseLaser2BaseFrame);
+      geometry_msgs::Point point = transform_point(cluster_list[i].cluster[j], odometryData,BaseLaser2BaseFrame);
+      tf2::doTransform(point,point,odom2map);
       // Get MAP COORDINATES
       x_map = round((int)((float)point.x/(map.info.resolution))) + ((int)(map.info.width)/2);
       y_map = round((int)((float)point.y/(map.info.resolution))) + ((int)(map.info.height)/2);
@@ -178,7 +150,7 @@ void shape_extraction::transformObjects(const nav_msgs::Odometry& odometryData,c
   {
     for(j=0; j < cluster_list[i].cluster.size(); j++)
     {
-       cluster_list[i].cluster[j].point = transform_point(cluster_list[i].cluster[j].point, odometryData,BaseLaser2BaseFrame);
+       cluster_list[i].cluster[j] = transform_point(cluster_list[i].cluster[j], odometryData,BaseLaser2BaseFrame);
     }
   }
 }
@@ -190,8 +162,6 @@ void shape_extraction::polygon_extraction(){
   geometry_msgs::Point32 point;
   object_attributes object;
  
-  
-
   for(i=0; i < object_attributes_list.size(); i++)
     object_attributes_list[i].polygon.points.clear();
 
@@ -200,8 +170,6 @@ void shape_extraction::polygon_extraction(){
 
   for(i=0; i < cluster_list.size(); i++)
   {
-
-    
     std::vector<int> vextor(cluster_list[i].cluster.size(),0);
     
     if(cluster_list[i].clusterNr != -1)
@@ -215,9 +183,9 @@ void shape_extraction::polygon_extraction(){
         {
           if(vextor[j])
           {
-            point.x = cluster_list[i].cluster[j].point.x;
-            point.y = cluster_list[i].cluster[j].point.y;
-            point.z = cluster_list[i].cluster[j].point.z;
+            point.x = cluster_list[i].cluster[j].x;
+            point.y = cluster_list[i].cluster[j].y;
+            point.z = cluster_list[i].cluster[j].z;
             object.polygon.points.push_back(point);
           }
         }
@@ -240,7 +208,7 @@ void shape_extraction::extract_corners(int startpoint,int endpoint, int length,i
     return;
   
   int max_itteration = ceil(log2(float(length)));
-  float distance_start =  sqrt(pow(cluster_list[clusterNr].cluster[startpoint].point.x - cluster_list[clusterNr].cluster[endpoint].point.x,2) + pow(cluster_list[clusterNr].cluster[startpoint].point.y - cluster_list[clusterNr].cluster[endpoint].point.y,2));
+  float distance_start =  sqrt(pow(cluster_list[clusterNr].cluster[startpoint].x - cluster_list[clusterNr].cluster[endpoint].x,2) + pow(cluster_list[clusterNr].cluster[startpoint].y - cluster_list[clusterNr].cluster[endpoint].y,2));
   int bestpoint = startpoint;
   float bestdist = distance_start;
   int *best_point = &bestpoint;
@@ -270,8 +238,8 @@ void shape_extraction::search_longest(int startpoint,int end_point, int current_
   int j;
   
   itteration++;
-  distance_1 =  sqrt(pow(cluster_list[clusterNr].cluster[startpoint].point.x - cluster_list[clusterNr].cluster[current_point].point.x,2) + pow(cluster_list[clusterNr].cluster[startpoint].point.y - cluster_list[clusterNr].cluster[current_point].point.y,2));
-  distance_2 =  sqrt(pow(cluster_list[clusterNr].cluster[current_point].point.x - cluster_list[clusterNr].cluster[end_point].point.x,2) + pow(cluster_list[clusterNr].cluster[current_point].point.y - cluster_list[clusterNr].cluster[end_point].point.y,2));
+  distance_1 =  sqrt(pow(cluster_list[clusterNr].cluster[startpoint].x - cluster_list[clusterNr].cluster[current_point].x,2) + pow(cluster_list[clusterNr].cluster[startpoint].y - cluster_list[clusterNr].cluster[current_point].y,2));
+  distance_2 =  sqrt(pow(cluster_list[clusterNr].cluster[current_point].x - cluster_list[clusterNr].cluster[end_point].x,2) + pow(cluster_list[clusterNr].cluster[current_point].y - cluster_list[clusterNr].cluster[end_point].y,2));
   distance_total = distance_1 + distance_2;
   if(distance_total > *best_dist){
     *best_point = current_point;
@@ -368,5 +336,3 @@ geometry_msgs::Point shape_extraction::transform_point(geometry_msgs::Point posi
   // transform to map
   //tf2::doTransform(point,point,odom2map);
 }
-
-// ------------------------------------------ Shape Extraction -----------------------------------------------------------------------

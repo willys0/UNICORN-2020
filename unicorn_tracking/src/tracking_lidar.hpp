@@ -43,7 +43,6 @@
 #include "Hungarian/Hungarian.h"
 #include "shape_extraction.hpp"
 #include "association.hpp"
-#include "ICP/icpPointToPlane.h"
 
 #define PI 3.14159265
 #define Lidar_Height 0.465
@@ -88,7 +87,7 @@ public:
 	std::string odomframeid = "odom_chassis";
 	std::string base_laser_frame = "base_laser";
 	std::string base_frame = "chassis_link";
-	tf2_ros::Buffer tf_buffer;
+	tf2_ros::Buffer tf_buffer,tf_buffer2;
 
 	struct association_variables{
 		//similarity weights

@@ -22,22 +22,15 @@ public:
     void shape_extraction_setvar(float *lambda_p,float *max_dist_laser_p,int *static_remove_dist_p,float* static_remove_ratio_p,int* min_size_cluster_p, float *polygon_tolerance_p, int *polygon_min_points_p);
 
 	
-	//void adaptive_break_point(const nav_msgs::Odometry& odometryData, const sensor_msgs::LaserScan& scan, geometry_msgs::TransformStamped BaseLaser2BaseFrame);
 	void adaptive_break_point(const sensor_msgs::LaserScan& scan);
-	void static_map_filter(const nav_msgs::OccupancyGrid& map, const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame);
+	void static_map_filter(const nav_msgs::OccupancyGrid& map, const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame,const geometry_msgs::TransformStamped odom2map);
 	void transformObjects(const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame);
 	void polygon_extraction();
 	void polygon_attribute_extraction();
 
 
-	struct clustered_point{
-		geometry_msgs::Point point;
-		float range;
-		float angle;
-	}typedef clustered_point;
-
 	struct cluster{
-		std::vector<clustered_point> cluster;
+		std::vector<geometry_msgs::Point> cluster;
 		int clusterNr;
 		float max_range;
 		float min_range;
@@ -50,8 +43,8 @@ public:
 		float length;
 		float width;
 		float average_angle;
+		std::vector<geometry_msgs::Point> cluster;
 		geometry_msgs::Point position;
-		std::vector<clustered_point> cluster;
 		geometry_msgs::Polygon polygon;
 	}typedef object_attributes;
 	std::vector<object_attributes> object_attributes_list;

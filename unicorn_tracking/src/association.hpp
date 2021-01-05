@@ -17,7 +17,7 @@
 #include "kalman/kalman.hpp"
 #include "Hungarian/Hungarian.h"
 #include "shape_extraction.hpp"
-
+//#include "ICP/icpPointToPlane.h"
 
 #define MAX_OBJECTS 100
 
@@ -27,23 +27,10 @@ public:
     association();
 
 	void association_setvar(int *CONFIRMED_TRACK_p, int *TRACKER_LIFE_p,float *max_similarty_deviation_p, float *sim_adj_dist_p,float *sim_adj_angle_p,float *sim_adj_side_p,float *sim_adj_xpos_p,float *sim_adj_ypos_p,float *sim_adj_posdiff_p);
-	/*
-	struct object_attributes{
-		int sides_amount;
-		float length;
-		float average_angle;
-		float estimated_x;
-		float estimated_y;
-		geometry_msgs::Polygon polygon;
-	}typedef object_attributes;*/
-
 	void associate(const std::vector<shape_extraction::object_attributes>& object_attributes_list,const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame, ros::Time stamp);
 	void estimate_new_position(double time);
 	void update_position();
-
-	void calculateOdometryChange(const nav_msgs::Odometry& odometryData_new);
-	
-	//void estimate_odometry(const sensor_msgs::LaserScan& scan_new, const sensor_msgs::LaserScan& scan_old);
+	//void estimate_moment(int trackerid, const shape_extraction::object_attributes& object, double dt);
 
 	//tracker multitracker;/*
 	struct tracker_attributes{
@@ -56,9 +43,8 @@ public:
 		float average_angle;
 		double time;
 		float color[4];
-		geometry_msgs::Polygon cluster;
 		geometry_msgs::Polygon points;
-		std::vector<geometry_msgs::Point> trace;
+		std::vector<geometry_msgs::Point> trace; // Position estimation over time for an object
 		KalmanFilter tracker;
   	}typedef tracker_attributes;
 
@@ -91,13 +77,8 @@ private:
 	geometry_msgs::Point transform_point(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame);
 	void calculateVel(shape_extraction::object_attributes object, int trackernr,float *sum);
 	void initiate_Trackers(shape_extraction::object_attributes object,double time, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame);
-	void update_tracker(int trackerID, float x, float y, double dt);
+	void update_tracker(shape_extraction::object_attributes object,int trackerID, double dt);
 
-	bool OdometryChange_initiated = false;
-	nav_msgs::Odometry odometryData;
-	double odom_change_x = 0;
-	double odom_change_y = 0;
-	double yaw_change = 0;
 };
 
 #endif

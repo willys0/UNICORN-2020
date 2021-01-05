@@ -1,8 +1,8 @@
 
 
 
-lambda: 0.15
-max_dist_laser: 10
+lambda: 0.05
+max_dist_laser: 3
 
 static_filter: true
 Static_map_removal_tolerance: 4
@@ -13,19 +13,19 @@ polygon_side_min_points_required: 4
 
 min_twist_detection: 0.3 #0.08
 
-similarty_side_length_weight: 2.0
+similarty_side_length_weight: 4.0
 similarty_side_angle_weigh: 1.0
 similarty_side_amount_weight: 0.0
-similarty_track_xposition_weight: 2.0
-similarty_track_yposition_weight: 2.0
-similarty_previous_position_weight: 5.0
+similarty_track_xposition_weight: 5.0
+similarty_track_yposition_weight: 5.0
+similarty_previous_position_weight: 10.0
 
 max_similarty_deviation: 2
 
 min_size_cluster: 4
 
-TRACKER_LIFE: 1000
-CONFIRMED_TRACK: 100
+TRACKER_LIFE: 100
+CONFIRMED_TRACK: 20
 
 mapframeid: map
 odomframeid: odom_chassis
