@@ -111,9 +111,9 @@ void association::associate(const std::vector<shape_extraction::object_attribute
         }
         similarity += s3 + s4 + s5 + s6;
         similarity /= (*sim_adj_dist + *sim_adj_angle + *sim_adj_side + *sim_adj_xpos + *sim_adj_ypos + *sim_adj_posdiff);
-        
+        // Incentices objects to be assigned to confirmed trackers
         if(trackers[i].age > *CONFIRMED_TRACK)
-          similarity *= 0.9;
+          similarity = similarity*0.7 + similarity*0.2*(*TRACKER_LIFE - (trackers[i].last_seen+1))/ *TRACKER_LIFE;
         if(!isnan(similarity))
           object_match_ratio[i][j] = double(similarity); 
 

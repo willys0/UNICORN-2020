@@ -2,23 +2,23 @@
 
 
 lambda: 0.05
-max_dist_laser: 3
+max_dist_laser: 5.0
 
 static_filter: true
 Static_map_removal_tolerance: 4
 
-polygon_tolerance: 1.04 # 1.04
+polygon_tolerance: 1.02 # 1.04
 static_remove_ratio: 0.5
 polygon_side_min_points_required: 4
 
 min_twist_detection: 0.3 #0.08
 
-similarty_side_length_weight: 4.0
+similarty_side_length_weight: 1.0
 similarty_side_angle_weigh: 1.0
-similarty_side_amount_weight: 0.0
+similarty_side_amount_weight: 1.0
 similarty_track_xposition_weight: 5.0
 similarty_track_yposition_weight: 5.0
-similarty_previous_position_weight: 10.0
+similarty_previous_position_weight: 2.5
 
 max_similarty_deviation: 2
 
