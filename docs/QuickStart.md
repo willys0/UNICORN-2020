@@ -99,13 +99,14 @@ Parameters for individual nodes may be edited as well --- the most important bei
 
 
 ### Start automower
-
-- Begin by opening the hatch and input the pin: `1111`
+- Turn on the robot with the switch below the handle.
+- Open the hatch and input the pin: `1111`
     - If the automower has ben without power it will ask for a new pin, enter `1111`. I will also want to set up of time and date. Just press ok untill the menu is reached. 
-- Enter settings and hold `7` and `9` until a new options appears.
-    - Press the wrench then goto special settings -> line something? and press the down arrow to disable.
-- Start by moving back to the main menu
-    + Press start and close the hatch
+- The loop detection should turn off automaticly if `main_2020.launch` has been launched. If not:
+    - Enter settings and hold `7` and `9` until a new options appears.
+    - Press the wrench then goto special settings -> override loop detection.
+    - Move back to the main menu
+    - Press start and close the hatch
 
 
 ### Troubleshooting
