@@ -29,7 +29,9 @@ The unicorn has been configured to automatically start the bluetooth driver for 
 The sections below assume that nothing is started automatically, disable autolaunch services like:
  
 > sudo systemctl disable roscore.service
+
 > sudo systemctl disable roslaunch.service
+
 > sudo systemctl disable sixad.service
  
 ...and restart.
@@ -39,9 +41,15 @@ The sections below assume that nothing is started automatically, disable autolau
 Re-enable the services with
  
 > sudo systemctl enable roscore.service
+
 > sudo systemctl enable roslaunch.service
+
 > sudo systemctl enable sixad.service
+
 > sudo reboot
+
+#### Important info
+The wireless emergency stop needs to be powered on when you try to use the robot. If it is not powered and within range (it has a large range so line of sight should be sufficient) the robot will not move any of its motors.
 
 
 ### Software
