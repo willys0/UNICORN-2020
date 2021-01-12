@@ -96,7 +96,7 @@ void shape_extraction::adaptive_break_point(const sensor_msgs::LaserScan& scan)
 
 
 /* Filters static map from scan, requires reliable odometry and static map*/
-void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map, const nav_msgs::Odometry& odometryData,const geometry_msgs::TransformStamped BaseLaser2BaseFrame,const geometry_msgs::TransformStamped odom2map)
+void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map,const geometry_msgs::TransformStamped BaseFrame2Odomframe,const geometry_msgs::TransformStamped BaseLaser2BaseFrame,const geometry_msgs::TransformStamped odom2map)
 {
 
   int i,j,m,n,ratio;
@@ -110,7 +110,12 @@ void shape_extraction::static_map_filter(const nav_msgs::OccupancyGrid& map, con
     {
       if(cluster_list[i].clusterNr != -1)
       {
-      geometry_msgs::Point point = transform_point(cluster_list[i].cluster[j], odometryData,BaseLaser2BaseFrame);
+      geometry_msgs::Point point;
+      point.x = cluster_list[i].cluster[j].x;
+      point.y = cluster_list[i].cluster[j].y;
+      point.z = cluster_list[i].cluster[j].z;
+      tf2::doTransform(point,point,BaseLaser2BaseFrame);
+      tf2::doTransform(point,point,BaseFrame2Odomframe);
       tf2::doTransform(point,point,odom2map);
       // Get MAP COORDINATES
       x_map = round((int)((float)point.x/(map.info.resolution))) + ((int)(map.info.width)/2);

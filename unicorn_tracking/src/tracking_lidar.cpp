@@ -62,7 +62,7 @@ tracking_lidar::tracking_lidar()
   n_.param("similarty_side_amount_weight",sim_adj_side, 3.0f);
   n_.param("similarty_track_xposition_weight",sim_adj_xpos, 5.0f);
   n_.param("similarty_track_yposition_weight",sim_adj_ypos, 5.0f);
-  n_.param("similarty_previous_position_weight",sim_adj_posdiff, 5.0f);
+  n_.param("similarty_previous_position_weight",sim_adj_posdiff, 2.0f);
 
   n_.param("TRACKER_LIFE",TRACKER_LIFE, 1000);
   n_.param("CONFIRMED_TRACK",CONFIRMED_TRACK, 100);
@@ -75,18 +75,21 @@ tracking_lidar::tracking_lidar()
   n_.param("odomframeid",odomframeid, std::string("odom_chassis")); 
 
   
-  odometry_sub_ = n_.subscribe("/odometry/filtered", 10, &tracking_lidar::odomCallback, this);
+  odometry_sub_2 = n_.subscribe("/odometry/filtered", 10, &tracking_lidar::odomCallback, this);
+  odometry_sub_ = n_.subscribe("/wheel_encoder/odom", 10, &tracking_lidar::odomCallback, this);
   scan_sub_ = n_.subscribe("/scan", 10, &tracking_lidar::scanCallback, this);
-  stable_odom_sub_ = n_.subscribe("/wheel_encoder/odom", 10, &tracking_lidar::stable_odomCallback, this);
+  
   // publishers
-  object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("/move_base/TebLocalPlannerROS/obstacles",10,false);
+  object_pub_ = n_.advertise<costmap_converter::ObstacleArrayMsg>("obstacles",10,false);
   marker_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArray",10,false);
   marker_Arrow_pub_ = n_.advertise<visualization_msgs::MarkerArray>("markerArrowArray",10,false);
 
   tf2_ros::TransformListener tf2_listener(tf_buffer);
   tf2_ros::TransformListener tf2_listener2(tf_buffer2);
+  tf2_ros::TransformListener tf2_listener3(tf_buffer3);
   Lidar2base = tf_buffer.lookupTransform(base_frame, base_laser_frame, ros::Time(0),ros::Duration(100));
-  odom2map = tf_buffer2.lookupTransform(mapframeid, odomframeid, ros::Time::now(),ros::Duration(5));
+  odom2map = tf_buffer2.lookupTransform(mapframeid, odomframeid, ros::Time(0),ros::Duration(100));
+  base2odom = tf_buffer3.lookupTransform(odomframeid, base_frame, ros::Time(0),ros::Duration(100));
 
   if(static_filter)
   {
@@ -256,14 +259,11 @@ void tracking_lidar::odomCallback(const nav_msgs::Odometry& odometry)
 }
 
 /* Odometry Call back */
-void tracking_lidar::stable_odomCallback(const nav_msgs::Odometry& odometry)
+void tracking_lidar::odomCallback2(const nav_msgs::Odometry& odometry)
 {
-    stable_odom_ = odometry;
-    if(!stable_odom_received){
-      stable_odom_received = true;
-      ROS_INFO("Stable Odom Received");
-    }
+    odometry_data_2 = odometry;
 }
+
 
 /* Checks for map */
 void tracking_lidar::mapCallback(const nav_msgs::OccupancyGrid& map)
@@ -281,14 +281,24 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 
     scan_data_ = scan;
     scan_received = true;
-    if(map_received && odom_received && stable_odom_received){
+    tf2_ros::TransformListener tf2_listener2(tf_buffer2);
+    odom2map = tf_buffer2.lookupTransform(mapframeid, odomframeid, ros::Time(0));
+
+    base2odom.transform.rotation = odometry_data_2.pose.pose.orientation;
+    base2odom.transform.translation.x = odometry_data_2.pose.pose.position.x;
+    base2odom.transform.translation.y = odometry_data_2.pose.pose.position.y;
+    base2odom.transform.translation.z = odometry_data_2.pose.pose.position.z;
+  
+    stable_odom_ = odometry_data_;
+    if(map_received && odom_received){
       
 
       shape_interface.adaptive_break_point(scan);
       std::cout << "Test clsuters:" << std::endl;
       std::cout << shape_interface.cluster_list.size() << std::endl;
+
       if(static_filter)
-        shape_interface.static_map_filter(map_data_, odometry_data_, Lidar2base,odom2map);
+        shape_interface.static_map_filter(map_data_, base2odom, Lidar2base,odom2map);
       
       shape_interface.transformObjects(stable_odom_,Lidar2base);
       shape_interface.polygon_extraction();
@@ -298,6 +308,11 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
 
       association_interface.associate(shape_interface.object_attributes_list, stable_odom_, Lidar2base, scan.header.stamp);
 
+
+      base2odom.transform.rotation = odometry_data_2.pose.pose.orientation;
+      base2odom.transform.translation.x = odometry_data_2.pose.pose.position.x;
+      base2odom.transform.translation.y = odometry_data_2.pose.pose.position.y;
+      base2odom.transform.translation.z = odometry_data_2.pose.pose.position.z;
       object_publisher();
       scan_received = false; 
       
@@ -335,6 +350,8 @@ geometry_msgs::Point tracking_lidar::transform_point_odometry(geometry_msgs::Poi
 
 geometry_msgs::Point tracking_lidar::transform_vel_odometry(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData_old,const nav_msgs::Odometry& odometryData_new)
 {
+
+
   double roll,pitch,yaw_old,yaw_new,yaw_map,x_t,y_t;
   tf::Quaternion q(odometryData_old.pose.pose.orientation.x,odometryData_old.pose.pose.orientation.y,odometryData_old.pose.pose.orientation.z,odometryData_old.pose.pose.orientation.w);
   tf::Quaternion r(odometryData_new.pose.pose.orientation.x,odometryData_new.pose.pose.orientation.y,odometryData_new.pose.pose.orientation.z,odometryData_new.pose.pose.orientation.w);
@@ -344,7 +361,6 @@ geometry_msgs::Point tracking_lidar::transform_vel_odometry(geometry_msgs::Point
   tf::Matrix3x3 o(t);
   m.getRPY(roll,pitch,yaw_old);
   n.getRPY(roll,pitch,yaw_new);
-  o.getRPY(roll,pitch,yaw_map);
   x_t = position.x;
   y_t = position.y;
   position.x = x_t*cos(yaw_new-yaw_old+yaw_map) - y_t*sin(yaw_new-yaw_old+yaw_map);

@@ -64,8 +64,8 @@ public:
 	float sim_adj_dist_std = 1.0;
 	float sim_adj_angle_std = 1.0;
 	float sim_adj_side_std = 1.0;
-	float sim_adj_xpos_std = 2.2;
-	float sim_adj_ypos_std = 2.2;
+	float sim_adj_xpos_std = 5.2;
+	float sim_adj_ypos_std = 5.2;
 	float sim_adj_posdiff_std = 2.2;
 	float max_similarty_deviation_std = 1.5;
 	int CONFIRMED_TRACK_std = 50;

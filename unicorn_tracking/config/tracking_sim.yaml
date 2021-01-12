@@ -24,7 +24,7 @@ max_similarty_deviation: 2
 
 min_size_cluster: 4
 
-TRACKER_LIFE: 100
+TRACKER_LIFE: 50
 CONFIRMED_TRACK: 20
 
 mapframeid: map

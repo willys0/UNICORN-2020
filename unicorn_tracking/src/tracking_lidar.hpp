@@ -55,7 +55,7 @@ class tracking_lidar
 public:
 	tracking_lidar();
 	void odomCallback(const nav_msgs::Odometry& odometry);
-	void stable_odomCallback(const nav_msgs::Odometry& odometry);
+	void odomCallback2(const nav_msgs::Odometry& odometry);
 	void mapCallback(const nav_msgs::OccupancyGrid& map);
 	void scanCallback(const sensor_msgs::LaserScan& scan);
 	void publishmsg();
@@ -87,7 +87,7 @@ public:
 	std::string odomframeid = "odom_chassis";
 	std::string base_laser_frame = "base_laser";
 	std::string base_frame = "chassis_link";
-	tf2_ros::Buffer tf_buffer,tf_buffer2;
+	tf2_ros::Buffer tf_buffer,tf_buffer2,tf_buffer3;
 
 	struct association_variables{
 		//similarity weights
@@ -111,13 +111,15 @@ private:
 
 	ros::NodeHandle n_;
 	nav_msgs::Odometry odometry_data_; 
+	nav_msgs::Odometry odometry_data_2; 
 	nav_msgs::Odometry stable_odom_; 
 	nav_msgs::OccupancyGrid map_data_;
 	sensor_msgs::LaserScan scan_data_;
 	geometry_msgs::TransformStamped Lidar2base;
 	geometry_msgs::TransformStamped odom2map;
+	geometry_msgs::TransformStamped base2odom;
 	ros::Subscriber odometry_sub_;
-	ros::Subscriber stable_odom_sub_;
+	ros::Subscriber odometry_sub_2;
 	ros::Subscriber map_sub_;
 	ros::Subscriber scan_sub_;
 	ros::Publisher object_pub_;
