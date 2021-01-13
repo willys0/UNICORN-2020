@@ -9,8 +9,4 @@
 		<param name="~/scale_angular" value="1.0" />
 		<remap from="/cmd_vel" to="/unicorn/cmd_vel" />
 	</node>
-	<node pkg="unicorn_joy" type="unicorn_joy_node" name="unicorn_joy_node">
-		<remap from="joy" to="/joy"/>
-		<remap from="TX2_unicorn_state" to="/TX2_unicorn_state" />
-	</node>
 </launch>
