@@ -4,6 +4,9 @@ Main interface between the Husqvarna Automower research platform and the rest of
 
 Implements additional safety features such as slowing down and stopping movement if desired velocity is not provided at a certain frequency (to prevent cases where a controlling joystick loses connection etc.). Also disables any actions running on lift, docking controller, or in move_base when either the stop button on the mower or the emergency stop is pressed.
 
+## Nodes
+`unicorn_hrp_interface_node` - Main node
+
 ## Subscribed topics
 
 `/unicorn/cmd_vel` - Desired velocity from UNICORN nodes
@@ -17,7 +20,9 @@ Implements additional safety features such as slowing down and stopping movement
 `/cmd_vel` - Final velocity sent to the automower
 
 `/move_base/cancel` - Cancels navigation commands on stop button pressed
+
 `/dock/cancel` - Cancels dock commands on stop button pressed
+
 `/lift/lift_action/cancel` - Cancels lift commands on stop button pressed
 
 ### hrp topics
