@@ -55,9 +55,9 @@
     <gazebo reference="${fb}_${lr}_wheel">
       <mu1 value="10000.0" />
       <mu2 value="10000.0" />
-      <kp value="100000.0" />
-      <kd value="10000.0" />
-      <dampingFactor value="0.5" />
+      <kp value="10e4" />
+      <kd value="10e2" />
+      <dampingFactor value="0.9" />
       <fdir1 value="1 0 0" />
       <material>Gazebo/Black</material>
       <turnGravityOff>false</turnGravityOff>

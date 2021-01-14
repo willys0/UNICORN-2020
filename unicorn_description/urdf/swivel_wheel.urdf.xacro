@@ -116,10 +116,10 @@
     <gazebo reference="${fb}_${lr}_swivel_wheel">
       <mu1 value="100" />
       <mu2 value="100" />
-      <kp value="1000000.0" />
-      <kd value="10000.0" />
+      <kp value="10e2" />
+      <kd value="10e2" />
       <dampingFactor value="0.9" />
-      <fdir1 value="1 0 0" />
+      <fdir1 value="1 1 1" />
       <material>Gazebo/Black</material>
       <turnGravityOff>false</turnGravityOff>
     </gazebo>
