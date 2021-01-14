@@ -43,7 +43,7 @@
 	<include file="$(find unicorn_localization)/launch/localization.launch">
 		<arg name="sim" value="$(arg sim)" />
 
-		<arg name="use_amcl" value="false"  unless="$(arg do_slam)" />
+		<arg name="use_amcl" value="true"  unless="$(arg do_slam)" />
 		<arg name="use_amcl" value="false" if="$(arg do_slam)" />
 
 		<arg name="scan_topic" value="$(arg scan_topic)" />
