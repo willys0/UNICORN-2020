@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>       
+    <!--arg name="scan_topic" default="scan" /-->
+
+    <node pkg="unicorn_scan_odometry" type="unicorn_scan_odometry_node" name="unicorn_scan_odometry">     
+        <rosparam file="$(find unicorn_scan_odometry)/config/scan_odom.yaml"/>
+        <remap from="scan" to="/frontLidar/scan" />
+        <!--remap from="scan" to="$(arg scan_topic)" /-->
+    </node>
+
+
+</launch>

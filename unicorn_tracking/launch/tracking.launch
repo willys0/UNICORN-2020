@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<launch>       
+    <!--arg name="scan_topic" default="scan" /-->
+    <arg name="sim" default="true" />
+    <!-- Launch tracking -->
+    <group if="$(arg sim)">
+        <node pkg="unicorn_tracking" type="unicorn_tracking_node" name="unicorn_tracking">     
+            <rosparam file="$(find unicorn_tracking)/config/tracking_sim.yaml"/>
+            <remap from="odom" to="/odometry/filtered" />
+            <remap from="scan" to="/frontLidar/scan" />
+            <remap from="/unicorn_tracking/obstacles" to="/obstacles" />
+            <!--remap from="scan" to="$(arg scan_topic)" /-->
+        </node>
+    </group>
+    <group unless="$(arg sim)">
+        <node pkg="unicorn_tracking" type="unicorn_tracking_node" name="unicorn_tracking">     
+            <rosparam file="$(find unicorn_tracking)/config/tracking.yaml"/>
+            <remap from="odom" to="/odometry/filtered" />
+            <remap from="scan" to="/frontLidar/scan" />          
+            <remap from="/unicorn_tracking/obstacles" to="/obstacles" />
+            <!--remap from="scan" to="$(arg scan_topic)" /-->
+        </node>
+    </group>
+
+</launch>
