@@ -28,14 +28,18 @@ Make sure you have cloned the repository into the src folder of your workspace (
 cd ~/catkin_ws/src
 git clone https://github.com/HusqvarnaResearch/hrp.git
 git clone https://github.com/husky/husky.git
-
-rosdep install --from-path src --ignore-src -r -y
 ```
 
 Goto hrp/am_driver_safe and insert a CATKIN_IGNORE file.
 ```
 cd hrp/am_driver_safe
 touch CATKIN_IGNORE
+```
+
+Install dependencies with rosdep
+```
+cd ~/catkin_ws
+rosdep install --from-path src --ignore-src -r -y
 ```
 
 The above dependencies should be enough to get the simulator working.
