@@ -1,6 +1,0 @@
-<library path="lib/libtracking_layers">
-  <class type="tracking_layers::VelocityLayer" base_class_type="costmap_2d::Layer">
-    <description>Uses object velocities to change costmap</description>
-  </class>
-
-</library>
