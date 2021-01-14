@@ -51,13 +51,13 @@
 
 	<include file="$(find unicorn_navigation)/launch/move_base.launch" >
 		<arg name="global_frame" value="map" />
-		<arg name="robot_base_frame" value="base_link" />
+		<arg name="robot_base_frame" value="chassis_link" />
 	</include>
 
 	<group if="$(arg do_slam)">
 		<include file="$(find unicorn_slam)/launch/gmapping.launch">
 			<arg name="scan_topic" value="$(arg scan_topic)" />
-            <arg name="robot_base_frame" value="base_link" />
+            <arg name="robot_base_frame" value="chassis_link" />
 		</include>
 	</group>
 
