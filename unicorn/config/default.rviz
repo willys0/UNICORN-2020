@@ -8,12 +8,9 @@ Panels:
         - /TF1
         - /TF1/Tree1
         - /Sensors1
-        - /Sensors1/LiDAR1
-        - /Sensors1/Camera1
-        - /MarkerArray1
-        - /MarkerArray2
+        - /Tracking1
       Splitter Ratio: 0.555825233
-    Tree Height: 945
+    Tree Height: 853
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -112,11 +109,19 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        base_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         chassis_link:
           Alpha: 1
           Show Axes: false
           Show Trail: false
           Value: true
+        dummy_wheel_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         front_left_swivel_wheel:
           Alpha: 1
           Show Axes: false
@@ -340,7 +345,7 @@ Visualization Manager:
               Max Color: 255; 255; 255
               Max Intensity: 999999
               Min Color: 0; 0; 0
-              Min Intensity: 8.40779079e-45
+              Min Intensity: 0
               Name: Front LaserScan
               Position Transformer: XYZ
               Queue Size: 10
@@ -370,7 +375,7 @@ Visualization Manager:
               Max Color: 255; 255; 255
               Max Intensity: 999999
               Min Color: 0; 0; 0
-              Min Intensity: 5.32493416e-44
+              Min Intensity: 0
               Name: Rear LaserScan
               Position Transformer: XYZ
               Queue Size: 10
@@ -449,7 +454,7 @@ Visualization Manager:
               Value: false
             - Class: rviz/Image
               Enabled: false
-              Image Topic: /realsense/color/image_raw
+              Image Topic: /zed/color/image_raw
               Max Value: 1
               Median window: 5
               Min Value: 0
@@ -483,26 +488,30 @@ Visualization Manager:
               Transport Hint: raw
               Unreliable: false
               Value: false
-          Enabled: true
+          Enabled: false
           Name: Camera
       Enabled: true
       Name: Sensors
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /unicorn_tracking/markerArray
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
-    - Class: rviz/MarkerArray
-      Enabled: false
-      Marker Topic: /unicorn_tracking/markerArrowArray
-      Name: MarkerArray
-      Namespaces:
-        {}
-      Queue Size: 100
-      Value: false
+    - Class: rviz/Group
+      Displays:
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /unicorn_tracking/markerArray
+          Name: Object Polygon
+          Namespaces:
+            Tracking: true
+          Queue Size: 100
+          Value: true
+        - Class: rviz/MarkerArray
+          Enabled: true
+          Marker Topic: /unicorn_tracking/markerArrowArray
+          Name: Object Heading
+          Namespaces:
+            Tracking: true
+          Queue Size: 100
+          Value: true
+      Enabled: true
+      Name: Tracking
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -528,7 +537,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 12.5088606
+      Distance: 15.0229721
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.0599999987
         Stereo Focal Distance: 1
@@ -543,20 +552,20 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.00999999978
-      Pitch: 0.629796863
+      Pitch: 0.819797039
       Target Frame: <Fixed Frame>
       Value: XYOrbit (rviz)
-      Yaw: 1.9949367
+      Yaw: 5.33311892
     Saved: ~
 Window Geometry:
   Apriltag Detections Image:
     collapsed: false
   Displays:
-    collapsed: true
-  Height: 1148
-  Hide Left Dock: true
+    collapsed: false
+  Height: 1056
+  Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd0000000400000000000001ab000003f2fc020000000bfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c0061007900730000000028000003f2000000d700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb00000012005a0045004400200049006d0061006700650000000311000000ad0000001600fffffffb0000001e005200650061006c00530065006e0073006500200049006d006100670065000000028c000001320000001600fffffffb000000320041007000720069006c00740061006700200044006500740065006300740069006f006e007300200049006d00610067006500000002f4000000ca0000001600ffffff000000010000010f000003f2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000028000003f2000000ad00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000003a00000003efc0100000002fb0000000800540069006d00650100000000000003a00000030000fffffffb0000000800540069006d00650100000000000004500000000000000000000003a0000003f200000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000001ab00000396fc020000000bfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006100fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000002800000396000000d700fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb00000012005a0045004400200049006d0061006700650000000311000000ad0000001600fffffffb0000001e005200650061006c00530065006e0073006500200049006d006100670065000000028c000001320000001600fffffffb000000320041007000720069006c00740061006700200044006500740065006300740069006f006e007300200049006d00610067006500000002f4000000ca0000001600ffffff000000010000010f000003f2fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a005600690065007700730000000028000003f2000000ad00fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e100000197000000030000073f0000003efc0100000002fb0000000800540069006d006501000000000000073f0000030000fffffffb0000000800540069006d006501000000000000045000000000000000000000058e0000039600000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   RealSense Image:
     collapsed: false
   Selection:
@@ -567,7 +576,7 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: true
-  Width: 928
+  Width: 1855
   X: 65
   Y: 24
   ZED Image:
