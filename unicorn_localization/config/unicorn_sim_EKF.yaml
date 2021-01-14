@@ -1,6 +1,6 @@
 #map_frame: map              # Defaults to "map" if unspecified
 odom_frame: odom_chassis
-base_link_frame: base_link
+base_link_frame: chassis_link
 world_frame: odom_chassis
 
 two_d_mode: true

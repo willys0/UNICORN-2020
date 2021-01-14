@@ -1,5 +1,5 @@
 # The frame which will be used to compare distance and rotation to
-base_link_frame: "base_link"
+base_link_frame: "chassis_link"
 lidar_frame: "rear_laser"
 
 use_lidar: true
