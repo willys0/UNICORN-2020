@@ -1,7 +1,7 @@
 #include "association.hpp"
 
 
-
+/* Sets Standard parameters */
 association::association()
 {
 	sim_adj_dist = &sim_adj_dist_std;
@@ -15,7 +15,7 @@ association::association()
 	TRACKER_LIFE = &TRACKER_LIFE_std;
 }
 
-
+/* Updateds adjustable parameters to custom values */
 void association::association_setvar(int *CONFIRMED_TRACK_p, int *TRACKER_LIFE_p,float *max_similarty_deviation_p, float *sim_adj_dist_p,float *sim_adj_angle_p,float *sim_adj_side_p,float *sim_adj_xpos_p,float *sim_adj_ypos_p,float *sim_adj_posdiff_p){
   
   CONFIRMED_TRACK = CONFIRMED_TRACK_p;
@@ -212,8 +212,6 @@ void association::associate(const std::vector<shape_extraction::object_attribute
   }
   ROS_INFO("Number of trackers %d",(int)trackers.size());
 
-  
-
 
   update_position();
 }
@@ -373,7 +371,7 @@ void association::update_position(){
   }
 }
 
-
+/* Updates a tracker with a new measured input */
 void association::update_tracker(shape_extraction::object_attributes object,int trackerID,double dt)
 {
   float x_dot = (trackers[trackerID].tracker.x_hat(0)-object.position.x)/float(dt);
@@ -405,6 +403,7 @@ void association::update_tracker(shape_extraction::object_attributes object,int 
   
 }
 
+/* Transforms a point  from local coordinates to global coordinates */
 geometry_msgs::Point association::transform_point(geometry_msgs::Point position, const nav_msgs::Odometry& odometryData,geometry_msgs::TransformStamped BaseLaser2BaseFrame)
 {
   double roll,pitch,yaw,x_t,y_t;

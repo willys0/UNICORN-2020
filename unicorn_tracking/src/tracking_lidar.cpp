@@ -74,7 +74,7 @@ tracking_lidar::tracking_lidar()
   n_.param("base_frame",base_frame, std::string("chassis_link")); 
   n_.param("odomframeid",odomframeid, std::string("odom_chassis")); 
 
-  
+  /// Subscibers
   odometry_sub_2 = n_.subscribe("/odometry/filtered", 10, &tracking_lidar::odomCallback, this);
   odometry_sub_ = n_.subscribe("/wheel_encoder/odom", 10, &tracking_lidar::odomCallback, this);
   scan_sub_ = n_.subscribe("/scan", 10, &tracking_lidar::scanCallback, this);
@@ -115,7 +115,7 @@ void tracking_lidar::object_publisher()
   geometry_msgs::Point point, velocity, position;
   geometry_msgs::Point32 point32;
   tf2::Quaternion Quad;
-
+  /* Create header and intiate parameters*/
   object.header.frame_id = mapframeid;
   
   object.header.seq = seq;
@@ -161,6 +161,7 @@ void tracking_lidar::object_publisher()
 
   object_array.obstacles.clear();
   object_array.header = object.header;
+  /* Fill arrays with objects and velocities*/
   int i,m;
   for(i=0; i < association_interface.trackers.size(); i++)
   {
@@ -240,6 +241,7 @@ void tracking_lidar::object_publisher()
       }
     }
   }
+  /* Publish Arrays */
   object_pub_.publish(object_array);
   marker_pub_.publish(markerArray);
   marker_Arrow_pub_.publish(markerDArray);
@@ -292,23 +294,28 @@ void tracking_lidar::scanCallback(const sensor_msgs::LaserScan& scan)
     stable_odom_ = odometry_data_;
     if(map_received && odom_received){
       
-
+      /* Shape Extraction and clsutering */
       shape_interface.adaptive_break_point(scan);
       std::cout << "Test clsuters:" << std::endl;
       std::cout << shape_interface.cluster_list.size() << std::endl;
 
+      /* Static filter*/
       if(static_filter)
         shape_interface.static_map_filter(map_data_, base2odom, Lidar2base,odom2map);
       
+
       shape_interface.transformObjects(stable_odom_,Lidar2base);
       shape_interface.polygon_extraction();
+
       std::cout << "Test objects:" << std::endl;
       std::cout << shape_interface.object_attributes_list.size() << std::endl;
+
       shape_interface.polygon_attribute_extraction();
 
+      /* Association and tracking */
       association_interface.associate(shape_interface.object_attributes_list, stable_odom_, Lidar2base, scan.header.stamp);
 
-
+      /* Update odometry frame */
       base2odom.transform.rotation = odometry_data_2.pose.pose.orientation;
       base2odom.transform.translation.x = odometry_data_2.pose.pose.position.x;
       base2odom.transform.translation.y = odometry_data_2.pose.pose.position.y;
