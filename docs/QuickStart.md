@@ -44,10 +44,6 @@ Re-enable the services with
 
 > sudo reboot
 
-#### Important info
-The wireless emergency stop needs to be powered on when you try to use the robot. If it is not powered and within range (it has a large range so line of sight should be sufficient) the robot will not move any of its motors.
-
-
 ### Software
 
 Make sure that the jetson tx2 is running the latest branch, either using github which requires an internet connection:
@@ -108,6 +104,9 @@ For convenience the console interface provided by Husqvarna (hrp_teleop) can be 
 
 hrp_teleop can also be used to override loop detection by pressing `9`.
 
+#### Important info
+The wireless emergency stop needs to be powered on when you try to use the robot. If it is not powered and within range (it has a large range so line of sight should be sufficient) the robot will not move any of its motors and the state will at best be `STOPPED`.
+
 
 ### Troubleshooting
 Here are some common errors and how to fix them:
@@ -116,7 +115,7 @@ Here are some common errors and how to fix them:
 Shown by hrp_teleop node and indicates that the automower is very sad. Open up the hatch and read the error message to proceed. It usually just want someone to listen to its problems.
 
 `STOPPED`
-Shown by hrp_teleop node and indicates that the automower is not started. If you are sure that it has started correctly try to restart the teleop node instead.
+Shown by hrp_teleop node and indicates that the automower is not started. If you are sure that it has started correctly try to restart the teleop node instead. If you forgot to power the wireless emergency stop, it would also be a good idea to do so now.
 
 `PAUSED`
 Shown by hrp_teleop and is actually not an error, it means that everything is good to go!
