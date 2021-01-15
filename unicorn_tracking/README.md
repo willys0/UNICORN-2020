@@ -6,7 +6,7 @@
 
     The package is built and tested for the simulator, but it is not as refined for a real-world platform.
 
-    ![Unicorn](docs/tracking.png)
+![Unicorn](docs/tracking.png)
 
 ## Subscribed Topics
 
