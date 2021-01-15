@@ -32,8 +32,6 @@ The sections below assume that nothing is started automatically, disable autolau
 
 > sudo systemctl disable roslaunch.service
 
-> sudo systemctl disable sixad.service
- 
 ...and restart.
  
 > sudo reboot
@@ -43,8 +41,6 @@ Re-enable the services with
 > sudo systemctl enable roscore.service
 
 > sudo systemctl enable roslaunch.service
-
-> sudo systemctl enable sixad.service
 
 > sudo reboot
 
@@ -56,7 +52,7 @@ The wireless emergency stop needs to be powered on when you try to use the robot
 
 Make sure that the jetson tx2 is running the latest branch, either using github which requires an internet connection:
 
-> roscd unicorn && git fetch
+> cd ~/catkin_ws/src/<local UNICORN repo> && git fetch
 
 > git remote show origin
 
@@ -64,47 +60,36 @@ Make sure that the jetson tx2 is running the latest branch, either using github 
 
 > git pull
 
-Or by copying files from your host computer:
+You can also set a connected computer as a remote and pull via ssh as demonstrated below, refer to this page for more info: <https://stackoverflow.com/questions/3596260/git-remote-add-with-other-ssh-port>
+
+> cd ~/catkin_ws/src/<local UNICORN repo> 
+
+> git remote add <remote> ssh://<user>@<host>:<port></path/to/repo>/.git
+
+...Or by copying files from your host computer (not recommended):
 
 > cd ~/catkin_ws/src
 
-> scp -r UNICORN nvidia@10.42.0.1:/home/nvidia/catkin_ws/src
-
-Copy this function into ~/.bashrc if you will be updating the platform frequently.
-
-```
-scp_file()
-{
-    my_pwd=$(pwd)
-    new_pwd=/home/nvidia/${my_pwd:15}/
-    scp -r "$@" nvidia@10.42.0.1:"$new_pwd"
-}
-```
-
-Usage example:
-
-> scp_file UNICORN/
+> scp -r UNICORN nvidia@10.0.0.2:/home/nvidia/catkin_ws/src
 
 Remember to build the code if you update it:
 
 > cd ~/catkin_ws && catkin_make
 
-#### Launch File
+#### Launch files
 
-The launch files main_*.launch all have the same arguments available. 
+The launch files main_2020.launch (to run on the robot) and simulator_2020.launch (for simulating the robot with gazebo) are provided in the unicorn package, some of the most useful arguments are listed below:
+    - do_slam: (default true)
+        - will use SLAM if true
+        - if false, a pre-defined map will be loaded and EKF based on wheel encoders and AMCL will be used to localize the robot.
+    - map_file: (default $(find unicorn_slam)/maps/c2.yaml)
+        - decides the map to be loaded when not using SLAM
 
-- use_gmapping: true if a map should be generated from laser scan.
-    + The map created using gmapping may be saved using the map_server:
+When SLAMming, the map can be saved using map_saver 
 
 > rosrun map_server map_saver -f map_name
 
-- map_file: path/to/map.yaml to use if `use_gmapping` is false.
-
-Parameters for individual nodes may be edited as well --- the most important being `serial_port` for both the range\_sensor\_driver and the `am_driver` nodes. 
-
-### Run
-
-
+...where map_name is the path where the map will be saved
 
 ### Start automower
 - Turn on the robot with the switch below the handle.
@@ -116,6 +101,12 @@ Parameters for individual nodes may be edited as well --- the most important bei
     - Move back to the main menu
     - Press start and close the hatch
 
+For convenience the console interface provided by Husqvarna (hrp_teleop) can be used to see the state of the mower, you want the status to be `PAUSED` to be able to control the mower:
+
+> rosrun am_driver hrp_teleop.py
+
+hrp_teleop can also be used to override loop detection by pressing `9`.
+
 
 ### Troubleshooting
 Here are some common errors and how to fix them:
@@ -126,11 +117,10 @@ Shown by hrp_teleop node and indicates that the automower is very sad. Open up t
 `STOPPED`
 Shown by hrp_teleop node and indicates that the automower is not started. If you are sure that it has started correctly try to restart the teleop node instead.
 
+`PAUSED`
+Shown by hrp_teleop and is actually not an error, it means that everything is good to go!
+
 `SERIAL PORT DOESN'T EXIST`
-Shown by am_driver_safe_node started by main_*.launch and indicates that the jetson tx1 cannot find the automower. Make sure that the usb cable is plugged in (hehe) and that ACM is listed under devices.
-
-
-
-### Run simulation
+Shown by am_driver_safe_node started by main_*.launch and indicates that the jetson tx2 cannot find the automower. Make sure that the usb cable is plugged in (hehe) and that ACM is listed under devices.
 
 
