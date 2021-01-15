@@ -79,11 +79,12 @@ Remember to build the code if you update it:
 #### Launch files
 
 The launch files main_2020.launch (to run on the robot) and simulator_2020.launch (for simulating the robot with gazebo) are provided in the unicorn package, some of the most useful arguments are listed below:
-    - do_slam: (default true)
-        - will use SLAM if true
-        - if false, a pre-defined map will be loaded and EKF based on wheel encoders and AMCL will be used to localize the robot.
-    - map_file: (default $(find unicorn_slam)/maps/c2.yaml)
-        - decides the map to be loaded when not using SLAM
+
+- do_slam: (default true)
+    - will use SLAM if true
+    - if false, a pre-defined map will be loaded and EKF based on wheel encoders and AMCL will be used to localize the robot.
+- map_file: (default $(find unicorn_slam)/maps/c2.yaml)
+    - decides the map to be loaded when not using SLAM
 
 When SLAMming, the map can be saved using map_saver 
 
