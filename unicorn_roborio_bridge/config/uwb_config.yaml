@@ -1,5 +1,5 @@
 uwb:
-  reference_frame: ""
+  reference_frame: "map"
   publish_frequency: 30.0
 
   covariance_matrix: [

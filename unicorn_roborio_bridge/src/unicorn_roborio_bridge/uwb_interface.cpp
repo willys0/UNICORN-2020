@@ -11,7 +11,6 @@ UwbInterface::UwbInterface(ros::NodeHandle nh) :
 void UwbInterface::setUwbPosition(const geometry_msgs::Point& pos) {
     uwb_pose_msg_.header.stamp = ros::Time::now();
     uwb_pose_msg_.header.seq++;
-    uwb_pose_msg_.header.frame_id = "chassis_link";
 
     uwb_pose_msg_.pose.pose.position = pos;
     uwb_pose_msg_.pose.pose.position.x /= 1000.0;
@@ -37,8 +36,7 @@ void UwbInterface::startTimer() {
 }
 
 void UwbInterface::initUwbMsg() {
-    // TODO: Do we need to assign a frame to the header?
-    nh_.param<std::string>("uwb/reference_frame", uwb_pose_msg_.header.frame_id, "");
+    nh_.param<std::string>("uwb/reference_frame", uwb_pose_msg_.header.frame_id, "map");
     nh_.param<float>("uwb/publish_frequency", uwb_pub_freq_, 30.0);
 
     std::vector<double> covariance_vector;
