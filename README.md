@@ -3,13 +3,17 @@
 ![Unicorn](docs/unicorn.jpg)
 ![Unicorn sim](docs/unicorn_sim.jpg)
 
-This repository contains the main ROS packages for the 2020th iteration of UNICORN, the trash-collecting robot.
+This repository contains the main ROS packages for the 2020th iteration of UNICORN, the refuse collecting robot.
 
-This project was made for ROS Kinetic.
+* [LabVIEW implementations](https://github.com/NihadF7/UNICORN-2020-LabVIEW) - Repository containing the LabVIEW implementations for the National Instruments RoboRIO board.
+
+* [2019th iteration](https://github.com/ProjectMDH/UNICORN-2019) - The code from the previous iteration of the project, which all code in this repository is based on.
+
+All software is based on ROS Kinetic, and has not been tested for later versions.
 
 * [ROS Kinetic](http://wiki.ros.org/kinetic/Installation/Ubuntu) - ROS Kinetic installation instructions for Ubuntu 16.04.
 
-* [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment) - Guide for setting up your ROS workspace. 
+* [ROS Tutorials](http://wiki.ros.org/ROS/Tutorials/InstallingandConfiguringROSEnvironment) - Guide for setting up your ROS workspace.
 
 ## Getting Started
 
@@ -17,8 +21,6 @@ Please read through the coding style guides we are using
 
 * [CppStyleGuide](http://wiki.ros.org/CppStyleGuide) - ROS Cpp Style Guide
 * [PyStyleGuide](http://wiki.ros.org/PyStyleGuide) - ROS Python Style Guide
-
-* [LabVIEW implementations](https://github.com/NihadF7/UNICORN-2020-LabVIEW) - Repository containing the LabVIEW implementations for the robots sensors etc.
 
 ### Dependencies
 
@@ -36,7 +38,9 @@ cd hrp/am_driver_safe
 touch CATKIN_IGNORE
 ```
 
-Install dependencies with rosdep
+The [AprilTag](AprilTag) library and [ROS wrapper](https://github.com/AprilRobotics/apriltag_ros) ROS wrapper is also needed.
+
+Install additional dependencies automatically using rosdep
 ```
 cd ~/catkin_ws
 rosdep install --from-path src --ignore-src -r -y
@@ -47,9 +51,7 @@ The above dependencies should be enough to get the simulator working.
 ### Dependencies for the robot
 * [ZED Camera SDK](https://www.stereolabs.com/developers/release/) - Install the SDK for JETPACK 3.3 on the TX2 platform if needed
 
-*TODO: Add realsense camera instructions*
-
-*TODO: Probably add even more instructions*
+* [Intel RealSense SDK](https://github.com/IntelRealSense/realsense-ros) - Install the RealSense SDK and ROS wrapper.
 
 ### Run the Simulator
 
@@ -79,6 +81,8 @@ roslaunch unicorn rviz.launch
 
 ## Documentation
 
+Please refer to docs/QuickStart.md for help on how to launch the platform.
+
 Generate documentation using rosdoc_lite by running:
 > ./generate_doc.sh
 
@@ -87,8 +91,6 @@ Then access the documentation by running:
 > xdg-open docs/doc/local_planner/html/annotated.html
 
 Or by going to the html folder and double-clicking on annotated.html.
-
-Please refer to docs/QuickStart.md for help on how to launch the platform.
 
 ## How to Git
 
